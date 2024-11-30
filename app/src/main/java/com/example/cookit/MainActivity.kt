@@ -38,5 +38,6 @@ fun App() {
     ) {
         composable("logIn") {LogInScreen(navController)}
         //composable("home") {HomeScreen(navController)}
+        composable("signUp") {SignUpScreen(navController)}
     }
 }
