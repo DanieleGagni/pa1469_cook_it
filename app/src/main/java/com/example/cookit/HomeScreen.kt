@@ -71,7 +71,7 @@ fun HomeScreen(navController: NavHostController) {
                                 }
                                 append(" with ease, connect\nthrough flavours.")
                             },
-                            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp), // Tamaño más grande
+                            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 25.sp), // Tamaño más grande
                             color = Color.Gray
                         )
                     }

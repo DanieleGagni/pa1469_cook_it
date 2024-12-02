@@ -34,6 +34,7 @@ fun SignUpScreen(navController: NavHostController) {
     val screenHeight = configuration.screenHeightDp.dp
 
     var username by remember { mutableStateOf(TextFieldValue("")) }
+    var email by remember { mutableStateOf(TextFieldValue("")) }
     var password by remember { mutableStateOf(TextFieldValue("")) }
     var passwordError by remember { mutableStateOf("") }
     var signUpError by remember { mutableStateOf("") }
@@ -115,6 +116,17 @@ fun SignUpScreen(navController: NavHostController) {
                     OutlinedTextField(
                         value = username,
                         onValueChange = { username = it },
+                        placeholder = { Text("john.doe") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        singleLine = true,
+                        shape = RoundedCornerShape(25.dp),
+                    )
+
+                    OutlinedTextField(
+                        value = email,
+                        onValueChange = { email = it },
                         placeholder = { Text("john.doe@example.com") },
                         modifier = Modifier
                             .fillMaxWidth()
