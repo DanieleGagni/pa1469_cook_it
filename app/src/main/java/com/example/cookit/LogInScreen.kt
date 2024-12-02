@@ -42,7 +42,7 @@ fun LogInScreen(navController: NavHostController) {
                 isLoading = false
                 if (task.isSuccessful) {
                     // Navigate to the home screen upon successful login
-                    navController.navigate("signUp")
+                    navController.navigate("home")
                 } else {
                     // Show error message
                     loginError = task.exception?.localizedMessage ?: "Login failed"
@@ -75,7 +75,6 @@ fun LogInScreen(navController: NavHostController) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
-                    // Adjust the size of the logo dynamically based on screen size
                     Spacer(modifier = Modifier.height(50.dp))
 
                     Image(
@@ -83,13 +82,12 @@ fun LogInScreen(navController: NavHostController) {
                         contentDescription = "App Logo",
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(screenWidth * 0.6f) // Adjusting height to 60% of screen width
+                            .height(screenWidth * 0.6f)
                             .padding(top = 16.dp)
                     )
 
                     Spacer(modifier = Modifier.height(50.dp))
 
-                    // Username TextField
                     OutlinedTextField(
                         value = username,
                         onValueChange = { username = it },
@@ -102,7 +100,6 @@ fun LogInScreen(navController: NavHostController) {
                         leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Username Icon") }
                     )
 
-                    // Password TextField
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
@@ -115,7 +112,6 @@ fun LogInScreen(navController: NavHostController) {
                         leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password Icon") }
                     )
 
-                    // Display error message if login fails
                     if (loginError.isNotEmpty()) {
                         Text(
                             text = loginError,
@@ -124,7 +120,6 @@ fun LogInScreen(navController: NavHostController) {
                         )
                     }
 
-                    // Login Button
                     FilledTonalButton(
                         onClick = { handleLogin() },
                         modifier = Modifier
@@ -145,38 +140,38 @@ fun LogInScreen(navController: NavHostController) {
 
                     Column(
                         modifier = Modifier
-                            .fillMaxSize() // Ensures the Column fills the entire screen
-                            .padding(16.dp), // Optional padding for the Column
-                        verticalArrangement = Arrangement.Center, // Centers the content vertically
-                        horizontalAlignment = Alignment.CenterHorizontally // Centers the content horizontally
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp), // Spacing between text and button
-                            verticalAlignment = Alignment.CenterVertically, // Vertically center the items
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(
                                 text = "Don't have an account?",
-                                color = Color.Black, // Text color
-                                fontSize = 16.sp, // Font size
-                                modifier = Modifier.padding(end = 8.dp) // Padding between text and button
+                                color = Color.Black,
+                                fontSize = 16.sp,
+                                modifier = Modifier.padding(end = 8.dp)
                             )
-                            // Custom Pressable Component for Sign Up
+
                             Surface(
                                 onClick = {
                                     navController.navigate("signUp")
                                 },
                                 modifier = Modifier
-                                    .height(48.dp) // Set height for the button
-                                    .clip(RoundedCornerShape(24.dp)) // Rounded corners for the button
-                                    .padding(vertical = 4.dp), // Optional padding for the button
-                                color = Color(0xFFFFF5DD) // Background color of the button
+                                    .height(48.dp)
+                                    .clip(RoundedCornerShape(24.dp))
+                                    .padding(vertical = 4.dp),
+                                color = Color(0xFFFFF5DD)
                             ) {
-                                Box(contentAlignment = Alignment.Center) { // Ensures text is centered in the button
+                                Box(contentAlignment = Alignment.Center) {
                                     Text(
-                                        text = "Sign up", // Button text
-                                        modifier = Modifier.padding(8.dp), // Padding inside the button
-                                        color = Color.Blue, // Text color
-                                        fontSize = 16.sp // Font size
+                                        text = "Sign up",
+                                        modifier = Modifier.padding(8.dp),
+                                        color = Color.Blue,
+                                        fontSize = 16.sp
                                     )
                                 }
                             }

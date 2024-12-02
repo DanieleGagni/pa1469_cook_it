@@ -4,6 +4,9 @@ package com.example.cookit
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -16,6 +19,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
@@ -61,7 +65,7 @@ fun SignUpScreen(navController: NavHostController) {
                     isLoading = false
                     if (task.isSuccessful) {
                         // Navigate to home screen after successful sign-up
-                        navController.navigate("logIn")
+                        navController.navigate("home")
                     } else {
                         // Display the error message
                         signUpError = task.exception?.localizedMessage ?: "Sign up failed"
@@ -78,30 +82,33 @@ fun SignUpScreen(navController: NavHostController) {
                     .fillMaxSize()
                     .background(Color(0xFFFFF5DD))
             ) {
+
+                val scrollState = rememberScrollState()
+
                 Column(
                     modifier = Modifier
                         .padding(innerPadding)
                         .fillMaxSize()
-                        .padding(horizontal = screenWidth * 0.1f) // Dynamic padding
-                        .padding(vertical = 16.dp),
+                        .verticalScroll(scrollState)
+                        .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
-                    Spacer(modifier = Modifier.height(screenHeight * 0.1f)) // Adjust spacing dynamically
+                    Spacer(modifier = Modifier.height(screenHeight * 0.1f))
 
                     Image(
                         painter = painterResource(id = R.drawable.logo),
                         contentDescription = "App Logo",
                         modifier = Modifier
-                            .fillMaxWidth(0.6f) // Fractional width for scalability
-                            .aspectRatio(1f) // Maintain aspect ratio
+                            .fillMaxWidth(0.6f)
+                            .aspectRatio(1f)
                     )
 
                     Spacer(modifier = Modifier.height(screenHeight * 0.05f))
 
                     Text(
                         text = "Just a few quick things to get started",
-                        fontSize = (screenWidth.value * 0.05f).sp, // Scale text size
+                        fontSize = (screenWidth.value * 0.05f).sp,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
@@ -112,7 +119,8 @@ fun SignUpScreen(navController: NavHostController) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp),
-                        singleLine = true
+                        singleLine = true,
+                        shape = RoundedCornerShape(25.dp),
                     )
 
                     OutlinedTextField(
@@ -122,14 +130,15 @@ fun SignUpScreen(navController: NavHostController) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp),
-                        singleLine = true
+                        singleLine = true,
+                        shape = RoundedCornerShape(25.dp),
                     )
 
                     if (passwordError.isNotEmpty()) {
                         Text(
                             text = passwordError,
                             color = Color.Red,
-                            fontSize = (screenWidth.value * 0.04f).sp, // Scaled font size
+                            fontSize = (screenWidth.value * 0.04f).sp,
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
                     }
@@ -138,7 +147,7 @@ fun SignUpScreen(navController: NavHostController) {
                         Text(
                             text = signUpError,
                             color = Color.Red,
-                            fontSize = (screenWidth.value * 0.04f).sp, // Scaled font size
+                            fontSize = (screenWidth.value * 0.04f).sp,
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
                     }
@@ -147,7 +156,7 @@ fun SignUpScreen(navController: NavHostController) {
                         onClick = { handleSignUp() },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(screenHeight * 0.07f), // Dynamic height
+                            .height(screenHeight * 0.07f),
                         enabled = !isLoading
                     ) {
                         if (isLoading) {
@@ -162,19 +171,45 @@ fun SignUpScreen(navController: NavHostController) {
 
                     Spacer(modifier = Modifier.height(screenHeight * 0.05f))
 
-                    Text("Already have an account?", fontSize = (screenWidth.value * 0.045f).sp)
-
-                    Spacer(modifier = Modifier.height(screenHeight * 0.03f))
-
-                    FilledTonalButton(
-                        onClick = {
-                            navController.navigate("logIn")
-                        },
+                    Column(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(screenHeight * 0.07f)
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text("Log in")
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = "Already have an account?",
+                                color = Color.Black,
+                                fontSize = 16.sp,
+                                modifier = Modifier.padding(end = 8.dp)
+                            )
+
+                            Surface(
+                                onClick = {
+                                    //PRESSABLE FUNCTIONALITY HAS TO CHANGE TO HOME SCREEN
+                                    navController.navigate("logIn")
+                                },
+                                modifier = Modifier
+                                    .height(48.dp)
+                                    .clip(RoundedCornerShape(24.dp))
+                                    .padding(vertical = 4.dp),
+                                color = Color(0xFFFFF5DD)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(
+                                        text = "Log In",
+                                        modifier = Modifier.padding(8.dp),
+                                        color = Color.Blue,
+                                        fontSize = 16.sp
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }

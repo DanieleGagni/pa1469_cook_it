@@ -31,7 +31,7 @@ fun App() {
         startDestination = "logIn"
     ) {
         composable("logIn") {LogInScreen(navController)}
-        //composable("home") {HomeScreen(navController)}
         composable("signUp") {SignUpScreen(navController)}
+        composable("home") {HomeScreen(navController)}
     }
 }
