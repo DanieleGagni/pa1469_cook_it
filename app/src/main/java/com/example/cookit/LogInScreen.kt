@@ -3,6 +3,9 @@ package com.example.cookit
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.navigation.NavHostController
@@ -16,6 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -37,7 +42,7 @@ fun LogInScreen(navController: NavHostController) {
                 isLoading = false
                 if (task.isSuccessful) {
                     // Navigate to the home screen upon successful login
-                    navController.navigate("home")
+                    navController.navigate("signUp")
                 } else {
                     // Show error message
                     loginError = task.exception?.localizedMessage ?: "Login failed"
@@ -58,16 +63,20 @@ fun LogInScreen(navController: NavHostController) {
                     .fillMaxSize()
                     .background(Color(0xFFFFF5DD))
             ) {
+
+                val scrollState = rememberScrollState()
+
                 Column(
                     modifier = Modifier
                         .padding(innerPadding)
                         .fillMaxSize()
+                        .verticalScroll(scrollState)
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
                     // Adjust the size of the logo dynamically based on screen size
-                    Spacer(modifier = Modifier.height(100.dp))
+                    Spacer(modifier = Modifier.height(50.dp))
 
                     Image(
                         painter = painterResource(id = R.drawable.logo),
@@ -89,6 +98,7 @@ fun LogInScreen(navController: NavHostController) {
                             .fillMaxWidth()
                             .padding(vertical = 8.dp),
                         singleLine = true,
+                        shape = RoundedCornerShape(25.dp),
                         leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Username Icon") }
                     )
 
@@ -101,6 +111,7 @@ fun LogInScreen(navController: NavHostController) {
                             .fillMaxWidth()
                             .padding(vertical = 8.dp),
                         singleLine = true,
+                        shape = RoundedCornerShape(25.dp),
                         leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password Icon") }
                     )
 
@@ -114,7 +125,7 @@ fun LogInScreen(navController: NavHostController) {
                     }
 
                     // Login Button
-                    Button(
+                    FilledTonalButton(
                         onClick = { handleLogin() },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -131,14 +142,44 @@ fun LogInScreen(navController: NavHostController) {
                         }
                     }
 
-                    // Sign-up Section
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxWidth()
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize() // Ensures the Column fills the entire screen
+                            .padding(16.dp), // Optional padding for the Column
+                        verticalArrangement = Arrangement.Center, // Centers the content vertically
+                        horizontalAlignment = Alignment.CenterHorizontally // Centers the content horizontally
                     ) {
-                        Text("Don't have an account? ")
-                        TextButton(onClick = { navController.navigate("signUp") }) {
-                            Text("Sign Up", color = Color.Blue)
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp), // Spacing between text and button
+                            verticalAlignment = Alignment.CenterVertically, // Vertically center the items
+                        ) {
+                            Text(
+                                text = "Don't have an account?",
+                                color = Color.Black, // Text color
+                                fontSize = 16.sp, // Font size
+                                modifier = Modifier.padding(end = 8.dp) // Padding between text and button
+                            )
+                            // Custom Pressable Component for Sign Up
+                            Surface(
+                                onClick = {
+                                    navController.navigate("signUp")
+                                },
+                                modifier = Modifier
+                                    .height(48.dp) // Set height for the button
+                                    .clip(RoundedCornerShape(24.dp)) // Rounded corners for the button
+                                    .padding(vertical = 4.dp), // Optional padding for the button
+                                color = Color(0xFFFFF5DD) // Background color of the button
+                            ) {
+                                Box(contentAlignment = Alignment.Center) { // Ensures text is centered in the button
+                                    Text(
+                                        text = "Sign up", // Button text
+                                        modifier = Modifier.padding(8.dp), // Padding inside the button
+                                        color = Color.Blue, // Text color
+                                        fontSize = 16.sp // Font size
+                                    )
+                                }
+                            }
                         }
                     }
                 }

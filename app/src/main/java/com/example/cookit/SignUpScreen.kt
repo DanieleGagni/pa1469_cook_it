@@ -61,7 +61,7 @@ fun SignUpScreen(navController: NavHostController) {
                     isLoading = false
                     if (task.isSuccessful) {
                         // Navigate to home screen after successful sign-up
-                        navController.navigate("home")
+                        navController.navigate("logIn")
                     } else {
                         // Display the error message
                         signUpError = task.exception?.localizedMessage ?: "Sign up failed"
