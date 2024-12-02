@@ -28,7 +28,7 @@ fun App() {
 
     NavHost(
         navController = navController,
-        startDestination = "logIn"
+        startDestination = "home"
     ) {
         composable("logIn") {LogInScreen(navController)}
         composable("signUp") {SignUpScreen(navController)}

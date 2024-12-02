@@ -37,47 +37,48 @@ fun HomeScreen(navController: NavHostController) {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .background(Color.White)
+                    .background(Color.White),
+                horizontalAlignment = Alignment.CenterHorizontally // Centrar el contenido
             ) {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(24.dp)) // Más espacio superior
 
-                // Saludo ta gure "esaldie"
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
+                // Avatar y saludo en columna
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.ic_user_avatar), // sesiñue hasten daben pertsonan argazkixe
+                        painter = painterResource(id = R.drawable.ic_user_avatar), // Foto de perfil
                         contentDescription = "User Avatar",
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(60.dp)
                             .clip(CircleShape)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Column {
-                        Text(
-                            //TEXT SHOULD CHANGE SO TAHT IT TAKES THE USER NAME
-                            text = "Hello Maria!",
-                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-                            color = Color.Black
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = buildAnnotatedString {
-                                withStyle(style = SpanStyle(color = Color(0xFFFFA500))) { // Color naranja para "Cook"
-                                    append("Cook")
-                                }
-                                append(" with ease, connect\nthrough flavours.")
-                            },
-                            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 25.sp), // Tamaño más grande
-                            color = Color.Gray
-                        )
-                    }
+                    Spacer(modifier = Modifier.height(12.dp)) // Espaciado entre la foto y el saludo
+                    Text(
+                        text = "Hello Maria!",
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                        color = Color.Black,
+                        textAlign = TextAlign.Center
+                    )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp)) // Espaciado entre saludo y eslogan
+
+                // Eslogan separado
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(style = SpanStyle(color = Color(0xFFFFA500))) { // Color naranja para "Cook"
+                            append("Cook")
+                        }
+                        append(" with ease, connect\n\nthrough flavours.")
+                    },
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 25.sp),
+                    color = Color.Black,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(24.dp)) // Espacio entre eslogan y búsqueda
 
                 // Cuadro de búsqueda
                 OutlinedTextField(
@@ -85,14 +86,14 @@ fun HomeScreen(navController: NavHostController) {
                     onValueChange = { /* Lógica de búsqueda */ },
                     placeholder = { Text("What would you like to eat?") },
                     modifier = Modifier
-                        .fillMaxWidth(0.9f) // Menos ancha
+                        .fillMaxWidth()
                         .padding(horizontal = 16.dp),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(25.dp),
                     leadingIcon = {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_search), // Ícono de búsqueda
+                            painter = painterResource(id = R.drawable.ic_search),
                             contentDescription = "Search Icon",
-                            modifier = Modifier.size(20.dp) // Tamaño reducido de la lupa
+                            modifier = Modifier.size(20.dp)
                         )
                     },
                     singleLine = true,
@@ -102,24 +103,22 @@ fun HomeScreen(navController: NavHostController) {
                     )
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp)) // Espacio entre búsqueda y categorías
 
                 // Categorías
                 Text(
                     text = "Categories",
                     style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp),
-                    modifier = Modifier.padding(start = 16.dp),
-                    textAlign = TextAlign.Start
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Grid de categorías
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxSize()
                         .padding(horizontal = 16.dp)
+                        .weight(1f) // Asegurar que ocupe el espacio restante
                 ) {
                     val categoryImages = mapOf(
                         "VEGETARIAN" to R.drawable.ic_category_vegetarian,
@@ -141,8 +140,7 @@ fun HomeScreen(navController: NavHostController) {
                                     .fillMaxWidth()
                                     .background(Color.White)
                             ) {
-                                // Imagen específica para cada categoría
-                                val imageRes = categoryImages[category] ?: R.drawable.ic_category_add //Hauxe da ez badau aurkitzen konkretuki bat, orokorrie
+                                val imageRes = categoryImages[category] ?: R.drawable.ic_category_add
                                 Image(
                                     painter = painterResource(id = imageRes),
                                     contentDescription = category,
@@ -175,37 +173,37 @@ fun BottomNavigationBar() {
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 16.dp, vertical = 4.dp), // Reducir padding vertical
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         IconButton(onClick = { /* Navegar a Home */ }) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_home), // Ícono de Home
+                painter = painterResource(id = R.drawable.ic_home),
                 contentDescription = "Home Icon"
             )
         }
         IconButton(onClick = { /* Navegar a Estadísticas */ }) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_stats), // Ícono de estadísticas
+                painter = painterResource(id = R.drawable.ic_stats),
                 contentDescription = "Stats Icon"
             )
         }
         IconButton(onClick = { /* Agregar nueva receta */ }) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_add), // Ícono de agregar
+                painter = painterResource(id = R.drawable.ic_add),
                 contentDescription = "Add Icon",
                 modifier = Modifier.size(48.dp)
             )
         }
         IconButton(onClick = { /* Navegar a Favoritos */ }) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_favorite), // Ícono de favoritos
+                painter = painterResource(id = R.drawable.ic_favorite),
                 contentDescription = "Favorite Icon"
             )
         }
         IconButton(onClick = { /* Navegar a Perfil */ }) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_profile), // Ícono de perfil
+                painter = painterResource(id = R.drawable.ic_profile),
                 contentDescription = "Profile Icon"
             )
         }
