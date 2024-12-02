@@ -30,7 +30,7 @@ fun HomeScreen(navController: NavHostController) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            BottomNavigationBar() // Barra de navegación inferior
+            BottomNavigationBar(navController) // Barra de navegación inferior
         },
         content = { innerPadding ->
             Column(
@@ -168,7 +168,7 @@ fun HomeScreen(navController: NavHostController) {
 
 // Barra inferior de navegación
 @Composable
-fun BottomNavigationBar() {
+fun BottomNavigationBar(navController: NavHostController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -188,7 +188,11 @@ fun BottomNavigationBar() {
                 contentDescription = "Stats Icon"
             )
         }
-        IconButton(onClick = { /* Agregar nueva receta */ }) {
+        IconButton(
+            onClick = {
+                navController.navigate("createRecipe")
+            }
+        ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_add),
                 contentDescription = "Add Icon",

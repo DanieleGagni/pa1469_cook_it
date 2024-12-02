@@ -15,45 +15,51 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 
 @Composable
 fun CreateRecipeScreen(
-    onClick: () -> Unit,
-    onChange: (String) -> Unit
+    navController: NavHostController // Pass the NavController for navigation
 ) {
-    var text1 by remember { mutableStateOf("") }
+    var menuName by remember { mutableStateOf("") }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // TextField to enter the recipe name
         TextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            value = text1,
-            onValueChange = { newText1 ->
-                text1 = newText1
-                onChange(newText1)
-            },
-            label = { Text(text = "Enter Menu Name")},
-            maxLines = 5
+            value = menuName,
+            onValueChange = { newText -> menuName = newText },
+            label = { Text(text = "Enter Menu Name") },
+            maxLines = 1
         )
+
+        // Add ingredients section
         AddEditIngredients(
-            onClick = { ingredients -> println("Posted ingredients: $ingredients")}
+            onClick = { ingredients ->
+                println("Posted ingredients: $ingredients")
+            }
         )
-        AddEditStepsScreen (
-            onClick = { steps -> println("Posted ingredients: $steps")}
+
+        // Add steps section
+        AddEditStepsScreen(
+            onClick = { steps ->
+                println("Posted steps: $steps")
+            }
         )
-        Button(onClick = onClick) {
+
+        // Post Button
+        Button(
+            onClick = {
+                // Add navigation to the home screen or perform your post action
+                navController.navigate("home")
+            },
+            modifier = Modifier.padding(16.dp)
+        ) {
             Text(text = "Post")
         }
     }
-}
-
-@Preview
-@Composable
-fun CreateRecipeScreenPreview() {
-    CreateRecipeScreen(
-        onClick = { },
-        onChange = { }
-    )
 }

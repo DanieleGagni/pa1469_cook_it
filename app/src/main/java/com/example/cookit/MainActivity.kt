@@ -28,10 +28,12 @@ fun App() {
 
     NavHost(
         navController = navController,
-        startDestination = "home"
+        startDestination = "logIn"
     ) {
         composable("logIn") {LogInScreen(navController)}
         composable("signUp") {SignUpScreen(navController)}
         composable("home") {HomeScreen(navController)}
+        composable("createRecipe") { CreateRecipeScreen(navController) }
+        //composable("home") {HomeScreen(navController)}
     }
 }
