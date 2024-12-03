@@ -1,4 +1,4 @@
-package com.example.cookit
+package com.example.cookit.screens.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.cookit.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,7 +31,7 @@ fun HomeScreen(navController: NavHostController) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            BottomNavigationBar() // Barra de navegación inferior
+            BottomNavigationBar(navController) // Barra de navegación inferior
         },
         content = { innerPadding ->
             Column(
@@ -168,7 +169,7 @@ fun HomeScreen(navController: NavHostController) {
 
 // Barra inferior de navegación
 @Composable
-fun BottomNavigationBar() {
+fun BottomNavigationBar(navController: NavHostController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -188,7 +189,11 @@ fun BottomNavigationBar() {
                 contentDescription = "Stats Icon"
             )
         }
-        IconButton(onClick = { /* Agregar nueva receta */ }) {
+        IconButton(
+            onClick = {
+                navController.navigate("createRecipe")
+            }
+        ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_add),
                 contentDescription = "Add Icon",
