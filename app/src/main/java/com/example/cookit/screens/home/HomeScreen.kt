@@ -1,4 +1,4 @@
-package com.example.cookit
+package com.example.cookit.screens.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.cookit.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

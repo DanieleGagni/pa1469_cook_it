@@ -1,4 +1,4 @@
-package com.example.cookit
+package com.example.cookit.screens.createRecipe.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,15 +17,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 
 @Composable
-fun AddEditIngredients(
+fun AddEditStepsScreen(
     onClick: (List<String>) -> Unit
 ) {
-    var currentIngredient by remember { mutableStateOf("") }
-    val ingredients = remember { mutableStateListOf<String>() }
+    var currentStep by remember { mutableStateOf("") }
+    val steps = remember { mutableStateListOf<String>() }
     var editIndex by remember { mutableStateOf(-1) }
+    var insertIndex by remember { mutableStateOf(-1) }
     Column (
         horizontalAlignment = Alignment.CenterHorizontally
     ){
@@ -33,31 +33,44 @@ fun AddEditIngredients(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            value = currentIngredient,
-            onValueChange = { newText -> currentIngredient = newText},
+            value = currentStep,
+            onValueChange = { newText -> currentStep = newText},
             label = {
                 Text(
-                    text = if (editIndex >= 0) "Edit Ingredient" else "Enter Ingredient"
+                    text = when {
+                        editIndex >= 0 -> "Edit Step"
+                        insertIndex >= 0 -> "Insert Step"
+                        else -> "Enter Step"
+                    }
                 )
             },
             maxLines = 1
         )
         Button(
             onClick = {
-                if (currentIngredient.isNotBlank()) {
-                    if (editIndex >= 0) {
-                        ingredients[editIndex] = currentIngredient
-                        editIndex = -1
-                    } else {
-                        ingredients.add(currentIngredient)
+                if (currentStep.isNotBlank()) {
+                    when {
+                        editIndex >= 0 -> {
+                            steps[editIndex] = currentStep
+                            editIndex = -1
+                        }
+
+                        insertIndex >= 0 -> {
+                            steps.add(insertIndex, currentStep)
+                            insertIndex = -1
+                        }
+
+                        else -> {
+                            steps.add(currentStep)
+                        }
                     }
-                    currentIngredient = ""
+                    currentStep = ""
                 }
             },
             modifier = Modifier.padding(8.dp)
         ) {
             Text(
-                text = if (editIndex >= 0) "Update Ingredient" else "Add Ingredient"
+                text = if (editIndex >= 0) "Update Step" else "Add Step"
             )
         }
         Column(
@@ -65,8 +78,8 @@ fun AddEditIngredients(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Text(text = "Ingredients:")
-            ingredients.forEachIndexed { index, ingredient ->
+            Text(text = "Steps:")
+            steps.forEachIndexed { index, step ->
                 Row(
                     Modifier
                         .fillMaxWidth()
@@ -74,12 +87,12 @@ fun AddEditIngredients(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "・$ingredient",
+                        text = "${index+1}.$step",
                         Modifier.weight(1f)
                     )
                     Button(
                         onClick = {
-                            currentIngredient = ingredient
+                            currentStep = step
                             editIndex = index
                         },
                         modifier = Modifier.padding(horizontal = 4.dp)
@@ -88,7 +101,16 @@ fun AddEditIngredients(
                     }
                     Button(
                         onClick = {
-                            ingredients.removeAt(index)
+                            currentStep = ""
+                            insertIndex = index + 1
+                        },
+                        modifier = Modifier.padding(horizontal = 4.dp)
+                    ) {
+                        Text(text = "Insert")
+                    }
+                    Button(
+                        onClick = {
+                            steps.removeAt(index)
                         },
                         modifier = Modifier.padding(horizontal = 4.dp)
                     ) {
@@ -102,8 +124,8 @@ fun AddEditIngredients(
 
 @Preview
 @Composable
-fun AddEditIngredientsPreview() {
-    AddEditIngredients(
-        onClick = { ingredients -> println("Posted ingredients: $ingredients")}
+fun AddEditStepsScreenPreview() {
+    AddEditStepsScreen (
+        onClick = { steps -> println("Posted ingredients: $steps")}
     )
 }

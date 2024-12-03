@@ -1,4 +1,4 @@
-package com.example.cookit
+package com.example.cookit.screens.createRecipe
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,9 +13,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.cookit.screens.createRecipe.components.AddEditIngredients
+import com.example.cookit.screens.createRecipe.components.AddEditStepsScreen
 
 @Composable
 fun CreateRecipeScreen(
