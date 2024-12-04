@@ -70,11 +70,11 @@ fun HomeScreen(navController: NavHostController) {
                 // Eslogan separado
                 Text(
                     text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(color = Color(0xFFFFA500))) { // Color naranja para "Cook"
+                        withStyle(style = SpanStyle(color = Color(0xFFF58D1E))) { // Color naranja para "Cook"
                             append("Cook")
                         }
                         append(" with ease, connect\n\nthrough ")
-                        withStyle(style = SpanStyle(color = Color(0xFFFFA500))) { // Color naranja para "Cook"
+                        withStyle(style = SpanStyle(color = Color(0xFFF58D1E))) { // Color naranja para "Cook"
                             append("flavours")
                         }
                         append(".")
