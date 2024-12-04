@@ -1,29 +1,30 @@
 package com.example.cookit
 
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.navigation.NavHostController
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.userProfileChangeRequest
 
 
 @Composable
@@ -33,14 +34,23 @@ fun SignUpScreen(navController: NavHostController) {
     val screenWidth = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp
 
+    var name by remember { mutableStateOf(TextFieldValue("")) }
     var username by remember { mutableStateOf(TextFieldValue("")) }
     var password by remember { mutableStateOf(TextFieldValue("")) }
     var passwordError by remember { mutableStateOf("") }
     var signUpError by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
 
-    fun validatePassword(username: String, password: String): Boolean {
+    fun validateInputs(name: String, username: String, password: String): Boolean {
         return when {
+            name.isEmpty() -> {
+                signUpError = "Name cannot be empty"
+                false
+            }
+            username.isEmpty() -> {
+                signUpError = "Email cannot be empty"
+                false
+            }
             password.length < 8 -> {
                 passwordError = "Password must be at least 8 characters"
                 false
@@ -51,23 +61,34 @@ fun SignUpScreen(navController: NavHostController) {
             }
             else -> {
                 passwordError = ""
+                signUpError = ""
                 true
             }
         }
     }
 
     fun handleSignUp() {
-        if (validatePassword(username.text, password.text)) {
+        if (validateInputs(name.text, username.text, password.text)) {
             isLoading = true
             signUpError = "" // Clear previous errors
             auth.createUserWithEmailAndPassword(username.text, password.text)
                 .addOnCompleteListener { task ->
                     isLoading = false
                     if (task.isSuccessful) {
-                        // Navigate to home screen after successful sign-up
-                        navController.navigate("home")
+                        val user = auth.currentUser
+                        user?.let {
+                            val profileUpdates = userProfileChangeRequest {
+                                displayName = name.text
+                            }
+                            it.updateProfile(profileUpdates).addOnCompleteListener { updateTask ->
+                                if (updateTask.isSuccessful) {
+                                    navController.navigate("home")
+                                } else {
+                                    signUpError = "Failed to update profile: ${updateTask.exception?.localizedMessage}"
+                                }
+                            }
+                        }
                     } else {
-                        // Display the error message
                         signUpError = task.exception?.localizedMessage ?: "Sign up failed"
                     }
                 }
@@ -113,6 +134,17 @@ fun SignUpScreen(navController: NavHostController) {
                     )
 
                     OutlinedTextField(
+                        value = name,
+                        onValueChange = { name = it },
+                        placeholder = { Text("Your Name") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        singleLine = true,
+                        shape = RoundedCornerShape(25.dp),
+                    )
+
+                    OutlinedTextField(
                         value = username,
                         onValueChange = { username = it },
                         placeholder = { Text("john.doe@example.com") },
@@ -132,6 +164,7 @@ fun SignUpScreen(navController: NavHostController) {
                             .padding(vertical = 8.dp),
                         singleLine = true,
                         shape = RoundedCornerShape(25.dp),
+                        visualTransformation = PasswordVisualTransformation()
                     )
 
                     if (passwordError.isNotEmpty()) {
@@ -191,7 +224,6 @@ fun SignUpScreen(navController: NavHostController) {
 
                             Surface(
                                 onClick = {
-                                    //PRESSABLE FUNCTIONALITY HAS TO CHANGE TO HOME SCREEN
                                     navController.navigate("logIn")
                                 },
                                 modifier = Modifier
@@ -216,4 +248,5 @@ fun SignUpScreen(navController: NavHostController) {
         }
     )
 }
+
 
