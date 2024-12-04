@@ -32,7 +32,7 @@ fun App() {
 
     NavHost(
         navController = navController,
-        startDestination = "home"
+        startDestination = "logIn"
     ) {
         composable("logIn") { LogInScreen(navController) }
         composable("signUp") { SignUpScreen(navController) }

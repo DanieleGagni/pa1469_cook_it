@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
@@ -30,7 +31,6 @@ fun LogInScreen(navController: NavHostController) {
 
     var username by remember { mutableStateOf(TextFieldValue("")) }
     var password by remember { mutableStateOf(TextFieldValue("")) }
-    var passwordError by remember { mutableStateOf("") }
     var loginError by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
 
@@ -110,6 +110,7 @@ fun LogInScreen(navController: NavHostController) {
                             .padding(vertical = 8.dp),
                         singleLine = true,
                         shape = RoundedCornerShape(25.dp),
+                        visualTransformation = PasswordVisualTransformation(),
                         leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password Icon") }
                     )
 
