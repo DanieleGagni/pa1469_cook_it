@@ -1,4 +1,4 @@
-package com.example.cookit
+package com.example.cookit.screens.logIn
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.sp
+import com.example.cookit.R
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
