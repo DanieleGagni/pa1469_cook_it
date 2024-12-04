@@ -28,6 +28,13 @@ import com.example.cookit.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavHostController) {
+
+    // Handle the login logic
+    fun handleSearch() {
+        //Navigate to the search screen
+    }
+
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
@@ -43,20 +50,14 @@ fun HomeScreen(navController: NavHostController) {
             ) {
                 Spacer(modifier = Modifier.height(24.dp)) // Más espacio superior
 
-                // Avatar y saludo en columna
+                //Saludo en columna
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_user_avatar), // Foto de perfil
-                        contentDescription = "User Avatar",
-                        modifier = Modifier
-                            .size(60.dp)
-                            .clip(CircleShape)
-                    )
-                    Spacer(modifier = Modifier.height(12.dp)) // Espaciado entre la foto y el saludo
+                    Spacer(modifier = Modifier.height(12.dp))
                     Text(
+                        //TEXT SHOULD CALL TO VIEWMODEL TO GET THE USER'S NAME
                         text = "Hello Maria!",
                         style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
                         color = Color.Black,
@@ -69,10 +70,14 @@ fun HomeScreen(navController: NavHostController) {
                 // Eslogan separado
                 Text(
                     text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(color = Color(0xFFFFA500))) { // Color naranja para "Cook"
+                        withStyle(style = SpanStyle(color = Color(0xFFF58D1E))) { // Color naranja para "Cook"
                             append("Cook")
                         }
-                        append(" with ease, connect\n\nthrough flavours.")
+                        append(" with ease, connect\n\nthrough ")
+                        withStyle(style = SpanStyle(color = Color(0xFFF58D1E))) { // Color naranja para "Cook"
+                            append("flavours")
+                        }
+                        append(".")
                     },
                     style = MaterialTheme.typography.bodyMedium.copy(fontSize = 25.sp),
                     color = Color.Black,
@@ -81,38 +86,25 @@ fun HomeScreen(navController: NavHostController) {
 
                 Spacer(modifier = Modifier.height(24.dp)) // Espacio entre eslogan y búsqueda
 
-                // Cuadro de búsqueda
-                OutlinedTextField(
-                    value = "",
-                    onValueChange = { /* Lógica de búsqueda */ },
-                    placeholder = { Text("What would you like to eat?") },
+                //Search button
+                Button(
+                    onClick = { handleSearch() },
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    shape = RoundedCornerShape(25.dp),
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_search),
-                            contentDescription = "Search Icon",
-                            modifier = Modifier.size(20.dp)
-                        )
-                    },
-                    singleLine = true,
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = Color.Gray,
-                        unfocusedBorderColor = Color.LightGray
+                        .height(80.dp)
+                        .width(80.dp)
+                        .padding(vertical = 8.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF5F5F5)) // Set the background color
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_search),
+                        contentDescription = "Search Icon",
+                        modifier = Modifier
+                            .size(40.dp),
+                        tint = Color.Unspecified
                     )
-                )
+                }
 
                 Spacer(modifier = Modifier.height(16.dp)) // Espacio entre búsqueda y categorías
-
-                // Categorías
-                Text(
-                    text = "Categories",
-                    style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp),
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    textAlign = TextAlign.Center
-                )
 
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
@@ -173,20 +165,22 @@ fun BottomNavigationBar(navController: NavHostController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White)
+            .background(Color(0xFFF5F5F5))
             .padding(horizontal = 16.dp, vertical = 4.dp), // Reducir padding vertical
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         IconButton(onClick = { /* Navegar a Home */ }) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_home),
-                contentDescription = "Home Icon"
+                contentDescription = "Home Icon",
+                tint = Color.Unspecified
             )
         }
-        IconButton(onClick = { /* Navegar a Estadísticas */ }) {
+        IconButton(onClick = { /* Navegar a Shopping List */ }) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_stats),
-                contentDescription = "Stats Icon"
+                contentDescription = "Shopping List Icon",
+                tint = Color.Unspecified
             )
         }
         IconButton(
@@ -197,19 +191,22 @@ fun BottomNavigationBar(navController: NavHostController) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_add),
                 contentDescription = "Add Icon",
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier.size(48.dp),
+                tint = Color.Unspecified
             )
         }
         IconButton(onClick = { /* Navegar a Favoritos */ }) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_favorite),
-                contentDescription = "Favorite Icon"
+                contentDescription = "Favorite Icon",
+                tint = Color.Unspecified
             )
         }
-        IconButton(onClick = { /* Navegar a Perfil */ }) {
+        IconButton(onClick = { /* Navegar a Settings */ }) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_profile),
-                contentDescription = "Profile Icon"
+                painter = painterResource(id = R.drawable.ic_settings),
+                contentDescription = "Settings Icon",
+                tint = Color.Unspecified
             )
         }
     }
