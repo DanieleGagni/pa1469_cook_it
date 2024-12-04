@@ -11,6 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.cookit.screens.createRecipe.CreateRecipeScreen
 import com.example.cookit.screens.home.HomeScreen
 import com.example.cookit.screens.logIn.LogInScreen
+import com.example.cookit.screens.shoppingList.ShoppingListScreen
 import com.example.cookit.screens.signUp.SignUpScreen
 import com.example.cookit.ui.theme.CookItTheme
 
@@ -32,11 +33,12 @@ fun App() {
 
     NavHost(
         navController = navController,
-        startDestination = "home"
+        startDestination = "logIn"
     ) {
         composable("logIn") { LogInScreen(navController) }
         composable("signUp") { SignUpScreen(navController) }
         composable("home") { HomeScreen(navController) }
         composable("createRecipe") { CreateRecipeScreen(navController) }
+        composable("shoppingList") { ShoppingListScreen(navController) }
     }
 }
