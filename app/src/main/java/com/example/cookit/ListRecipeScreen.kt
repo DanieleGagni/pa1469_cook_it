@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -27,12 +29,20 @@ class ListRecipeScreen : ComponentActivity() {
 
 @Composable
 fun SearchRecipeScreen(viewModel: ListRecipeViewModel = viewModel()) {
+    val recipes by viewModel.recipes.observeAsState(emptyList())
+
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Button(onClick = { viewModel.searchRecipes("example query") }) {
-            Text(text = "Search Recipe", fontSize = 18.sp)
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Button(onClick = { viewModel.searchRecipes() }) {
+                Text(text = "Search Recipes", fontSize = 18.sp)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            recipes.forEach { recipe: Recipe ->
+                Text(text = recipe.title, fontSize = 16.sp)
+            }
         }
     }
 }
