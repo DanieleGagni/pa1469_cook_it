@@ -1,11 +1,13 @@
 package com.example.cookit.screens.shoppingList
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -13,7 +15,10 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -43,88 +49,116 @@ import com.example.cookit.R
 @Composable
 fun ShoppingListScreen(navController: NavHostController) {
 
-    var ingredient by remember { mutableStateOf(TextFieldValue("")) }
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
+
+    var newIngredient by remember { mutableStateOf(TextFieldValue("")) }
+
+    fun handleAddIngredient() {
+        //--------ADD INGREDIENT TO USER'S SHOPPING LIST
+        // NEW INGREDIENT SHOULD BE SHOW ON THE LIST
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            com.example.cookit.screens.home.BottomNavigationBar(navController) // Barra de navegación inferior
+            BottomNavigationBar(navController)
         },
         content = { innerPadding ->
 
             Box(
                 modifier = Modifier
-                    //.fillMaxSize()
                     .wrapContentHeight()
-                    .padding(innerPadding) // Ensure padding includes insets from Scaffold
-                    .imePadding() // Adjust for keyboard
+                    .padding(innerPadding)
                     .background(Color.White)
             ) {
-                // Main content scrollable
+
+                val scrollState = rememberScrollState()
+
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        //.verticalScroll(rememberScrollState()) // Allow scrolling
-                        .padding(16.dp), // Adjust padding for content
-                    horizontalAlignment = Alignment.CenterHorizontally // Center the content
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Spacer(modifier = Modifier.height(24.dp)) // More space at the top
 
                     Text(
                         text = buildAnnotatedString {
                             withStyle(
                                 style = SpanStyle(
                                     color = Color(0xFFF58D1E),
-                                    fontWeight = FontWeight.Bold // Bold applied here
+                                    fontWeight = FontWeight.Bold
                                 )
                             ) {
                                 append("SHOPPING ")
                             }
-                            append("LIST") // No bold applied to "LIST"
+                            append("LIST")
                         },
                         style = MaterialTheme.typography.bodyMedium.copy(fontSize = 25.sp),
                         color = Color.Black,
                         textAlign = TextAlign.Center
                     )
 
-                    //------------------------CHECKLIST SHOULD BE HERE
-
-                    // Just for spacing above the text input field
-                    //Spacer(modifier = Modifier.weight(1f)) // Push content upwards
-
-                }
-
-                // Create a Row for the TextField and Button side by side
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        //.padding(horizontal = 16.dp)
-                        .align(Alignment.BottomCenter), // Align at the bottom
-                    horizontalArrangement = Arrangement.spacedBy(8.dp) // Space between TextField and Button
-                ) {
-                    OutlinedTextField(
-                        value = ingredient,
-                        onValueChange = { newText -> ingredient = newText }, // Update the state
-                        placeholder = { Text("Add ingredient...") },
+                    Column(
                         modifier = Modifier
-                            .weight(1f) // Make the TextField take up the available space, but not fill the entire width
-                            .padding(vertical = 8.dp),
-                        singleLine = true,
-                        shape = RoundedCornerShape(25.dp)
-                    )
-
-                    // Add a Button next to the TextField
-                    IconButton(
-                        onClick = { /* Handle button click */ },
-                        modifier = Modifier
-                            .size(48.dp)
-                            .align(Alignment.CenterVertically) // Vertically center the button with the text field
+                            .fillMaxWidth()
+                            .height(screenHeight * 0.80f)
+                            .padding(16.dp)
+                            .verticalScroll(scrollState),
                     ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_add_black), // Use the appropriate icon
-                            contentDescription = "Add Ingredient Icon",
-                            tint = Color.Unspecified
+
+                        //LIST OF INGREDIENTS
+                        for (i in 1..20) { // Simulate a list with 20 items
+
+                            //EACH INGREDIENT SHOULD HAVE AN ATRIBUTE TO KNOW IF IT IS CHECKED OR NOT
+                            var checked by remember { mutableStateOf(false) }
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp)
+                            ) {
+                                Checkbox(
+                                    checked = checked,
+                                    onCheckedChange = { checked = it }
+                                )
+                                Text("Ingredient $i")
+                            }
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+
+                        //LOGIC OF INPUT TEXT AND BUTTON TO ADD NEW INGREDIENT SHOULD BE ADDED BELOW
+                        OutlinedTextField(
+                            value = newIngredient,
+                            onValueChange = { newIngredient = it },
+                            placeholder = { Text("Add ingredients") },
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(vertical = 6.dp),
+                            singleLine = true,
+                            shape = RoundedCornerShape(25.dp),
                         )
+
+                        IconButton(
+                            onClick = {
+                                handleAddIngredient()
+                            },
+                            modifier = Modifier
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_add_black),
+                                contentDescription = "Add Icon",
+                                tint = Color.Unspecified
+                            )
+                        }
                     }
                 }
             }

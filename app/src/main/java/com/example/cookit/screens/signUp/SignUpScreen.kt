@@ -62,7 +62,7 @@ fun SignUpScreen(navController: NavHostController) {
         if (validatePassword(username.text, password.text)) {
             isLoading = true
             signUpError = "" // Clear previous errors
-            auth.createUserWithEmailAndPassword(username.text, password.text)
+            auth.createUserWithEmailAndPassword(email.text, password.text)
                 .addOnCompleteListener { task ->
                     isLoading = false
                     if (task.isSuccessful) {
