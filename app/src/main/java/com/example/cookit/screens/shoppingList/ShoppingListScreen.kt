@@ -1,19 +1,13 @@
 package com.example.cookit.screens.shoppingList
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -45,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.cookit.R
+import com.example.cookit.screens.components.NavigationBar
 
 @Composable
 fun ShoppingListScreen(navController: NavHostController) {
@@ -62,7 +57,7 @@ fun ShoppingListScreen(navController: NavHostController) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            BottomNavigationBar(navController)
+            NavigationBar(navController)
         },
         content = { innerPadding ->
 
@@ -164,66 +159,4 @@ fun ShoppingListScreen(navController: NavHostController) {
             }
         }
     )
-}
-
-
-// Barra inferior de navegación
-@Composable
-fun BottomNavigationBar(navController: NavHostController) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color(0xFFF5F5F5))
-            .padding(horizontal = 16.dp, vertical = 4.dp), // Reducir padding vertical
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        IconButton(
-            onClick = {
-                navController.navigate("home")
-            }
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_home),
-                contentDescription = "Home Icon",
-                tint = Color.Unspecified
-            )
-        }
-        IconButton(
-            onClick = {
-                navController.navigate("shoppingList")
-            }
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_stats),
-                contentDescription = "Shopping List Icon",
-                tint = Color.Unspecified
-            )
-        }
-        IconButton(
-            onClick = {
-                navController.navigate("createRecipe")
-            }
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_add),
-                contentDescription = "Add Icon",
-                modifier = Modifier.size(48.dp),
-                tint = Color.Unspecified
-            )
-        }
-        IconButton(onClick = { /* Navegar a Favoritos */ }) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_favorite),
-                contentDescription = "Favorite Icon",
-                tint = Color.Unspecified
-            )
-        }
-        IconButton(onClick = { /* Navegar a Settings */ }) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_settings),
-                contentDescription = "Settings Icon",
-                tint = Color.Unspecified
-            )
-        }
-    }
 }
