@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cookit.R
 import com.google.firebase.auth.FirebaseAuth
+import com.example.cookit.screens.components.NavigationBar
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
@@ -38,7 +39,7 @@ fun HomeScreen(navController: NavHostController) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            BottomNavigationBar(navController) // Barra de navegación inferior
+            NavigationBar(navController) // Barra de navegación inferior
         },
         content = { innerPadding ->
             Column(
@@ -157,65 +158,4 @@ fun HomeScreen(navController: NavHostController) {
             }
         }
     )
-}
-
-// Barra inferior de navegación
-@Composable
-fun BottomNavigationBar(navController: NavHostController) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color(0xFFF5F5F5))
-            .padding(horizontal = 16.dp, vertical = 4.dp), // Reducir padding vertical
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        IconButton(
-            onClick = {
-                navController.navigate("home")
-            }
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_home),
-                contentDescription = "Home Icon",
-                tint = Color.Unspecified
-            )
-        }
-        IconButton(
-            onClick = {
-                navController.navigate("shoppingList")
-            }
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_stats),
-                contentDescription = "Shopping List Icon",
-                tint = Color.Unspecified
-            )
-        }
-        IconButton(
-            onClick = {
-                navController.navigate("createRecipe")
-            }
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_add),
-                contentDescription = "Add Icon",
-                modifier = Modifier.size(48.dp),
-                tint = Color.Unspecified
-            )
-        }
-        IconButton(onClick = { /* Navegar a Favoritos */ }) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_favorite),
-                contentDescription = "Favorite Icon",
-                tint = Color.Unspecified
-            )
-        }
-        IconButton(onClick = { /* Navegar a Settings */ }) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_settings),
-                contentDescription = "Settings Icon",
-                tint = Color.Unspecified
-            )
-        }
-    }
 }
