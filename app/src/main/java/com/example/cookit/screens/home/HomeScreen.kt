@@ -169,14 +169,22 @@ fun BottomNavigationBar(navController: NavHostController) {
             .padding(horizontal = 16.dp, vertical = 4.dp), // Reducir padding vertical
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        IconButton(onClick = { /* Navegar a Home */ }) {
+        IconButton(
+            onClick = {
+                navController.navigate("home")
+            }
+        ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_home),
                 contentDescription = "Home Icon",
                 tint = Color.Unspecified
             )
         }
-        IconButton(onClick = { /* Navegar a Shopping List */ }) {
+        IconButton(
+            onClick = {
+                navController.navigate("shoppingList")
+            }
+        ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_stats),
                 contentDescription = "Shopping List Icon",
