@@ -195,7 +195,12 @@ fun BottomNavigationBar(navController: NavHostController) {
                 tint = Color.Unspecified
             )
         }
-        IconButton(onClick = { /* Navegar a Favoritos */ }) {
+        IconButton(
+            onClick = {
+                //--------RIGHT NOW IT REDIRECTS TO RECIPE TO SEE WHAT THE SCREEN IS LIKE
+                navController.navigate("recipe")
+            }
+        ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_favorite),
                 contentDescription = "Favorite Icon",
