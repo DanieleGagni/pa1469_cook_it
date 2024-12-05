@@ -1,6 +1,9 @@
 package com.example.cookit.screens.signUp
 
-
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -8,73 +11,123 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.navigation.NavHostController
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.painterResource
 import com.example.cookit.R
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.userProfileChangeRequest
 
+// Data class for holding the UI state
+data class SignUpUiState(
+    val name: String = "",
+    val username: String = "",
+    val password: String = "",
+    val passwordError: String = "",
+    val signUpError: String = "",
+    val isLoading: Boolean = false
+)
 
-@Composable
-fun SignUpScreen(navController: NavHostController) {
-    val auth = FirebaseAuth.getInstance()
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp
-    val screenHeight = configuration.screenHeightDp.dp
+// ViewModel for SignUpScreen
+class SignUpViewModel : ViewModel() {
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
-    var username by remember { mutableStateOf(TextFieldValue("")) }
-    var email by remember { mutableStateOf(TextFieldValue("")) }
-    var password by remember { mutableStateOf(TextFieldValue("")) }
-    var passwordError by remember { mutableStateOf("") }
-    var signUpError by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
+    private val _uiState = MutableStateFlow(SignUpUiState())
+    val uiState: StateFlow<SignUpUiState> get() = _uiState
 
-    fun validatePassword(username: String, password: String): Boolean {
+    fun onNameChange(newName: String) {
+        _uiState.value = _uiState.value.copy(name = newName)
+    }
+
+    fun onUsernameChange(newUsername: String) {
+        _uiState.value = _uiState.value.copy(username = newUsername)
+    }
+
+    fun onPasswordChange(newPassword: String) {
+        _uiState.value = _uiState.value.copy(password = newPassword)
+    }
+
+    private fun validateInputs(): Boolean {
+        val state = _uiState.value
         return when {
-            password.length < 8 -> {
-                passwordError = "Password must be at least 8 characters"
+            state.name.isEmpty() -> {
+                _uiState.value = state.copy(signUpError = "Name cannot be empty")
                 false
             }
-            password == username -> {
-                passwordError = "Password cannot be the username"
+            state.username.isEmpty() -> {
+                _uiState.value = state.copy(signUpError = "Email cannot be empty")
+                false
+            }
+            state.password.length < 8 -> {
+                _uiState.value = state.copy(passwordError = "Password must be at least 8 characters")
+                false
+            }
+            state.password == state.username -> {
+                _uiState.value = state.copy(passwordError = "Password cannot be the username")
                 false
             }
             else -> {
-                passwordError = ""
+                _uiState.value = state.copy(passwordError = "", signUpError = "")
                 true
             }
         }
     }
 
-    fun handleSignUp() {
-        if (validatePassword(username.text, password.text)) {
-            isLoading = true
-            signUpError = "" // Clear previous errors
-            auth.createUserWithEmailAndPassword(email.text, password.text)
+    fun handleSignUp(navController: NavHostController) {
+        if (validateInputs()) {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+
+            val name = _uiState.value.name
+            val username = _uiState.value.username
+            val password = _uiState.value.password
+
+            auth.createUserWithEmailAndPassword(username, password)
                 .addOnCompleteListener { task ->
-                    isLoading = false
                     if (task.isSuccessful) {
-                        // Navigate to home screen after successful sign-up
-                        navController.navigate("home")
+                        val user = auth.currentUser
+                        user?.let {
+                            val profileUpdates = userProfileChangeRequest {
+                                displayName = name
+                            }
+                            it.updateProfile(profileUpdates).addOnCompleteListener { updateTask ->
+                                if (updateTask.isSuccessful) {
+                                    navController.navigate("home")
+                                } else {
+                                    _uiState.value = _uiState.value.copy(
+                                        isLoading = false,
+                                        signUpError = "Failed to update profile: ${updateTask.exception?.localizedMessage}"
+                                    )
+                                }
+                            }
+                        }
                     } else {
-                        // Display the error message
-                        signUpError = task.exception?.localizedMessage ?: "Sign up failed"
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            signUpError = task.exception?.localizedMessage ?: "Sign up failed"
+                        )
                     }
                 }
         }
     }
+}
+
+@Composable
+fun SignUpScreen(
+    navController: NavHostController,
+    viewModel: SignUpViewModel = viewModel() // Default ViewModel instance
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val screenHeight = configuration.screenHeightDp.dp
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -115,9 +168,9 @@ fun SignUpScreen(navController: NavHostController) {
                     )
 
                     OutlinedTextField(
-                        value = username,
-                        onValueChange = { username = it },
-                        placeholder = { Text("john.doe") },
+                        value = uiState.name,
+                        onValueChange = { viewModel.onNameChange(it) },
+                        placeholder = { Text("Your Name") },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp),
@@ -126,8 +179,8 @@ fun SignUpScreen(navController: NavHostController) {
                     )
 
                     OutlinedTextField(
-                        value = email,
-                        onValueChange = { email = it },
+                        value = uiState.username,
+                        onValueChange = { viewModel.onUsernameChange(it) },
                         placeholder = { Text("john.doe@example.com") },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -137,28 +190,29 @@ fun SignUpScreen(navController: NavHostController) {
                     )
 
                     OutlinedTextField(
-                        value = password,
-                        onValueChange = { password = it },
+                        value = uiState.password,
+                        onValueChange = { viewModel.onPasswordChange(it) },
                         placeholder = { Text("Password") },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp),
                         singleLine = true,
                         shape = RoundedCornerShape(25.dp),
+                        visualTransformation = PasswordVisualTransformation()
                     )
 
-                    if (passwordError.isNotEmpty()) {
+                    if (uiState.passwordError.isNotEmpty()) {
                         Text(
-                            text = passwordError,
+                            text = uiState.passwordError,
                             color = Color.Red,
                             fontSize = (screenWidth.value * 0.04f).sp,
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
                     }
 
-                    if (signUpError.isNotEmpty()) {
+                    if (uiState.signUpError.isNotEmpty()) {
                         Text(
-                            text = signUpError,
+                            text = uiState.signUpError,
                             color = Color.Red,
                             fontSize = (screenWidth.value * 0.04f).sp,
                             modifier = Modifier.padding(vertical = 4.dp)
@@ -166,13 +220,13 @@ fun SignUpScreen(navController: NavHostController) {
                     }
 
                     FilledTonalButton(
-                        onClick = { handleSignUp() },
+                        onClick = { viewModel.handleSignUp(navController) },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(screenHeight * 0.07f),
-                        enabled = !isLoading
+                            .padding(vertical = 8.dp),
+                        enabled = !uiState.isLoading
                     ) {
-                        if (isLoading) {
+                        if (uiState.isLoading) {
                             CircularProgressIndicator(
                                 color = Color.White,
                                 modifier = Modifier.size(16.dp)
@@ -204,7 +258,6 @@ fun SignUpScreen(navController: NavHostController) {
 
                             Surface(
                                 onClick = {
-                                    //PRESSABLE FUNCTIONALITY HAS TO CHANGE TO HOME SCREEN
                                     navController.navigate("logIn")
                                 },
                                 modifier = Modifier

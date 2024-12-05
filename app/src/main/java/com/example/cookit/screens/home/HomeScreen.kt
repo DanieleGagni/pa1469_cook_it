@@ -6,14 +6,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -24,16 +22,18 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cookit.R
+import com.google.firebase.auth.FirebaseAuth
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavHostController) {
+    val auth = FirebaseAuth.getInstance()
+    val currentUser = auth.currentUser
+    val userName = currentUser?.displayName ?: "User" // Fallback to "User" if name is not set
 
     // Handle the login logic
     fun handleSearch() {
         //Navigate to the search screen
     }
-
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -58,7 +58,7 @@ fun HomeScreen(navController: NavHostController) {
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         //TEXT SHOULD CALL TO VIEWMODEL TO GET THE USER'S NAME
-                        text = "Hello Maria!",
+                        text = "Hello $userName!",
                         style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
                         color = Color.Black,
                         textAlign = TextAlign.Center
