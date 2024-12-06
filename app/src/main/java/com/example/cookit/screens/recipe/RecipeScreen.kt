@@ -84,11 +84,6 @@ fun RecipeScreen(navController: NavHostController) {
                     .wrapContentHeight()
                     .padding(innerPadding)
                     .background(Color.White)
-                    .border(
-                        width = 2.dp,                // Border thickness
-                        color = Color.Black,         // Border color
-                        shape = RoundedCornerShape(8.dp) // Optional: Rounded corners
-                    )
             ) {
 
                 val scrollState = rememberScrollState()
@@ -98,11 +93,6 @@ fun RecipeScreen(navController: NavHostController) {
                         .fillMaxSize()
                         .padding(16.dp)
                         //.padding(top = 30.dp)
-                        .border(
-                            width = 2.dp,                // Border thickness
-                            color = Color.Red,         // Border color
-                            shape = RoundedCornerShape(8.dp) // Optional: Rounded corners
-                        ),
                     //horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
@@ -159,11 +149,7 @@ fun RecipeScreen(navController: NavHostController) {
                                     .fillMaxWidth()
                                     .padding(vertical = 4.dp)
                                     .padding(start = 10.dp)
-                                    .border(
-                                        width = 2.dp,                // Border thickness
-                                        color = Color.Blue,         // Border color
-                                        shape = RoundedCornerShape(8.dp) // Optional: Rounded corners
-                                    ),
+                                    .padding(bottom = 10.dp)
                             ) {
                                 Text("Ingredient $i")
                             }
@@ -214,12 +200,7 @@ fun RecipeScreen(navController: NavHostController) {
                         modifier = Modifier
                             .fillMaxSize()
                             .fillMaxWidth()
-                            .padding(bottom = 20.dp)
-                            .border(
-                                width = 2.dp,                // Border thickness
-                                color = Color.Cyan,         // Border color
-                                shape = RoundedCornerShape(8.dp) // Optional: Rounded corners
-                            ),
+                            .padding(bottom = 20.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
