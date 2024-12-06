@@ -64,7 +64,7 @@ fun NavigationBar(navController: NavHostController) {
         IconButton(
             onClick = {
                 //---SHOULD GO TO FAVOURITES SCREEN BUT FOR NOW IT GOES TO RECIPE SCREEN TO SEE WHAT HAPPENS
-                //navController.navigate("recipe")
+                navController.navigate("recipe")
             }
         ) {
             Icon(
