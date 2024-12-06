@@ -1,5 +1,9 @@
-package com.example.cookit
+package com.example.cookit.screens.logIn
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,46 +18,66 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.sp
+import com.example.cookit.R
 import com.google.firebase.auth.FirebaseAuth
 
-@Composable
-fun LogInScreen(navController: NavHostController) {
-    val auth = FirebaseAuth.getInstance()
 
-    var username by remember { mutableStateOf(TextFieldValue("")) }
-    var password by remember { mutableStateOf(TextFieldValue("")) }
-    var passwordError by remember { mutableStateOf("") }
-    var loginError by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
+data class LoginUiState(
+    val username: String = "",
+    val password: String = "",
+    val loginError: String = "",
+    val isLoading: Boolean = false
+)
 
-    // Handle the login logic
-    fun handleLogin() {
-        isLoading = true
-        loginError = "" // Clear previous errors
-        auth.signInWithEmailAndPassword(username.text, password.text)
+class LoginViewModel : ViewModel() {
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+
+    // UI State
+    private val _uiState = MutableStateFlow(LoginUiState())
+    val uiState: StateFlow<LoginUiState> get() = _uiState
+
+    fun onUsernameChange(newUsername: String) {
+        _uiState.value = _uiState.value.copy(username = newUsername)
+    }
+
+    fun onPasswordChange(newPassword: String) {
+        _uiState.value = _uiState.value.copy(password = newPassword)
+    }
+
+    fun login(navController: NavHostController) {
+        val username = _uiState.value.username
+        val password = _uiState.value.password
+
+        // Reset error and show loading
+        _uiState.value = _uiState.value.copy(isLoading = true, loginError = "")
+
+        auth.signInWithEmailAndPassword(username, password)
             .addOnCompleteListener { task ->
-                isLoading = false
                 if (task.isSuccessful) {
-                    // Navigate to the home screen upon successful login
                     navController.navigate("home")
                 } else {
-                    // Show error message
-                    loginError = task.exception?.localizedMessage ?: "Login failed"
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        loginError = task.exception?.localizedMessage ?: "Login failed"
+                    )
                 }
             }
     }
+}
 
-    // Get screen width and height
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp
-    val screenHeight = configuration.screenHeightDp.dp
+@Composable
+fun LogInScreen(
+    navController: NavHostController,
+    viewModel: LoginViewModel = viewModel() // Default ViewModel instance
+) {
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -82,15 +106,15 @@ fun LogInScreen(navController: NavHostController) {
                         contentDescription = "App Logo",
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(screenWidth * 0.6f)
+                            .height(LocalConfiguration.current.screenWidthDp.dp * 0.6f)
                             .padding(top = 16.dp)
                     )
 
                     Spacer(modifier = Modifier.height(50.dp))
 
                     OutlinedTextField(
-                        value = username,
-                        onValueChange = { username = it },
+                        value = uiState.username,
+                        onValueChange = { viewModel.onUsernameChange(it) },
                         placeholder = { Text("john.doe@example.com") },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -101,33 +125,34 @@ fun LogInScreen(navController: NavHostController) {
                     )
 
                     OutlinedTextField(
-                        value = password,
-                        onValueChange = { password = it },
+                        value = uiState.password,
+                        onValueChange = { viewModel.onPasswordChange(it) },
                         placeholder = { Text("Password") },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp),
                         singleLine = true,
                         shape = RoundedCornerShape(25.dp),
+                        visualTransformation = PasswordVisualTransformation(),
                         leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password Icon") }
                     )
 
-                    if (loginError.isNotEmpty()) {
+                    if (uiState.loginError.isNotEmpty()) {
                         Text(
-                            text = loginError,
+                            text = uiState.loginError,
                             color = Color.Red,
                             modifier = Modifier.padding(vertical = 8.dp)
                         )
                     }
 
                     FilledTonalButton(
-                        onClick = { handleLogin() },
+                        onClick = { viewModel.login(navController) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp),
-                        enabled = !isLoading
+                        enabled = !uiState.isLoading
                     ) {
-                        if (isLoading) {
+                        if (uiState.isLoading) {
                             CircularProgressIndicator(
                                 color = Color.White,
                                 modifier = Modifier.size(16.dp)
@@ -136,7 +161,6 @@ fun LogInScreen(navController: NavHostController) {
                             Text("Log In")
                         }
                     }
-
 
                     Column(
                         modifier = Modifier
@@ -182,6 +206,3 @@ fun LogInScreen(navController: NavHostController) {
         }
     )
 }
-
-
-

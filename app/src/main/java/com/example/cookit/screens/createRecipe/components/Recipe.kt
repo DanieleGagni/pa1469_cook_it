@@ -1,4 +1,4 @@
-package com.example.cookit
+package com.example.cookit.screens.createRecipe.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
