@@ -9,6 +9,10 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavHostController
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,6 +29,7 @@ import com.example.cookit.R
 import com.google.firebase.auth.FirebaseAuth
 import com.example.cookit.screens.components.NavigationBar
 
+
 @Composable
 fun HomeScreen(navController: NavHostController) {
     val auth = FirebaseAuth.getInstance()
@@ -33,38 +38,30 @@ fun HomeScreen(navController: NavHostController) {
 
     // Handle the login logic
     fun handleSearch() {
-        //Navigate to the search screen
+        // Trigger modal for search
     }
+
+    var showSearchModal by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        bottomBar = {
-            NavigationBar(navController) // Barra de navegación inferior
-        },
+        bottomBar = { NavigationBar(navController) }, // Bottom navigation bar
         content = { innerPadding ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
                     .background(Color.White),
-                horizontalAlignment = Alignment.CenterHorizontally // Centrar el contenido
+                horizontalAlignment = Alignment.CenterHorizontally // Center the content
             ) {
-                Spacer(modifier = Modifier.height(24.dp)) // Más espacio superior
+                Spacer(modifier = Modifier.height(24.dp)) // Top space
 
-                //Saludo en columna
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                ) {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        //TEXT SHOULD CALL TO VIEWMODEL TO GET THE USER'S NAME
-                        text = "Hello $userName!",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-                        color = Color.Black,
-                        textAlign = TextAlign.Center
-                    )
-                }
+                Text(
+                    text = "Hello $userName!",
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                    color = Color.Black,
+                    textAlign = TextAlign.Center
+                )
 
                 Spacer(modifier = Modifier.height(16.dp)) // Espaciado entre saludo y eslogan
 
@@ -85,26 +82,51 @@ fun HomeScreen(navController: NavHostController) {
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(24.dp)) // Espacio entre eslogan y búsqueda
+                Spacer(modifier = Modifier.height(24.dp))
 
-                //Search button
                 Button(
-                    onClick = { handleSearch() },
+                    onClick = { showSearchModal = true },
                     modifier = Modifier
                         .height(80.dp)
                         .width(80.dp)
                         .padding(vertical = 8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF5F5F5)) // Set the background color
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF5F5F5))
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_search),
                         contentDescription = "Search Icon",
-                        modifier = Modifier
-                            .size(40.dp),
+                        modifier = Modifier.size(40.dp),
                         tint = Color.Unspecified
                     )
                 }
 
+                // Display search modal when clicked
+                if (showSearchModal) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.5f)) // Overlay background
+                            .padding(16.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White, RoundedCornerShape(16.dp))
+                                .padding(16.dp)
+                        ) {
+                            Text(
+                                text = "Search Layout", // This can be your search-related UI
+                                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp)
+                            )
+
+                            //--------------------------Add search components (like text input, filters, etc.)
+
+                            Button(onClick = { showSearchModal = false }) {
+                                Text("Close")
+                            }
+                        }
+                    }
+                }
                 Spacer(modifier = Modifier.height(16.dp)) // Espacio entre búsqueda y categorías
 
                 LazyVerticalGrid(
@@ -134,7 +156,8 @@ fun HomeScreen(navController: NavHostController) {
                                     .fillMaxWidth()
                                     .background(Color.White)
                             ) {
-                                val imageRes = categoryImages[category] ?: R.drawable.ic_category_add
+                                val imageRes =
+                                    categoryImages[category] ?: R.drawable.ic_category_add
                                 Image(
                                     painter = painterResource(id = imageRes),
                                     contentDescription = category,
@@ -159,3 +182,4 @@ fun HomeScreen(navController: NavHostController) {
         }
     )
 }
+
