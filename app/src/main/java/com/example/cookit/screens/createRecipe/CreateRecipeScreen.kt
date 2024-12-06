@@ -1,17 +1,28 @@
 package com.example.cookit.screens.createRecipe
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -23,8 +34,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 
@@ -63,6 +80,10 @@ fun AddEditIngredients(
                     currentIngredient = ""
                 }
             },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xB3F58D1E),
+                contentColor = Color.Black
+            ),
             modifier = Modifier.padding(8.dp)
         ) {
             Text(
@@ -91,22 +112,38 @@ fun AddEditIngredients(
                             currentIngredient = ingredient
                             editIndex = index
                         },
-                        modifier = Modifier.padding(horizontal = 3.dp)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.LightGray,
+                            contentColor = Color.Black
+                        ),
+                        modifier = Modifier
+                            .padding(horizontal = 3.dp)
+                            .size(48.dp),
+                        contentPadding = PaddingValues(0.dp)
                     ) {
                         Icon(
                             painter = painterResource(id = android.R.drawable.ic_menu_edit),
-                            contentDescription = "Edit Ingredient"
+                            contentDescription = "Edit Ingredient",
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                     Button(
                         onClick = {
                             ingredients.removeAt(index)
                         },
-                        modifier = Modifier.padding(horizontal = 4.dp)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.LightGray,
+                            contentColor = Color.Black
+                        ),
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp)
+                            .size(48.dp),
+                        contentPadding = PaddingValues(0.dp)
                     ) {
                         Icon(
                             painter = painterResource(id = android.R.drawable.ic_menu_delete),
-                            contentDescription = "Delete Ingredient"
+                            contentDescription = "Delete Ingredient",
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 }
@@ -164,6 +201,10 @@ fun AddEditStepsScreen(
                     currentStep = ""
                 }
             },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xB3F58D1E),
+                contentColor = Color.Black
+            ),
             modifier = Modifier.padding(8.dp)
         ) {
             Text(
@@ -192,26 +233,59 @@ fun AddEditStepsScreen(
                             currentStep = step
                             editIndex = index
                         },
-                        modifier = Modifier.padding(horizontal = 4.dp)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.LightGray,
+                            contentColor = Color.Black
+                        ),
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp)
+                            .size(48.dp),
+                        contentPadding = PaddingValues(0.dp)
                     ) {
-                        Text(text = "Edit")
+                        Icon(
+                            painter = painterResource(id = android.R.drawable.ic_menu_edit),
+                            contentDescription = "Edit Step",
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                     Button(
                         onClick = {
                             currentStep = ""
                             insertIndex = index + 1
                         },
-                        modifier = Modifier.padding(horizontal = 4.dp)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.LightGray,
+                            contentColor = Color.Black
+                        ),
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp)
+                            .size(48.dp),
+                        contentPadding = PaddingValues(0.dp)
                     ) {
-                        Text(text = "Insert")
+                        Icon(
+                            painter = painterResource(id = android.R.drawable.ic_input_add),
+                            contentDescription = "Insert Step",
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                     Button(
                         onClick = {
                             steps.removeAt(index)
                         },
-                        modifier = Modifier.padding(horizontal = 4.dp)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.LightGray,
+                            contentColor = Color.Black
+                        ),
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp)
+                            .size(48.dp),
+                        contentPadding = PaddingValues(0.dp)
                     ) {
-                        Text(text = "Delete")
+                        Icon(
+                            painter = painterResource(id = android.R.drawable.ic_menu_delete),
+                            contentDescription = "Delete Step",
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                 }
             }
@@ -233,84 +307,183 @@ fun CreateRecipeScreen(
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        item {
+            Spacer(modifier = Modifier.height(20.dp))
+        }
+
         item{
             Box {
-                Text(text = "Create Recipe",
-                    modifier = Modifier
-                        .background(color = Color.Red)
-                        .width(300.dp)
+                Text(
+                    text = buildAnnotatedString {
+                        append("Create")
+                        withStyle(
+                            style = SpanStyle(
+                                color = Color(0xFFF58D1E),
+                                fontWeight = FontWeight.Bold)
+                        ) {
+                            append(" Recipe")
+                        }
+                    },
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = 25.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = Color.Black,
+                    textAlign = TextAlign.Center
                 )
             }
         }
 
         // TextField to enter the recipe name
         item {
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                value = title,
-                onValueChange = { title = it },
-                label = { Text(text = "Enter Menu Name") },
-                maxLines = 1
-            )
+            Spacer(modifier = Modifier.height(20.dp))
+            Box {
+                Text(
+                    text = "TITLE",
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
+                    color = Color.Black,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+                TextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    value = title,
+                    onValueChange = { title = it },
+                    label = { Text(text = "Enter Menu Name") },
+                    maxLines = 1,
+                )
+            }
         }
 
         // TextField to enter the type of dish
         item {
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                value = type,
-                onValueChange = { type = it },
-                label = { Text(text = "Enter Type") },
-                maxLines = 1
-            )
+            Spacer(modifier = Modifier.height(20.dp))
+            Box {
+                Text(
+                    text = "TYPE",
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
+                    color = Color.Black,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+                TextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    value = type,
+                    onValueChange = { type = it },
+                    label = { Text(text = "Enter Type") },
+                    maxLines = 1
+                )
+            }
         }
 
         // TextField to enter estimated time
         item {
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                value = estimatedTime,
-                onValueChange = { estimatedTime = it },
-                label = { Text(text = "Enter Estimated Time (minutes)") },
-                maxLines = 1
-            )
+            Spacer(modifier = Modifier.height(20.dp))
+            Box {
+                Text(
+                    text = "TIME",
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
+                    color = Color.Black,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+                TextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    value = estimatedTime,
+                    onValueChange = { estimatedTime = it },
+                    label = { Text(text = "Enter Estimated Time (minutes)") },
+                    maxLines = 1
+                )
+            }
         }
 
         // TextField to enter how many people it serves
         item {
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                value = serves,
-                onValueChange = { serves = it },
-                label = { Text(text = "Enter Servings") },
-                maxLines = 1
-            )
+            Spacer(modifier = Modifier.height(20.dp))
+            Box {
+                Text(
+                    text = "SERVES",
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
+                    color = Color.Black,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+                TextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    value = serves,
+                    onValueChange = { serves = it },
+                    label = { Text(text = "Enter Servings") },
+                    maxLines = 1
+                )
+            }
         }
 
         // Add ingredients section
         item {
-            AddEditIngredients(
-                onClick = { ingredients ->
-                    println("Posted ingredients: $ingredients")
-                }
-            )
+            Spacer(modifier = Modifier.height(20.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .background(
+                        color = Color.White,
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .border(
+                        1.dp,
+                        Color.Black,
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = "INGREDIENTS",
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
+                    color = Color.Black,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+                AddEditIngredients(
+                    onClick = { ingredients ->
+                        println("Posted ingredients: $ingredients")
+                    }
+                )
+            }
         }
 
         // Add steps section
         item {
-            AddEditStepsScreen(
-                onClick = { steps ->
-                    println("Posted steps: $steps")
-                }
-            )
+            Spacer(modifier = Modifier.height(20.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .background(
+                        color = Color.White,
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .border(
+                        1.dp,
+                        Color.Black,
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .padding(16.dp),
+            ) {
+                Text(
+                    text = "STEPS",
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
+                    color = Color.Black,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+                AddEditStepsScreen(
+                    onClick = { steps ->
+                        println("Posted steps: $steps")
+                    }
+                )
+            }
         }
 
         // Post Button
@@ -320,6 +493,10 @@ fun CreateRecipeScreen(
                     // Add navigation to the home screen or perform your post action
                     navController.navigate("home")
                 },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFF58D1E),
+                    contentColor = Color.Black
+                ),
                 modifier = Modifier.padding(16.dp)
             ) {
                 Text(text = "Save Recipe")
