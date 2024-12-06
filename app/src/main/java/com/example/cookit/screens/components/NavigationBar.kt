@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -24,7 +25,8 @@ fun NavigationBar(navController: NavHostController) {
         modifier = Modifier
             .fillMaxWidth()
             .background(Color(0xFFF5F5F5))
-            .padding(horizontal = 16.dp, vertical = 4.dp), // Reducir padding vertical
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .navigationBarsPadding(), // Reducir padding vertical
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         IconButton(
