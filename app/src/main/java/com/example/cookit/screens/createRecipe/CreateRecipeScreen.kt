@@ -317,14 +317,6 @@ fun CreateRecipeScreen(
         item {
             Button(
                 onClick = {
-                    val recipe = Recipe(
-                        title = title,
-                        type = type,
-                        estimatedTime = estimatedTime.toIntOrNull() ?: 0,
-                        serves = serves.toIntOrNull() ?: 0,
-                        ingredients = ingredients.toList(),
-                        steps = steps.toList()
-                    )
                     // Add navigation to the home screen or perform your post action
                     navController.navigate("home")
                 },
