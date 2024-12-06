@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -429,10 +430,14 @@ fun CreateRecipeScreen(
                     .fillMaxWidth()
                     .padding(16.dp)
                     .background(
-                        color = MaterialTheme.colorScheme.surface,
-                        shape = MaterialTheme.shapes.small
+                        color = Color.White,
+                        shape = RoundedCornerShape(16.dp)
                     )
-                    .border(1.dp, MaterialTheme.colorScheme.primary)
+                    .border(
+                        1.dp,
+                        Color.Black,
+                        shape = RoundedCornerShape(16.dp)
+                    )
                     .padding(16.dp)
             ) {
                 Text(
@@ -457,11 +462,15 @@ fun CreateRecipeScreen(
                     .fillMaxWidth()
                     .padding(16.dp)
                     .background(
-                        color = MaterialTheme.colorScheme.surface,
-                        shape = MaterialTheme.shapes.small
+                        color = Color.White,
+                        shape = RoundedCornerShape(16.dp)
                     )
-                    .border(1.dp, MaterialTheme.colorScheme.primary)
-                    .padding(16.dp)
+                    .border(
+                        1.dp,
+                        Color.Black,
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .padding(16.dp),
             ) {
                 Text(
                     text = "STEPS",
