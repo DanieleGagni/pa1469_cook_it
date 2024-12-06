@@ -1,7 +1,9 @@
 package com.example.cookit.screens.recipe
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,113 +12,237 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.cookit.R
-import com.example.cookit.screens.home.BottomNavigationBar
+import com.example.cookit.screens.components.NavigationBar
+
+
+@Composable
+fun FavoriteButton() {
+
+    //GET FAVOURITE STATE FROM VIEWMODEL AS A PARAMETER
+    var isFavorited by remember { mutableStateOf(false) }
+
+    IconButton(
+        onClick = {
+            isFavorited = !isFavorited
+        },
+        modifier = Modifier.size(60.dp)
+    ) {
+        Icon(
+            painter = if (isFavorited) painterResource(id = R.drawable.ic_favorite) else painterResource(id = R.drawable.ic_favourite_outlined),
+            contentDescription = if (isFavorited) "Remove from favorites" else "Add to favorites",
+            tint = Color.Unspecified,
+            modifier = Modifier.size(60.dp)
+        )
+    }
+}
+
 
 @Composable
 fun RecipeScreen(navController: NavHostController) {
+
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            BottomNavigationBar(navController)
+            NavigationBar(navController)
         },
         content = { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .background(Color.White),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.height(30.dp))
 
-                //SHOULD CALL VIEW MODEL FOR THE NAME OF THE RECIPE
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(color = Color(0xFFF58D1E))) {
-                            append("NAME OF THE RECIPE")
+            Box(
+                modifier = Modifier
+                    .wrapContentHeight()
+                    .padding(innerPadding)
+                    .background(Color.White)
+                    .border(
+                        width = 2.dp,                // Border thickness
+                        color = Color.Black,         // Border color
+                        shape = RoundedCornerShape(8.dp) // Optional: Rounded corners
+                    )
+            ) {
+
+                val scrollState = rememberScrollState()
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                        //.padding(top = 30.dp)
+                        .border(
+                            width = 2.dp,                // Border thickness
+                            color = Color.Red,         // Border color
+                            shape = RoundedCornerShape(8.dp) // Optional: Rounded corners
+                        ),
+                    //horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+
+                    //---------RECIPE NAME
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(
+                                style = SpanStyle(
+                                    color = Color(0xFFF58D1E),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            ) {
+                                //CHANGE TO GET NAME FROM VIEW MODEL
+                                append("RECIPE NAME ")
+                            }
+                        },
+                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 30.sp),
+                        color = Color.Black,
+                    )
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(screenHeight * 0.75f)
+                            .padding(top = 16.dp)
+                            .verticalScroll(scrollState)
+                            .border(
+                                width = 2.dp,                // Border thickness
+                                color = Color.Green,         // Border color
+                                shape = RoundedCornerShape(8.dp) // Optional: Rounded corners
+                            ),
+                    ) {
+
+                        Text(
+                            text = buildAnnotatedString {
+                                withStyle(
+                                    style = SpanStyle(
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                ) {
+                                    append("INGREDIENTS")
+                                }
+                            },
+                            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 20.sp),
+                            color = Color.Black,
+                        )
+
+                        //GET INGREDIENTS FROM VIEWMODEL
+                        for (i in 1..10) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp)
+                                    .padding(start = 10.dp)
+                                    .border(
+                                        width = 2.dp,                // Border thickness
+                                        color = Color.Blue,         // Border color
+                                        shape = RoundedCornerShape(8.dp) // Optional: Rounded corners
+                                    ),
+                            ) {
+                                Text("Ingredient $i")
+                            }
                         }
-                    },
-                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 25.sp),
-                    color = Color.Black,
-                    textAlign = TextAlign.Center
-                )
+
+                        //SPACER TO CHECK IF SCROLLABLE WORKS
+                        //SPOILER ALERT IT DOESN'T WORK
+                        Spacer(modifier = Modifier.height(250.dp))
+
+                        Text(
+                            text = buildAnnotatedString {
+                                withStyle(
+                                    style = SpanStyle(
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                ) {
+                                    append("STEPS")
+                                }
+                            },
+                            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 20.sp),
+                            color = Color.Black,
+                        )
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                                .padding(start = 10.dp)
+                                .padding(end = 10.dp)
+                                .border(
+                                    width = 2.dp,                // Border thickness
+                                    color = Color.Blue,         // Border color
+                                    shape = RoundedCornerShape(8.dp) // Optional: Rounded corners
+                                ),
+                        ) {
+                            Text(
+                                text = "RECIPE STEPS RECIPE STEPS RECIPE STEPS RECIPE STEPS RECIPE STEPS RECIPE STEPS",
+                                textAlign = TextAlign.Justify,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .fillMaxWidth()
+                            .padding(bottom = 20.dp)
+                            .border(
+                                width = 2.dp,                // Border thickness
+                                color = Color.Cyan,         // Border color
+                                shape = RoundedCornerShape(8.dp) // Optional: Rounded corners
+                            ),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+
+                        //PASS FAVOURITE ATRIBUTE AS PARAMETER
+                        FavoriteButton()
+                        IconButton(
+                                onClick = {
+                                    //navController.navigate("shoppingList")
+                                },
+                                modifier = Modifier.size(60.dp)
+                                ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_shopping_cart),
+                                contentDescription = "Shopping List Icon",
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(60.dp)
+                            )
+                        }
+
+                    }
+                }
             }
         }
     )
-}
-
-// Barra inferior de navegación
-@Composable
-fun BottomNavigationBar(navController: NavHostController) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color(0xFFF5F5F5))
-            .padding(horizontal = 16.dp, vertical = 4.dp), // Reducir padding vertical
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        IconButton(onClick = { /* Navegar a Home */ }) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_home),
-                contentDescription = "Home Icon",
-                tint = Color.Unspecified
-            )
-        }
-        IconButton(onClick = { /* Navegar a Shopping List */ }) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_stats),
-                contentDescription = "Shopping List Icon",
-                tint = Color.Unspecified
-            )
-        }
-        IconButton(
-            onClick = {
-                navController.navigate("createRecipe")
-            }
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_add),
-                contentDescription = "Add Icon",
-                modifier = Modifier.size(48.dp),
-                tint = Color.Unspecified
-            )
-        }
-        IconButton(
-            onClick = {
-                //--------RIGHT NOW IT REDIRECTS TO RECIPE TO SEE WHAT THE SCREEN IS LIKE
-                navController.navigate("recipe")
-            }
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_favorite),
-                contentDescription = "Favorite Icon",
-                tint = Color.Unspecified
-            )
-        }
-        IconButton(onClick = { /* Navegar a Settings */ }) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_settings),
-                contentDescription = "Settings Icon",
-                tint = Color.Unspecified
-            )
-        }
-    }
 }
