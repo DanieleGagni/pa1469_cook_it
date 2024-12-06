@@ -1,5 +1,13 @@
 package com.example.cookit.screens.shoppingList
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +28,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,37 +47,153 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.cookit.R
 import com.example.cookit.screens.components.NavigationBar
 
-@Composable
-fun ShoppingListScreen(navController: NavHostController) {
 
-    val configuration = LocalConfiguration.current
-    val screenHeight = configuration.screenHeightDp.dp
+data class ShoppingItem(
+    val entry: String,
+    val done: Boolean
+)
+
+class ShoppingListViewModel : ViewModel() {
+    private val db = FirebaseFirestore.getInstance()
+    private val currentUserId: String?
+        get() = FirebaseAuth.getInstance().currentUser?.uid
+
+    private val _shoppingList = MutableStateFlow<List<ShoppingItem>>(emptyList())
+    val shoppingList: StateFlow<List<ShoppingItem>> = _shoppingList
+
+    fun fetchShoppingList(navController: NavHostController) {
+        val userId = currentUserId
+        if (userId == null) {
+            println("User not logged in.")
+            navController.navigate("login")
+        } else {
+            viewModelScope.launch {
+                db.collection("shoppingLists")
+                    .whereEqualTo("userId", userId)
+                    .get()
+                    .addOnSuccessListener { documents ->
+                        if (documents.isEmpty) {
+                            createEmptyShoppingList(userId)
+                        } else {
+                            val items = documents.flatMap { document ->
+                                val rawItems =
+                                    document.get("items") as? List<Map<String, Any>> ?: emptyList()
+                                rawItems.map {
+                                    ShoppingItem(
+                                        entry = it["entry"] as String,
+                                        done = it["done"] as Boolean
+                                    )
+                                }
+                            }
+                            _shoppingList.value = items
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        println("Error fetching shopping list: $e")
+                    }
+            }
+        }
+    }
+
+    private fun createEmptyShoppingList(userId: String) {
+        val newShoppingList = hashMapOf(
+            "userId" to userId,
+            "items" to emptyList<Map<String, Any>>() // No items initially
+        )
+
+        db.collection("shoppingLists")
+            .add(newShoppingList)
+            .addOnSuccessListener {
+                println("Created empty shopping list for user: $userId")
+                _shoppingList.value = emptyList() // Reflect empty list in UI
+            }
+            .addOnFailureListener { e ->
+                println("Error creating empty shopping list: $e")
+            }
+    }
+
+    fun addShoppingItem(navController: NavHostController, itemText: String) {
+        val userId = currentUserId
+        if (userId == null) {
+            println("User not logged in.")
+            navController.navigate("login")
+        }
+
+        val newItem = ShoppingItem(entry = itemText, done = false)
+        _shoppingList.value += newItem
+
+        // Update Firestore (Add item to a specific shopping list)
+        db.collection("shoppingLists")
+            .whereEqualTo("userId", userId)
+            .get()
+            .addOnSuccessListener { documents ->
+                documents.firstOrNull()?.reference?.update(
+                    "items",
+                    _shoppingList.value.map { mapOf("entry" to it.entry, "done" to it.done) }
+                )
+            }
+            .addOnFailureListener { e ->
+                println("Error updating Firestore: $e")
+            }
+    }
+
+    fun toggleItemStatus(navController: NavHostController, index: Int) {
+        val userId = currentUserId
+        if (userId == null) {
+            println("User not logged in.")
+            navController.navigate("login")
+        }
+
+        val updatedList = _shoppingList.value.toMutableList().apply {
+            this[index] = this[index].copy(done = !this[index].done)
+        }
+        _shoppingList.value = updatedList
+
+        // Sync with Firestore
+        db.collection("shoppingLists")
+            .whereEqualTo("userId", userId)
+            .get()
+            .addOnSuccessListener { documents ->
+                documents.firstOrNull()?.reference?.update(
+                    "items",
+                    updatedList.map { mapOf("entry" to it.entry, "done" to it.done) }
+                )
+            }
+            .addOnFailureListener { e ->
+                println("Error updating item status in Firestore: $e")
+            }
+    }
+}
+
+
+@Composable
+fun ShoppingListScreen(
+    navController: NavHostController,
+    viewModel: ShoppingListViewModel = viewModel()
+) {
+    val shoppingList by viewModel.shoppingList.collectAsState()
+    // Trigger data fetch when the screen is first displayed
+    LaunchedEffect(Unit) {
+        viewModel.fetchShoppingList(navController)
+    }
 
     var newIngredient by remember { mutableStateOf(TextFieldValue("")) }
 
-    fun handleAddIngredient() {
-        //--------ADD INGREDIENT TO USER'S SHOPPING LIST
-        // NEW INGREDIENT SHOULD BE SHOW ON THE LIST
-    }
-
-    Scaffold(
+    Scaffold (
         modifier = Modifier.fillMaxSize(),
-        bottomBar = {
-            NavigationBar(navController)
-        },
+        bottomBar = { NavigationBar(navController) },
         content = { innerPadding ->
-
             Box(
                 modifier = Modifier
                     .wrapContentHeight()
                     .padding(innerPadding)
                     .background(Color.White)
             ) {
-
                 val scrollState = rememberScrollState()
 
                 Column(
@@ -76,7 +202,6 @@ fun ShoppingListScreen(navController: NavHostController) {
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-
                     Text(
                         text = buildAnnotatedString {
                             withStyle(
@@ -94,43 +219,49 @@ fun ShoppingListScreen(navController: NavHostController) {
                         textAlign = TextAlign.Center
                     )
 
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(screenHeight * 0.80f)
-                            .padding(16.dp)
-                            .verticalScroll(scrollState),
-                    ) {
-
-                        //LIST OF INGREDIENTS
-                        for (i in 1..20) { // Simulate a list with 20 items
-
-                            //EACH INGREDIENT SHOULD HAVE AN ATRIBUTE TO KNOW IF IT IS CHECKED OR NOT
-                            var checked by remember { mutableStateOf(false) }
-
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp)
-                            ) {
-                                Checkbox(
-                                    checked = checked,
-                                    onCheckedChange = { checked = it }
-                                )
-                                Text("Ingredient $i")
+                    if (shoppingList.isEmpty()) {
+                        Text(
+                            text = "Your shopping list is empty. Start adding items!",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray,
+                            modifier = Modifier.padding(16.dp),
+                            textAlign = TextAlign.Center
+                        )
+                    } else {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(LocalConfiguration.current.screenHeightDp.dp * 0.80f)
+                                .padding(16.dp)
+                                .verticalScroll(scrollState),
+                        ) {
+                            shoppingList.forEachIndexed { index, item ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp)
+                                ) {
+                                    Checkbox(
+                                        checked = item.done,
+                                        onCheckedChange = {
+                                            viewModel.toggleItemStatus(
+                                                navController,
+                                                index
+                                            )
+                                        }
+                                    )
+                                    Text(item.entry)
+                                }
                             }
                         }
                     }
 
                     Row(
                         modifier = Modifier
-                            .fillMaxSize()
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-
-                        //LOGIC OF INPUT TEXT AND BUTTON TO ADD NEW INGREDIENT SHOULD BE ADDED BELOW
                         OutlinedTextField(
                             value = newIngredient,
                             onValueChange = { newIngredient = it },
@@ -144,7 +275,8 @@ fun ShoppingListScreen(navController: NavHostController) {
 
                         IconButton(
                             onClick = {
-                                handleAddIngredient()
+                                viewModel.addShoppingItem(navController, newIngredient.text)
+                                newIngredient = TextFieldValue("") // Clear input
                             },
                             modifier = Modifier
                         ) {
