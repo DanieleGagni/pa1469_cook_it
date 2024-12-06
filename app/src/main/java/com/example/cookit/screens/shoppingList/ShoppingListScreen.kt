@@ -17,9 +17,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -194,7 +193,6 @@ fun ShoppingListScreen(
                     .padding(innerPadding)
                     .background(Color.White)
             ) {
-                val scrollState = rememberScrollState()
 
                 Column(
                     modifier = Modifier
@@ -228,14 +226,14 @@ fun ShoppingListScreen(
                             textAlign = TextAlign.Center
                         )
                     } else {
-                        Column(
+                        LazyColumn(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(LocalConfiguration.current.screenHeightDp.dp * 0.80f)
+                                .weight(1f)
                                 .padding(16.dp)
-                                .verticalScroll(scrollState),
                         ) {
-                            shoppingList.forEachIndexed { index, item ->
+                            items(shoppingList.size) { index ->
+                                val item = shoppingList[index]
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier
@@ -245,10 +243,7 @@ fun ShoppingListScreen(
                                     Checkbox(
                                         checked = item.done,
                                         onCheckedChange = {
-                                            viewModel.toggleItemStatus(
-                                                navController,
-                                                index
-                                            )
+                                            viewModel.toggleItemStatus(navController, index)
                                         }
                                     )
                                     Text(item.entry)
