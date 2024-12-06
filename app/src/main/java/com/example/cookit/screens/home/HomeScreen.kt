@@ -49,6 +49,7 @@ fun HomeScreen(navController: NavHostController) {
                     .background(Color.White),
                 horizontalAlignment = Alignment.CenterHorizontally // Centrar el contenido
             ) {
+
                 Spacer(modifier = Modifier.height(24.dp)) // Más espacio superior
 
                 //Saludo en columna
