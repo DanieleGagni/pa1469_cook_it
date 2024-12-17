@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
+    id("kotlin-parcelize")
 }
 
 android {
@@ -38,6 +39,7 @@ android {
     }
     buildFeatures {
         compose = true
+        //viewBinding = true : maybe needed for Parcelize to work?
     }
 }
 
