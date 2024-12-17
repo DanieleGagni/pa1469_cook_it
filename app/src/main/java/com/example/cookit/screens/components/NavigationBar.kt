@@ -101,11 +101,27 @@ fun NavigationBar(navController: NavHostController) {
                 modifier = Modifier.background(Color(0xFFF5F5F5))
             ) {
                 DropdownMenuItem(
+                    text = { Text("Recipes created") },
+                    onClick = {
+                        isMenuExpanded = false
+                        // Handle logout action
+                        navController.navigate("listRecipes")
+                    }
+                )
+                DropdownMenuItem(
                     text = { Text("Log Out") },
                     onClick = {
                         isMenuExpanded = false
                         // Handle logout action
                         navController.navigate("login")
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Delete account") },
+                    onClick = {
+                        isMenuExpanded = false
+                        // Handle logout action
+                        navController.navigate("signUp")
                     }
                 )
             }
