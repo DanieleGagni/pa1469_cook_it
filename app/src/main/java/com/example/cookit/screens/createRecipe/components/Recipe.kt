@@ -1,6 +1,5 @@
 package com.example.cookit.screens.createRecipe.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -8,22 +7,22 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
-@Stable
+@Parcelize
 data class Recipe(
     val title: String = "",
     val estimatedTime: Int = 0,
     val ingredients: List<String> = emptyList(),
     val serves: Int = 0,
     val steps: List<String> = emptyList(),
-    val type: String = ""
-)
+    val type: String = "",
+    val keywords: List<String> = emptyList()
+) : Parcelable
 
 @Composable
 fun RecipeView(recipe: Recipe) {
