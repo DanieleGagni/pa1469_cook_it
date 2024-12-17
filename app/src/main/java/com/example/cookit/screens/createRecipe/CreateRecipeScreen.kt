@@ -1,5 +1,6 @@
 package com.example.cookit.screens.createRecipe
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -46,12 +47,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 
 @Composable
-fun AddEditIngredients(
-    onClick: (List<String>) -> Unit
-) {
+fun AddEditIngredients( ingredients: MutableList<String>) {
     var currentIngredient by remember { mutableStateOf("") }
-    val ingredients = remember { mutableStateListOf<String>() }
     var editIndex by remember { mutableStateOf(-1) }
+    //val ingredients = remember { mutableStateListOf<String>() }
+
     Column (
         horizontalAlignment = Alignment.CenterHorizontally
     ){
@@ -153,13 +153,11 @@ fun AddEditIngredients(
 }
 
 @Composable
-fun AddEditStepsScreen(
-    onClick: (List<String>) -> Unit
-) {
+fun AddEditStepsScreen(steps: MutableList<String>) {
     var currentStep by remember { mutableStateOf("") }
-    val steps = remember { mutableStateListOf<String>() }
     var editIndex by remember { mutableStateOf(-1) }
     var insertIndex by remember { mutableStateOf(-1) }
+    //val steps = remember { mutableStateListOf<String>() }
     Column (
         horizontalAlignment = Alignment.CenterHorizontally
     ){
@@ -304,6 +302,7 @@ fun CreateRecipeScreen(
     val ingredients = remember { mutableStateListOf<String>() }
     val steps = remember { mutableStateListOf<String>() }
 
+
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -446,11 +445,7 @@ fun CreateRecipeScreen(
                     color = Color.Black,
                     modifier = Modifier.padding(start = 16.dp)
                 )
-                AddEditIngredients(
-                    onClick = { ingredients ->
-                        println("Posted ingredients: $ingredients")
-                    }
-                )
+                AddEditIngredients(ingredients)
             }
         }
 
@@ -478,11 +473,7 @@ fun CreateRecipeScreen(
                     color = Color.Black,
                     modifier = Modifier.padding(start = 16.dp)
                 )
-                AddEditStepsScreen(
-                    onClick = { steps ->
-                        println("Posted steps: $steps")
-                    }
-                )
+                AddEditStepsScreen(steps)
             }
         }
 
@@ -492,6 +483,20 @@ fun CreateRecipeScreen(
                 onClick = {
                     // Add navigation to the home screen or perform your post action
                     navController.navigate("home")
+
+                    Log.d("[------------------------- DEBUG]", "------------------------- $title")
+                    ingredients.forEach { ingredient ->
+                        Log.d("[------------------------- DEBUG]", "------------------------- $ingredient")
+                    }
+                    steps.forEach { step ->
+                        Log.d("[------------------------- DEBUG]", "------------------------- $step")
+                    }
+
+
+                    // TODO create recipe
+                    // addRecipe(recipe)
+
+
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFF58D1E),
