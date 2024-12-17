@@ -16,13 +16,13 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,35 +39,81 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.cookit.R
 import com.example.cookit.screens.components.NavigationBar
+import com.example.cookit.screens.createRecipe.components.Recipe
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+
+
+class RecipeViewModel : ViewModel() {
+    private val db = FirebaseFirestore.getInstance()
+
+    private val _isFavorited = MutableStateFlow(false)
+    val isFavorited: StateFlow<Boolean> = _isFavorited
+
+    //TODO fix this
+    fun toggleFavorite(recipe: Recipe) {
+        val newFavoriteState = !_isFavorited.value
+        _isFavorited.value = newFavoriteState
+
+        // Update favorite state in Firestore or local database
+        db.collection("favorites").document(recipe.title)
+            .set(mapOf("isFavorited" to newFavoriteState))
+    }
+
+    fun addIngredientsToShoppingList(ingredients: List<String>) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val shoppingListRef = db.collection("shoppingLists").document(userId)
+
+        //TODO fix this
+        shoppingListRef.update("items", FieldValue.arrayUnion(*ingredients.toTypedArray()))
+            .addOnSuccessListener {
+                // Handle success
+            }
+            .addOnFailureListener {
+                // Handle error
+            }
+    }
+}
 
 
 @Composable
-fun FavoriteButton() {
-
-    //GET FAVOURITE STATE FROM VIEWMODEL AS A PARAMETER
-    var isFavorited by remember { mutableStateOf(false) }
+fun FavoriteButton(
+    isFavorited: Boolean,
+    onFavoriteClick: (Boolean) -> Unit
+) {
+    var isFavoritedState by remember { mutableStateOf(isFavorited) }
 
     IconButton(
         onClick = {
-            isFavorited = !isFavorited
+            isFavoritedState = !isFavoritedState
+            onFavoriteClick(isFavoritedState)
         },
         modifier = Modifier.size(60.dp)
     ) {
         Icon(
-            painter = if (isFavorited) painterResource(id = R.drawable.ic_favorite) else painterResource(id = R.drawable.ic_favourite_outlined),
-            contentDescription = if (isFavorited) "Remove from favorites" else "Add to favorites",
+            painter = if (isFavoritedState) painterResource(id = R.drawable.ic_favorite) else painterResource(id = R.drawable.ic_favourite_outlined),
+            contentDescription = if (isFavoritedState) "Remove from favorites" else "Add to favorites",
             tint = Color.Unspecified,
             modifier = Modifier.size(60.dp)
         )
     }
 }
 
-
 @Composable
-fun RecipeScreen(navController: NavHostController) {
+fun RecipeScreen(
+    navController: NavHostController,
+    recipe: Recipe,
+    viewModel: RecipeViewModel = viewModel()
+) {
+    val isFavorited by viewModel.isFavorited.collectAsState()
 
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
@@ -85,7 +131,6 @@ fun RecipeScreen(navController: NavHostController) {
                     .padding(innerPadding)
                     .background(Color.White)
             ) {
-
                 val scrollState = rememberScrollState()
 
                 Column(
@@ -95,8 +140,7 @@ fun RecipeScreen(navController: NavHostController) {
                         //.padding(top = 30.dp)
                     //horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-
-                    //---------RECIPE NAME
+                    // Recipe title
                     Text(
                         text = buildAnnotatedString {
                             withStyle(
@@ -105,14 +149,13 @@ fun RecipeScreen(navController: NavHostController) {
                                     fontWeight = FontWeight.Bold
                                 )
                             ) {
-                                //CHANGE TO GET NAME FROM VIEW MODEL
-                                append("RECIPE NAME ")
+                                append(recipe.title)
                             }
                         },
                         style = MaterialTheme.typography.bodyMedium.copy(fontSize = 30.sp),
                         color = Color.Black,
                     )
-
+                    // Recipe content
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -125,102 +168,74 @@ fun RecipeScreen(navController: NavHostController) {
                                 shape = RoundedCornerShape(8.dp) // Optional: Rounded corners
                             ),
                     ) {
-
+                        // Ingredients section
                         Text(
-                            text = buildAnnotatedString {
-                                withStyle(
-                                    style = SpanStyle(
-                                        color = Color.Black,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                ) {
-                                    append("INGREDIENTS")
-                                }
-                            },
+                            text = "INGREDIENTS",
                             style = MaterialTheme.typography.bodyMedium.copy(fontSize = 20.sp),
                             color = Color.Black,
+                            fontWeight = FontWeight.Bold
                         )
 
-                        //GET INGREDIENTS FROM VIEWMODEL
-                        for (i in 1..10) {
+                        recipe.ingredients.forEach { ingredient ->
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 4.dp)
-                                    .padding(start = 10.dp)
-                                    .padding(bottom = 10.dp)
+                                    .padding(vertical = 4.dp, horizontal = 10.dp)
                             ) {
-                                Text("Ingredient $i")
+                                Text(text = ingredient)
                             }
                         }
 
                         //SPACER TO CHECK IF SCROLLABLE WORKS
                         //SPOILER ALERT IT DOESN'T WORK
-                        Spacer(modifier = Modifier.height(250.dp))
+                        //Spacer(modifier = Modifier.height(250.dp))
 
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Steps Section
                         Text(
-                            text = buildAnnotatedString {
-                                withStyle(
-                                    style = SpanStyle(
-                                        color = Color.Black,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                ) {
-                                    append("STEPS")
-                                }
-                            },
+                            text = "STEPS",
                             style = MaterialTheme.typography.bodyMedium.copy(fontSize = 20.sp),
                             color = Color.Black,
+                            fontWeight = FontWeight.Bold
                         )
 
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp)
-                                .padding(start = 10.dp)
-                                .padding(end = 10.dp)
-                                .border(
-                                    width = 2.dp,                // Border thickness
-                                    color = Color.Blue,         // Border color
-                                    shape = RoundedCornerShape(8.dp) // Optional: Rounded corners
-                                ),
-                        ) {
+                        recipe.steps.forEachIndexed { index, step ->
                             Text(
-                                text = "RECIPE STEPS RECIPE STEPS RECIPE STEPS RECIPE STEPS RECIPE STEPS RECIPE STEPS",
+                                text = "${index + 1}. $step",
                                 textAlign = TextAlign.Justify,
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier.padding(vertical = 4.dp, horizontal = 10.dp)
                             )
                         }
-
                     }
 
+                    // Actions Row
                     Row(
                         modifier = Modifier
-                            .fillMaxSize()
                             .fillMaxWidth()
                             .padding(bottom = 20.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
+                        FavoriteButton(
+                            isFavorited = isFavorited,
+                            onFavoriteClick = {
+                                viewModel.toggleFavorite(recipe)
+                            }
+                        )
 
-                        //PASS FAVOURITE ATRIBUTE AS PARAMETER
-                        FavoriteButton()
                         IconButton(
-                                onClick = {
-                                    //navController.navigate("shoppingList")
-                                },
-                                modifier = Modifier.size(60.dp)
-                                ) {
+                            onClick = { viewModel.addIngredientsToShoppingList(recipe.ingredients) },
+                            modifier = Modifier.size(60.dp)
+                        ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_shopping_cart),
-                                contentDescription = "Shopping List Icon",
+                                contentDescription = "Add to Shopping List",
                                 tint = Color.Unspecified,
                                 modifier = Modifier.size(60.dp)
                             )
                         }
-
                     }
                 }
             }
