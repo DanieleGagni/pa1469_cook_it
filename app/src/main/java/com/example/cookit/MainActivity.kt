@@ -21,6 +21,7 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.cookit.screens.createRecipe.CreateRecipeScreenPreview
 import com.example.cookit.screens.listRecipes.ListRecipesScreen
+import com.example.cookit.screens.listRecipes.Recipe
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,6 +34,28 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+
+val recipes = listOf(
+    Recipe(
+        id = "1",
+        name = "Spaghetti Carbonara",
+        //imageUrl = "https://via.placeholder.com/150",
+        description = "A creamy Italian pasta dish."
+    ),
+    Recipe(
+        id = "2",
+        name = "Chicken Alfredo",
+        //imageUrl = "https://via.placeholder.com/150",
+        description = "Rich and creamy pasta with chicken."
+    ),
+    Recipe(
+        id = "3",
+        name = "Taco Salad",
+        //imageUrl = "https://via.placeholder.com/150",
+        description = "A refreshing salad with taco flavors."
+    )
+)
 
 @Composable
 fun App() {
@@ -54,6 +77,6 @@ fun App() {
             RecipeScreen(navController, recipeId)
         }
         composable("shoppingList") { ShoppingListScreen(navController) }
-        composable("listRecipes") { ListRecipesScreen(navController, recipes = emptyList()) }
+        composable("listRecipes") { ListRecipesScreen(navController, recipes = recipes) }
     }
 }

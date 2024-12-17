@@ -31,6 +31,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.example.cookit.R
+import com.example.cookit.screens.components.NavigationBar
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -39,7 +40,7 @@ import kotlinx.coroutines.launch
 data class Recipe(
     val id: String,
     val name: String,
-    val imageUrl: String,
+    //val imageUrl: String,
     val description: String
 )
 
@@ -59,19 +60,19 @@ class ListRecipesViewModel : ViewModel() {
                 Recipe(
                     id = "1",
                     name = "Spaghetti Carbonara",
-                    imageUrl = "https://via.placeholder.com/150",
+                    //imageUrl = "https://via.placeholder.com/150",
                     description = "A creamy Italian pasta dish."
                 ),
                 Recipe(
                     id = "2",
                     name = "Chicken Alfredo",
-                    imageUrl = "https://via.placeholder.com/150",
+                    //imageUrl = "https://via.placeholder.com/150",
                     description = "Rich and creamy pasta with chicken."
                 ),
                 Recipe(
                     id = "3",
                     name = "Taco Salad",
-                    imageUrl = "https://via.placeholder.com/150",
+                    //imageUrl = "https://via.placeholder.com/150",
                     description = "A refreshing salad with taco flavors."
                 )
             )
@@ -84,36 +85,42 @@ fun ListRecipesScreen(
     navController: NavHostController,
     recipes: List<Recipe>
 ) {
-    Scaffold { innerPadding -> // Use the padding values provided by Scaffold
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding) // Correctly apply innerPadding
-        ) {
-            if (recipes.isEmpty()) {
-                Text(
-                    text = "No recipes found. Start creating some!",
-                    modifier = Modifier.align(Alignment.Center),
-                    style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray)
-                )
-            } else {
-                LazyColumn(
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(recipes.size) { index ->
-                        RecipeItem(
-                            recipe = recipes[index],
-                            onClick = {
-                                // Navigate to the recipe details screen
-                                navController.navigate("recipe/${recipes[index].id}")
-                            }
-                        )
+    Scaffold (
+        modifier = Modifier.fillMaxSize(),
+        bottomBar = {
+            NavigationBar(navController) // Barra de navegación inferior
+        },
+        content = { innerPadding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding) // Correctly apply innerPadding
+            ) {
+                if (recipes.isEmpty()) {
+                    Text(
+                        text = "No recipes found. Start creating some!",
+                        modifier = Modifier.align(Alignment.Center),
+                        style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray)
+                    )
+                } else {
+                    LazyColumn(
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(recipes.size) { index ->
+                            RecipeItem(
+                                recipe = recipes[index],
+                                onClick = {
+                                    // Navigate to the recipe details screen
+                                    navController.navigate("recipe/${recipes[index].id}")
+                                }
+                            )
+                        }
                     }
                 }
             }
         }
-    }
+    )
 }
 
 @Composable
