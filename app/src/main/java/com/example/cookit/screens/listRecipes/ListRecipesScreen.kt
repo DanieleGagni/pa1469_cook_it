@@ -46,38 +46,7 @@ data class Recipe(
 
 // ViewModel for the ListRecipes screen
 class ListRecipesViewModel : ViewModel() {
-    private val _recipes = MutableStateFlow<List<Recipe>>(emptyList())
-    val recipes: StateFlow<List<Recipe>> = _recipes
 
-    init {
-        fetchRecipes()
-    }
-
-    private fun fetchRecipes() {
-        // Simulate fetching recipes from a database or API
-        viewModelScope.launch {
-            _recipes.value = listOf(
-                Recipe(
-                    id = "1",
-                    name = "Spaghetti Carbonara",
-                    //imageUrl = "https://via.placeholder.com/150",
-                    description = "A creamy Italian pasta dish."
-                ),
-                Recipe(
-                    id = "2",
-                    name = "Chicken Alfredo",
-                    //imageUrl = "https://via.placeholder.com/150",
-                    description = "Rich and creamy pasta with chicken."
-                ),
-                Recipe(
-                    id = "3",
-                    name = "Taco Salad",
-                    //imageUrl = "https://via.placeholder.com/150",
-                    description = "A refreshing salad with taco flavors."
-                )
-            )
-        }
-    }
 }
 
 @Composable
@@ -133,7 +102,8 @@ fun RecipeItem(
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
+        elevation = CardDefaults.cardElevation(4.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Row(
             modifier = Modifier
@@ -141,15 +111,6 @@ fun RecipeItem(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Placeholder image logic (replace with Coil for dynamic images)
-            Image(
-                painter = painterResource(id = R.drawable.ic_category_vegetarian),
-                contentDescription = recipe.name,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(80.dp)
-                    .padding(end = 16.dp)
-            )
             Column(
                 modifier = Modifier.weight(1f)
             ) {
