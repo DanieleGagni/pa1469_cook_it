@@ -67,7 +67,7 @@ fun FavoriteButton() {
 
 
 @Composable
-fun RecipeScreen(navController: NavHostController) {
+fun RecipeScreen(navController: NavHostController, recipeId: String) {
 
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
