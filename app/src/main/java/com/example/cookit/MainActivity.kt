@@ -17,6 +17,10 @@ import com.example.cookit.screens.shoppingList.ShoppingListScreen
 import com.example.cookit.screens.signUp.SignUpScreen
 import com.example.cookit.ui.theme.CookItTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import com.example.cookit.screens.createRecipe.CreateRecipeScreenPreview
+import com.example.cookit.screens.listRecipes.ListRecipesScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,7 +46,14 @@ fun App() {
         composable("signUp") { SignUpScreen(navController) }
         composable("home") { HomeScreen(navController) }
         composable("createRecipe") { CreateRecipeScreen(navController) }
-        composable("recipe") { RecipeScreen(navController) }
+        composable(
+            route = "recipe/{recipeId}",
+            arguments = listOf(navArgument("recipeId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val recipeId = backStackEntry.arguments?.getString("recipeId") ?: ""
+            RecipeScreen(navController, recipeId)
+        }
         composable("shoppingList") { ShoppingListScreen(navController) }
+        composable("listRecipes") { ListRecipesScreen(navController, recipes = emptyList()) }
     }
 }

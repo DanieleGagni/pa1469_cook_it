@@ -2,6 +2,7 @@ package com.example.cookit.screens.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -127,8 +128,11 @@ fun HomeScreen(navController: NavHostController) {
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier
                                 .padding(8.dp)
+                                .clickable {
+                                    navController.navigate("listRecipes")
+                                }
                                 .fillMaxWidth(),
-                            elevation = CardDefaults.cardElevation(4.dp)
+                            elevation = CardDefaults.cardElevation(4.dp),
                         ) {
                             Column(
                                 modifier = Modifier
