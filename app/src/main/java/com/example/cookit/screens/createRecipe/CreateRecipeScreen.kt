@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -42,6 +43,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -503,10 +505,17 @@ fun CreateRecipeScreen(
                         .fillMaxWidth()
                         .padding(16.dp),
                     value = estimatedTime,
-                    onValueChange = { estimatedTime = it },
+                    onValueChange = {
+                        newValue ->
+                        if(newValue.all { it.isDigit() }) {
+                            estimatedTime = newValue
+                        } },
                     label = { Text(text = "Enter Estimated Time (minutes)") },
                     maxLines = 1,
                     singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                    ),
                     keyboardActions = KeyboardActions(
                         onDone = {
                             keyboardController?.hide()
@@ -531,10 +540,17 @@ fun CreateRecipeScreen(
                         .fillMaxWidth()
                         .padding(16.dp),
                     value = serves,
-                    onValueChange = { serves = it },
+                    onValueChange = {
+                            newValue ->
+                        if(newValue.all { it.isDigit() }) {
+                            serves = newValue
+                        } },
                     label = { Text(text = "Enter Servings") },
                     maxLines = 1,
                     singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                    ),
                     keyboardActions = KeyboardActions(
                         onDone = {
                             keyboardController?.hide()
@@ -602,6 +618,15 @@ fun CreateRecipeScreen(
 
         // Post Button
         item {
+            val isEnabled = title.isNotBlank() &&
+                    estimatedTime.isNotBlank() &&
+                    estimatedTime.all { it.isDigit() } &&
+                    serves.isNotBlank() &&
+                    serves.all { it.isDigit() } &&
+                    type.isNotBlank() &&
+                    ingredients.isNotEmpty() &&
+                    steps.isNotEmpty()
+
             Button(
                 onClick = {
 
@@ -627,8 +652,13 @@ fun CreateRecipeScreen(
                     navController.navigate("home")
 
                 },
+                enabled = isEnabled,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFF58D1E),
+                    containerColor = if (isEnabled) {
+                        Color(0xFFF58D1E)
+                    } else {
+                        Color.Gray
+                    },
                     contentColor = Color.Black
                 ),
                 modifier = Modifier.padding(16.dp)
