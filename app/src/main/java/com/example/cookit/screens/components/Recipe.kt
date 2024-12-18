@@ -11,6 +11,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import java.util.UUID
 
 data class Recipe(
     val id: String = "",
@@ -33,7 +34,7 @@ data class Recipe(
             type: String = ""
         ): Recipe {
             return Recipe(
-                id = "",
+                id = UUID.randomUUID().toString(),
                 title = title,
                 title_keywords = emptyList(),
                 ingredients = ingredients,

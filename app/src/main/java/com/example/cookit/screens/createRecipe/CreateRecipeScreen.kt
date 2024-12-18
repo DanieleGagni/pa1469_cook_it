@@ -60,6 +60,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import java.util.UUID
 import kotlin.math.truncate
 
 class CreateRecipeViewModel : ViewModel() {
@@ -68,18 +69,21 @@ class CreateRecipeViewModel : ViewModel() {
     private val recipesCollection = db.collection("recipes")
 
     fun addRecipe(recipe: Recipe) {
-
+        val id = UUID.randomUUID().toString()
         val updatedRecipe = recipe
+            .copy(id = id)
             .withTitleKeywords( extractTitleKeywords(recipe.title) )
             .withIngredientsKeywords( extractIngredientsKeywords(recipe.ingredients) )
 
         // TODO: recipe.id is not initialized
 
         recipesCollection
-            .add(updatedRecipe)
-            .addOnSuccessListener { documentReference ->
-                Log.d("[------------------------- DEBUG]", "Recipe '${updatedRecipe.title}' added successfully.")
-                Log.d("[------------------------- DEBUG]", "Recipe added with ID: ${documentReference.id}")
+            .document(id)
+            .set(updatedRecipe)
+            .addOnSuccessListener {
+                Log.d("[DEBUG]", "Recipe '${updatedRecipe.title}' added successfully with ID: $id")
+                //Log.d("[------------------------- DEBUG]", "Recipe '${updatedRecipe.title}' added successfully.")
+                //Log.d("[------------------------- DEBUG]", "Recipe added with ID: ${documentReference.id}")
             }
             .addOnFailureListener { e ->
                 Log.e("[------------------------- DEBUG]", "Error adding recipe '${updatedRecipe.title}': ${e.message}")
@@ -258,7 +262,7 @@ fun AddEditIngredients( ingredients: MutableList<String>) {
 fun AddEditStepsScreen(steps: MutableList<String>) {
     var currentStep by remember { mutableStateOf("") }
     var editIndex by remember { mutableStateOf(-1) }
-    var insertIndex by remember { mutableStateOf(-1) }
+    //var insertIndex by remember { mutableStateOf(-1) }
     //val steps = remember { mutableStateListOf<String>() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -275,7 +279,7 @@ fun AddEditStepsScreen(steps: MutableList<String>) {
                 Text(
                     text = when {
                         editIndex >= 0 -> "Edit Step"
-                        insertIndex >= 0 -> "Insert Step"
+                        //insertIndex >= 0 -> "Insert Step"
                         else -> "Enter Step"
                     }
                 )
@@ -290,10 +294,10 @@ fun AddEditStepsScreen(steps: MutableList<String>) {
                                 steps[editIndex] = currentStep
                                 editIndex = -1
                             }
-                            insertIndex >= 0 -> {
-                                steps.add(insertIndex, currentStep)
-                                insertIndex = -1
-                            }
+//                            insertIndex >= 0 -> {
+//                                steps.add(insertIndex, currentStep)
+//                                insertIndex = -1
+//                            }
                             else -> {
                                 steps.add(currentStep)
                             }
@@ -341,26 +345,26 @@ fun AddEditStepsScreen(steps: MutableList<String>) {
                             modifier = Modifier.size(24.dp)
                         )
                     }
-                    Button(
-                        onClick = {
-                            currentStep = ""
-                            insertIndex = index + 1
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.LightGray,
-                            contentColor = Color.Black
-                        ),
-                        modifier = Modifier
-                            .padding(horizontal = 4.dp)
-                            .size(48.dp),
-                        contentPadding = PaddingValues(0.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = android.R.drawable.ic_input_add),
-                            contentDescription = "Insert Step",
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+//                    Button(
+//                        onClick = {
+//                            currentStep = ""
+//                            insertIndex = index + 1
+//                        },
+//                        colors = ButtonDefaults.buttonColors(
+//                            containerColor = Color.LightGray,
+//                            contentColor = Color.Black
+//                        ),
+//                        modifier = Modifier
+//                            .padding(horizontal = 4.dp)
+//                            .size(48.dp),
+//                        contentPadding = PaddingValues(0.dp)
+//                    ) {
+//                        Icon(
+//                            painter = painterResource(id = android.R.drawable.ic_input_add),
+//                            contentDescription = "Insert Step",
+//                            modifier = Modifier.size(24.dp)
+//                        )
+//                    }
                     Button(
                         onClick = {
                             steps.removeAt(index)

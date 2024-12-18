@@ -20,8 +20,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.cookit.screens.createRecipe.CreateRecipeScreenPreview
+import com.example.cookit.screens.editRecipe.EditRecipeScreen
 import com.example.cookit.screens.listRecipes.ListRecipesScreen
-import com.example.cookit.screens.listRecipes.Recipe
+//import com.example.cookit.screens.listRecipes.Recipe
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,26 +37,26 @@ class MainActivity : ComponentActivity() {
 }
 
 
-val recipes = listOf(
-    Recipe(
-        id = "1",
-        name = "Spaghetti Carbonara",
-        //imageUrl = "https://via.placeholder.com/150",
-        description = "A creamy Italian pasta dish."
-    ),
-    Recipe(
-        id = "2",
-        name = "Chicken Alfredo",
-        //imageUrl = "https://via.placeholder.com/150",
-        description = "Rich and creamy pasta with chicken."
-    ),
-    Recipe(
-        id = "3",
-        name = "Taco Salad",
-        //imageUrl = "https://via.placeholder.com/150",
-        description = "A refreshing salad with taco flavors."
-    )
-)
+//val recipes = listOf(
+//    Recipe(
+//        id = "1",
+//        name = "Spaghetti Carbonara",
+//        //imageUrl = "https://via.placeholder.com/150",
+//        description = "A creamy Italian pasta dish."
+//    ),
+//    Recipe(
+//        id = "2",
+//        name = "Chicken Alfredo",
+//        //imageUrl = "https://via.placeholder.com/150",
+//        description = "Rich and creamy pasta with chicken."
+//    ),
+//    Recipe(
+//        id = "3",
+//        name = "Taco Salad",
+//        //imageUrl = "https://via.placeholder.com/150",
+//        description = "A refreshing salad with taco flavors."
+//    )
+//)
 
 @Composable
 fun App() {
@@ -64,7 +65,7 @@ fun App() {
     NavHost(
         navController = navController,
         //startDestination = "logIn"
-        startDestination = "createRecipe"
+        startDestination = "listRecipes"
     ) {
         composable("logIn") { LogInScreen(navController) }
         composable("signUp") { SignUpScreen(navController) }
@@ -78,6 +79,13 @@ fun App() {
             RecipeScreen(navController, recipeId)
         }
         composable("shoppingList") { ShoppingListScreen(navController) }
-        composable("listRecipes") { ListRecipesScreen(navController, recipes = recipes) }
+        //composable("listRecipes") { ListRecipesScreen(navController, recipes = recipes) }
+        composable("listRecipes") { ListRecipesScreen(navController) }
+        composable("editRecipe/{recipeId}") { backStackEntry ->
+            val recipeId = backStackEntry.arguments?.getString("recipeId")
+            recipeId?.let {
+                EditRecipeScreen(navController, recipeId)
+            }
+        }
     }
 }
