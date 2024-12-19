@@ -75,7 +75,7 @@ fun EditRecipeScreen(
         val steps = remember { mutableStateListOf(*loadedRecipe.steps.toTypedArray()) }
     }
 
-    val title = recipe?.title ?: "No Title" // nullチェック
+    val title = recipe?.title ?: "No Title"
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()

@@ -68,11 +68,9 @@ class ListRecipesViewModel : ViewModel() {
                     document.toObject(Recipe::class.java)?.copy(id = document.id)
                 }
                 _recipes.value = fetchedRecipes
-                println("Fetched recipes: $fetchedRecipes")
             }
             .addOnFailureListener { e ->
                 e.printStackTrace()
-                println("Error fetching recipes: ${e.message}")
             }
     }
 }
