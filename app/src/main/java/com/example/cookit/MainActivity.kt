@@ -18,6 +18,7 @@ import com.example.cookit.ui.theme.CookItTheme
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.cookit.screens.createRecipe.components.Recipe
+import com.google.gson.Gson
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,32 +38,27 @@ fun App() {
 
     NavHost(
         navController = navController,
-        startDestination = "logIn"
+        startDestination = "home"
     ) {
         composable("logIn") { LogInScreen(navController) }
         composable("signUp") { SignUpScreen(navController) }
         composable("home") { HomeScreen(navController) }
         composable("createRecipe") { CreateRecipeScreen(navController) }
         composable(
-            route = "recipe",
-            arguments = listOf(navArgument("recipe") { type = NavType.ParcelableType(Recipe::class.java) })
+            route = "showRecipe/{recipe}",
+            arguments = listOf(navArgument("recipe") { type = NavType.StringType })
         ) { backStackEntry ->
-            val recipe = backStackEntry.arguments?.getParcelable<Recipe>("recipe")
-            if (recipe != null) {
-                RecipeScreen(navController = navController, recipe = recipe)
-            }
+            val recipeJson = backStackEntry.arguments?.getString("recipe")
+            val recipe = Gson().fromJson(recipeJson, Recipe::class.java)
+            RecipeScreen(navController, recipe)
         }
         composable("shoppingList") { ShoppingListScreen(navController) }
     }
-
-    // When navigating to the RecipeScreen, adapt this code:
-    // (you need to change "searchScreen" to the screen name you are in and your Recipe object
-    // needs to be called *recipe* (without the *) for the code to work)
-
-    // navController.navigate("recipe") {
-    //    popUpTo("searchScreen") { inclusive = false }
-    //    arguments = Bundle().apply {
-    //        putParcelable("recipe", recipe)
-    //    }
-    // }
 }
+
+// when navigating to showRecipe, the call must look like this:
+
+// val recipeJson = Uri.encode(Gson().toJson(testRecipe))
+// navController.navigate("showRecipe/$recipeJson")
+
+// ... where testRecipe is your recipe object
