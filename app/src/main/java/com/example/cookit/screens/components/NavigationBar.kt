@@ -1,5 +1,6 @@
 package com.example.cookit.screens.components
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -16,6 +17,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.cookit.R
+import com.example.cookit.screens.createRecipe.components.Recipe
+import com.google.gson.Gson
 
 
 // Barra inferior de navegación
@@ -65,8 +68,19 @@ fun NavigationBar(navController: NavHostController) {
         }
         IconButton(
             onClick = {
-                //---SHOULD GO TO FAVOURITES SCREEN BUT FOR NOW IT GOES TO RECIPE SCREEN TO SEE WHAT HAPPENS
-                navController.navigate("recipe")
+                //---SHOULD GO TO FAVORITES SCREEN BUT FOR NOW IT GOES TO RECIPE SCREEN TO SEE WHAT HAPPENS
+                val testRecipe = Recipe(
+                    title = "Test Recipe",
+                    estimatedTime = 30,
+                    ingredients = listOf("1 cup flour", "2 eggs", "1 cup milk"),
+                    serves = 4,
+                    steps = listOf("Mix ingredients", "Pour into pan", "Bake at 180°C for 25 minutes"),
+                    type = "Dessert",
+                    keywords = listOf("easy", "quick", "dessert")
+                )
+
+                val recipeJson = Uri.encode(Gson().toJson(testRecipe))
+                navController.navigate("showRecipe/$recipeJson")
             }
         ) {
             Icon(
