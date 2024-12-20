@@ -1,4 +1,4 @@
-package com.example.cookit.screens.createRecipe.components
+package com.example.cookit.screens.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,14 +15,40 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Recipe(
+    val id: String = "",
     val title: String = "",
-    val estimatedTime: Int = 0,
+    val title_keywords: List<String> = emptyList(),
     val ingredients: List<String> = emptyList(),
+    val ingredients_keywords: List<String> = emptyList(),
+    val estimatedTime: Int = 0,
     val serves: Int = 0,
     val steps: List<String> = emptyList(),
     val type: String = "",
-    val keywords: List<String> = emptyList()
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun create(
+            title: String = "",
+            ingredients: List<String> = emptyList(),
+            estimatedTime: Int = 0,
+            serves: Int = 0,
+            steps: List<String> = emptyList(),
+            type: String = ""
+        ): Recipe {
+            return Recipe(
+                id = "",
+                title = title,
+                title_keywords = emptyList(),
+                ingredients = ingredients,
+                ingredients_keywords = emptyList(),
+                estimatedTime = estimatedTime,
+                serves = serves,
+                steps = steps,
+                type = type
+            )
+        }
+    }
+}
+
 
 @Composable
 fun RecipeView(recipe: Recipe) {

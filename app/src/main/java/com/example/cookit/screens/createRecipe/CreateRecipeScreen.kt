@@ -1,5 +1,6 @@
 package com.example.cookit.screens.createRecipe
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -7,13 +8,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -33,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -42,16 +47,118 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.cookit.screens.components.Recipe
+import com.example.cookit.screens.logIn.LoginUiState
+import com.example.cookit.screens.logIn.LoginViewModel
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlin.math.truncate
+
+class CreateRecipeViewModel : ViewModel() {
+
+    private val db = Firebase.firestore
+    private val recipesCollection = db.collection("recipes")
+
+    fun addRecipe(recipe: Recipe) {
+
+        val updatedRecipe = recipe
+            .withTitleKeywords( extractTitleKeywords(recipe.title) )
+            .withIngredientsKeywords( extractIngredientsKeywords(recipe.ingredients) )
+
+        // TODO: recipe.id is not initialized
+
+        recipesCollection
+            .add(updatedRecipe)
+            .addOnSuccessListener { documentReference ->
+                Log.d("[------------------------- DEBUG]", "Recipe '${updatedRecipe.title}' added successfully.")
+                Log.d("[------------------------- DEBUG]", "Recipe added with ID: ${documentReference.id}")
+            }
+            .addOnFailureListener { e ->
+                Log.e("[------------------------- DEBUG]", "Error adding recipe '${updatedRecipe.title}': ${e.message}")
+            }
+    }
+
+    // extract keywords from recipe title
+    private fun extractTitleKeywords(title: String): List<String> {
+
+        // \b([A-Za-z]+)\b --> matches only alphabetic characters
+        val wordPattern = "\\b([A-Za-z]+)\\b".toRegex()
+
+        val STOP_WORDS = setOf(
+            "a", "an", "and", "as", "at", "by", "for", "from", "in", "into", "of",
+            "on", "or", "the", "to", "with", "your", "my", "our", "their", "this",
+            "that", "these", "those", "over", "under", "around", "up", "down", "out",
+            "inside", "outside", "through", "onto", "off"
+        )
+
+        val  extractedKeywords =  wordPattern.findAll(title)
+            .map { it.groupValues[1] } //extracts ONLY the captured word group
+            .map { it.lowercase() }
+            .filter { it !in STOP_WORDS }
+            .toList()
+
+        extractedKeywords.forEach { keyword ->
+            Log.d("[------------------------- DEBUG]", "------------------------- $keyword")
+        }
+
+        return extractedKeywords
+    }
+
+    // extract keywords from ingredients
+    private fun extractIngredientsKeywords(ingredients: List<String>):MutableList<String> {
+
+        val regex = """(?:\d+\s*[^a-zA-Z]*|\b)([a-zA-Z\s]+?)(?=\b\d*[^a-zA-Z]*$|\b)""".toRegex()
+
+        val STOP_WORDS = setOf(
+            "cup", "teaspoon", "tablespoon", "small", "medium", "large", "chopped", "diced", "minced", "fresh",
+            "optional", "to", "taste", "and", "or", "any", "half", "cooked", "ounces", "pounds", "g", "mg", "ml",
+            "liter", "kilogram", "gram", "liter", "tsp", "tbsp", "flour", "salt", "pepper", "oil", "water", "sugar",
+            "butter", "cheese", "egg"
+        )
+
+        val allKeywords = mutableListOf<String>()
+
+        ingredients.forEach { ingredient ->
+            val extractedKeywords = mutableListOf<String>()
+
+            regex.findAll(ingredient).forEach { matchResult ->
+
+                val keyword = matchResult.groupValues[1].trim().lowercase()
+
+                if (keyword.isNotBlank() && keyword !in STOP_WORDS) {
+                    allKeywords.add(keyword)
+                }
+            }
+        }
+
+        return allKeywords
+    }
+
+    fun Recipe.withTitleKeywords(titleKeywords: List<String>): Recipe {
+        return this.copy(title_keywords = titleKeywords)
+    }
+
+    fun Recipe.withIngredientsKeywords(ingredientsKeywords: List<String>): Recipe {
+        return this.copy(ingredients_keywords = ingredientsKeywords)
+    }
+
+
+
+}
 
 @Composable
-fun AddEditIngredients(
-    onClick: (List<String>) -> Unit
-) {
+fun AddEditIngredients( ingredients: MutableList<String>) {
     var currentIngredient by remember { mutableStateOf("") }
-    val ingredients = remember { mutableStateListOf<String>() }
     var editIndex by remember { mutableStateOf(-1) }
+    //val ingredients = remember { mutableStateListOf<String>() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     Column (
         horizontalAlignment = Alignment.CenterHorizontally
     ){
@@ -66,30 +173,23 @@ fun AddEditIngredients(
                     text = if (editIndex >= 0) "Edit Ingredient" else "Enter Ingredient"
                 )
             },
-            maxLines = 1
-        )
-        Button(
-            onClick = {
-                if (currentIngredient.isNotBlank()) {
-                    if (editIndex >= 0) {
-                        ingredients[editIndex] = currentIngredient
-                        editIndex = -1
-                    } else {
-                        ingredients.add(currentIngredient)
+            maxLines = 1,
+            singleLine = true,
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    if (currentIngredient.isNotBlank()) {
+                        if (editIndex >= 0) {
+                            ingredients[editIndex] = currentIngredient
+                            editIndex = -1
+                        } else {
+                            ingredients.add(currentIngredient)
+                        }
+                        currentIngredient = ""
+                        keyboardController?.hide()
                     }
-                    currentIngredient = ""
                 }
-            },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xB3F58D1E),
-                contentColor = Color.Black
-            ),
-            modifier = Modifier.padding(8.dp)
-        ) {
-            Text(
-                text = if (editIndex >= 0) "Update Ingredient" else "Add Ingredient"
             )
-        }
+        )
         Column(
             Modifier
                 .fillMaxWidth()
@@ -153,13 +253,13 @@ fun AddEditIngredients(
 }
 
 @Composable
-fun AddEditStepsScreen(
-    onClick: (List<String>) -> Unit
-) {
+fun AddEditStepsScreen(steps: MutableList<String>) {
     var currentStep by remember { mutableStateOf("") }
-    val steps = remember { mutableStateListOf<String>() }
     var editIndex by remember { mutableStateOf(-1) }
     var insertIndex by remember { mutableStateOf(-1) }
+    //val steps = remember { mutableStateListOf<String>() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     Column (
         horizontalAlignment = Alignment.CenterHorizontally
     ){
@@ -178,39 +278,30 @@ fun AddEditStepsScreen(
                     }
                 )
             },
-            maxLines = 1
-        )
-        Button(
-            onClick = {
-                if (currentStep.isNotBlank()) {
-                    when {
-                        editIndex >= 0 -> {
-                            steps[editIndex] = currentStep
-                            editIndex = -1
+            maxLines = 1,
+            singleLine = true,
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    if (currentStep.isNotBlank()) {
+                        when {
+                            editIndex >= 0 -> {
+                                steps[editIndex] = currentStep
+                                editIndex = -1
+                            }
+                            insertIndex >= 0 -> {
+                                steps.add(insertIndex, currentStep)
+                                insertIndex = -1
+                            }
+                            else -> {
+                                steps.add(currentStep)
+                            }
                         }
-
-                        insertIndex >= 0 -> {
-                            steps.add(insertIndex, currentStep)
-                            insertIndex = -1
-                        }
-
-                        else -> {
-                            steps.add(currentStep)
-                        }
+                        currentStep = ""
+                        keyboardController?.hide()
                     }
-                    currentStep = ""
                 }
-            },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xB3F58D1E),
-                contentColor = Color.Black
-            ),
-            modifier = Modifier.padding(8.dp)
-        ) {
-            Text(
-                text = if (editIndex >= 0) "Update Step" else "Add Step"
             )
-        }
+        )
         Column(
             Modifier
                 .fillMaxWidth()
@@ -295,7 +386,8 @@ fun AddEditStepsScreen(
 
 @Composable
 fun CreateRecipeScreen(
-    navController: NavHostController // Pass the NavController for navigation
+    navController: NavHostController,
+    viewModel: CreateRecipeViewModel = viewModel()
 ) {
     var title by remember { mutableStateOf("") }
     var estimatedTime by remember { mutableStateOf("") }
@@ -304,7 +396,13 @@ fun CreateRecipeScreen(
     val ingredients = remember { mutableStateListOf<String>() }
     val steps = remember { mutableStateListOf<String>() }
 
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+
     LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .imePadding(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item {
@@ -352,6 +450,12 @@ fun CreateRecipeScreen(
                     onValueChange = { title = it },
                     label = { Text(text = "Enter Menu Name") },
                     maxLines = 1,
+                    singleLine = true,
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            keyboardController?.hide()
+                        }
+                    )
                 )
             }
         }
@@ -373,7 +477,13 @@ fun CreateRecipeScreen(
                     value = type,
                     onValueChange = { type = it },
                     label = { Text(text = "Enter Type") },
-                    maxLines = 1
+                    maxLines = 1,
+                    singleLine = true,
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            keyboardController?.hide()
+                        }
+                    )
                 )
             }
         }
@@ -395,7 +505,13 @@ fun CreateRecipeScreen(
                     value = estimatedTime,
                     onValueChange = { estimatedTime = it },
                     label = { Text(text = "Enter Estimated Time (minutes)") },
-                    maxLines = 1
+                    maxLines = 1,
+                    singleLine = true,
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            keyboardController?.hide()
+                        }
+                    )
                 )
             }
         }
@@ -417,7 +533,13 @@ fun CreateRecipeScreen(
                     value = serves,
                     onValueChange = { serves = it },
                     label = { Text(text = "Enter Servings") },
-                    maxLines = 1
+                    maxLines = 1,
+                    singleLine = true,
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            keyboardController?.hide()
+                        }
+                    )
                 )
             }
         }
@@ -446,11 +568,7 @@ fun CreateRecipeScreen(
                     color = Color.Black,
                     modifier = Modifier.padding(start = 16.dp)
                 )
-                AddEditIngredients(
-                    onClick = { ingredients ->
-                        println("Posted ingredients: $ingredients")
-                    }
-                )
+                AddEditIngredients(ingredients)
             }
         }
 
@@ -478,11 +596,7 @@ fun CreateRecipeScreen(
                     color = Color.Black,
                     modifier = Modifier.padding(start = 16.dp)
                 )
-                AddEditStepsScreen(
-                    onClick = { steps ->
-                        println("Posted steps: $steps")
-                    }
-                )
+                AddEditStepsScreen(steps)
             }
         }
 
@@ -490,8 +604,28 @@ fun CreateRecipeScreen(
         item {
             Button(
                 onClick = {
-                    // Add navigation to the home screen or perform your post action
+
+                    val recipe = Recipe.create(
+                        title = title,
+                        ingredients = ingredients,
+                        estimatedTime = estimatedTime.toInt(),
+                        serves = serves.toInt(),
+                        steps = steps,
+                        type = type
+                    )
+
+
+                    Log.d("[------------------------- DEBUG]", "------------------------- ${recipe.title}")
+                    recipe.ingredients.forEach { ingredient ->
+                        Log.d("[------------------------- DEBUG]", "------------------------- $ingredient")
+                    }
+                    steps.forEach { step ->
+                        Log.d("[------------------------- DEBUG]", "------------------------- $step")
+                    }
+
+                    viewModel.addRecipe(recipe)
                     navController.navigate("home")
+
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFF58D1E),

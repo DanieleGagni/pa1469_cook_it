@@ -17,7 +17,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.cookit.R
-import com.example.cookit.screens.createRecipe.components.Recipe
+import com.example.cookit.screens.components.Recipe
 import com.google.gson.Gson
 
 
@@ -76,7 +76,6 @@ fun NavigationBar(navController: NavHostController) {
                     serves = 4,
                     steps = listOf("Mix ingredients", "Pour into pan", "Bake at 180°C for 25 minutes"),
                     type = "Dessert",
-                    keywords = listOf("easy", "quick", "dessert")
                 )
 
                 val recipeJson = Uri.encode(Gson().toJson(testRecipe))

@@ -44,7 +44,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.cookit.R
 import com.example.cookit.screens.components.NavigationBar
-import com.example.cookit.screens.createRecipe.components.Recipe
+import com.example.cookit.screens.components.Recipe
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
