@@ -107,6 +107,14 @@ fun FavoriteButton(
     }
 }
 
+
+// when navigating to the RecipeScreen, the call must look like this:
+
+// val recipeJson = Uri.encode(Gson().toJson(testRecipe))
+// navController.navigate("showRecipe/$recipeJson")
+
+// ... where testRecipe is your recipe object
+
 @Composable
 fun RecipeScreen(
     navController: NavHostController,
