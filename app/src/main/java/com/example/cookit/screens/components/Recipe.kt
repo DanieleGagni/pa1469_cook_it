@@ -7,11 +7,13 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class Recipe(
     val id: String = "",
     val title: String = "",
@@ -21,8 +23,8 @@ data class Recipe(
     val estimatedTime: Int = 0,
     val serves: Int = 0,
     val steps: List<String> = emptyList(),
-    val type: String = ""
-) {
+    val type: String = "",
+) : Parcelable {
     companion object {
         fun create(
             title: String = "",
