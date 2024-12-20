@@ -55,17 +55,17 @@ import kotlinx.coroutines.flow.StateFlow
 class RecipeViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
 
-    private val _isFavorited = MutableStateFlow(false)
-    val isFavorited: StateFlow<Boolean> = _isFavorited
+    private val _isFavorite = MutableStateFlow(false)
+    val isFavorite: StateFlow<Boolean> = _isFavorite
 
     //TODO fix this
     fun toggleFavorite(recipe: Recipe) {
-        val newFavoriteState = !_isFavorited.value
-        _isFavorited.value = newFavoriteState
+        val newFavoriteState = !_isFavorite.value
+        _isFavorite.value = newFavoriteState
 
-        // Update favorite state in Firestore or local database
+        // Update favorite state in Firestore
         db.collection("favorites").document(recipe.title)
-            .set(mapOf("isFavorited" to newFavoriteState))
+            .set(mapOf("isFavorite" to newFavoriteState))
     }
 
     fun addIngredientsToShoppingList(ingredients: List<String>) {
@@ -86,21 +86,21 @@ class RecipeViewModel : ViewModel() {
 
 @Composable
 fun FavoriteButton(
-    isFavorited: Boolean,
+    isFavorite: Boolean,
     onFavoriteClick: (Boolean) -> Unit
 ) {
-    var isFavoritedState by remember { mutableStateOf(isFavorited) }
+    var isFavoriteState by remember { mutableStateOf(isFavorite) }
 
     IconButton(
         onClick = {
-            isFavoritedState = !isFavoritedState
-            onFavoriteClick(isFavoritedState)
+            isFavoriteState = !isFavoriteState
+            onFavoriteClick(isFavoriteState)
         },
         modifier = Modifier.size(60.dp)
     ) {
         Icon(
-            painter = if (isFavoritedState) painterResource(id = R.drawable.ic_favorite) else painterResource(id = R.drawable.ic_favourite_outlined),
-            contentDescription = if (isFavoritedState) "Remove from favorites" else "Add to favorites",
+            painter = if (isFavoriteState) painterResource(id = R.drawable.ic_favorite) else painterResource(id = R.drawable.ic_favourite_outlined),
+            contentDescription = if (isFavoriteState) "Remove from favorites" else "Add to favorites",
             tint = Color.Unspecified,
             modifier = Modifier.size(60.dp)
         )
@@ -113,7 +113,7 @@ fun RecipeScreen(
     recipe: Recipe,
     viewModel: RecipeViewModel = viewModel()
 ) {
-    val isFavorited by viewModel.isFavorited.collectAsState()
+    val isFavorite by viewModel.isFavorite.collectAsState()
 
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
@@ -187,10 +187,6 @@ fun RecipeScreen(
                             }
                         }
 
-                        //SPACER TO CHECK IF SCROLLABLE WORKS
-                        //SPOILER ALERT IT DOESN'T WORK
-                        //Spacer(modifier = Modifier.height(250.dp))
-
                         Spacer(modifier = Modifier.height(16.dp))
 
                         // Steps Section
@@ -219,7 +215,7 @@ fun RecipeScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         FavoriteButton(
-                            isFavorited = isFavorited,
+                            isFavorite = isFavorite,
                             onFavoriteClick = {
                                 viewModel.toggleFavorite(recipe)
                             }
