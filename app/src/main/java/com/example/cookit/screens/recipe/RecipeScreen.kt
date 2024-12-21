@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -20,12 +19,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,6 +52,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 
 class RecipeViewModel : ViewModel() {
@@ -68,17 +71,45 @@ class RecipeViewModel : ViewModel() {
             .set(mapOf("isFavorite" to newFavoriteState))
     }
 
-    fun addIngredientsToShoppingList(ingredients: List<String>) {
+    fun addIngredientsToShoppingList(
+        ingredients: List<String>,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val shoppingListRef = db.collection("shoppingLists").document(userId)
 
-        //TODO fix this
-        shoppingListRef.update("items", FieldValue.arrayUnion(*ingredients.toTypedArray()))
-            .addOnSuccessListener {
-                // Handle success
+        // Query the shoppingLists collection to find the document for the user
+        db.collection("shoppingLists")
+            .whereEqualTo("userId", userId)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val document = querySnapshot.documents.firstOrNull()
+                if (document != null) {
+                    val shoppingListRef = document.reference
+
+                    // Create a list of structured ingredient objects
+                    val ingredientObjects = ingredients.map { ingredient ->
+                        mapOf(
+                            "entry" to ingredient,
+                            "done" to false
+                        )
+                    }
+
+                    // Update the items field with the new ingredients
+                    shoppingListRef.update("items", FieldValue.arrayUnion(*ingredientObjects.toTypedArray()))
+                        .addOnSuccessListener {
+                            onSuccess()
+                        }
+                        .addOnFailureListener { exception ->
+                            onFailure(exception)
+                        }
+                } else {
+                    // No document found for the user
+                    onFailure(Exception("No shopping list found for userId: $userId"))
+                }
             }
-            .addOnFailureListener {
-                // Handle error
+            .addOnFailureListener { exception ->
+                onFailure(exception)
             }
     }
 }
@@ -126,27 +157,31 @@ fun RecipeScreen(
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
 
+    // Snackbar state
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             NavigationBar(navController)
         },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         content = { innerPadding ->
-
             Box(
                 modifier = Modifier
-                    .wrapContentHeight()
+                    .fillMaxSize()
                     .padding(innerPadding)
                     .background(Color.White)
             ) {
                 val scrollState = rememberScrollState()
 
+                // Make the outer Column scrollable
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
+                        .verticalScroll(scrollState)
                         .padding(16.dp)
-                        //.padding(top = 30.dp)
-                    //horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Recipe title
                     Text(
@@ -163,17 +198,17 @@ fun RecipeScreen(
                         style = MaterialTheme.typography.bodyMedium.copy(fontSize = 30.sp),
                         color = Color.Black,
                     )
+
                     // Recipe content
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(screenHeight * 0.75f)
                             .padding(top = 16.dp)
-                            .verticalScroll(scrollState)
                             .border(
-                                width = 2.dp,                // Border thickness
-                                color = Color.Green,         // Border color
-                                shape = RoundedCornerShape(8.dp) // Optional: Rounded corners
+                                width = 2.dp,
+                                color = Color.Green,
+                                shape = RoundedCornerShape(8.dp)
                             ),
                     ) {
                         // Ingredients section
@@ -230,7 +265,21 @@ fun RecipeScreen(
                         )
 
                         IconButton(
-                            onClick = { viewModel.addIngredientsToShoppingList(recipe.ingredients) },
+                            onClick = {
+                                viewModel.addIngredientsToShoppingList(
+                                    recipe.ingredients,
+                                    onSuccess = {
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar("Ingredients added to shopping list!")
+                                        }
+                                    },
+                                    onFailure = { exception ->
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar("Failed to add ingredients: ${exception.message}")
+                                        }
+                                    }
+                                )
+                            },
                             modifier = Modifier.size(60.dp)
                         ) {
                             Icon(
