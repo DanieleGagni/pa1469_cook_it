@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,8 +56,22 @@ import kotlinx.coroutines.flow.StateFlow
 class RecipeViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
 
+    private val _recipe = MutableStateFlow<Recipe?>(null)
+    val recipe: StateFlow<Recipe?> = _recipe
+
     private val _isFavorite = MutableStateFlow(false)
     val isFavorite: StateFlow<Boolean> = _isFavorite
+
+    fun loadRecipe(recipeId: String) {
+        db.collection("recipes").document(recipeId).get()
+            .addOnSuccessListener { document ->
+                val fetchedRecipe = document.toObject(Recipe::class.java)
+                _recipe.value = fetchedRecipe
+            }
+            .addOnFailureListener {
+                it.printStackTrace()
+            }
+    }
 
     //TODO fix this
     fun toggleFavorite(recipe: Recipe) {
@@ -118,13 +133,19 @@ fun FavoriteButton(
 @Composable
 fun RecipeScreen(
     navController: NavHostController,
-    recipe: Recipe,
+    recipeId: String,
     viewModel: RecipeViewModel = viewModel()
 ) {
+    val recipe by viewModel.recipe.collectAsState()
     val isFavorite by viewModel.isFavorite.collectAsState()
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
 
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
+
+    LaunchedEffect(recipeId) {
+        viewModel.loadRecipe(recipeId)
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -141,6 +162,7 @@ fun RecipeScreen(
             ) {
                 val scrollState = rememberScrollState()
 
+                recipe?.let {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -157,7 +179,7 @@ fun RecipeScreen(
                                     fontWeight = FontWeight.Bold
                                 )
                             ) {
-                                append(recipe.title)
+                                append(it.title)
                             }
                         },
                         style = MaterialTheme.typography.bodyMedium.copy(fontSize = 30.sp),
@@ -184,7 +206,7 @@ fun RecipeScreen(
                             fontWeight = FontWeight.Bold
                         )
 
-                        recipe.ingredients.forEach { ingredient ->
+                        it.ingredients.forEach { ingredient ->
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier
@@ -205,7 +227,7 @@ fun RecipeScreen(
                             fontWeight = FontWeight.Bold
                         )
 
-                        recipe.steps.forEachIndexed { index, step ->
+                        it.steps.forEachIndexed { index, step ->
                             Text(
                                 text = "${index + 1}. $step",
                                 textAlign = TextAlign.Justify,
@@ -213,7 +235,6 @@ fun RecipeScreen(
                             )
                         }
                     }
-
                     // Actions Row
                     Row(
                         modifier = Modifier
@@ -225,12 +246,27 @@ fun RecipeScreen(
                         FavoriteButton(
                             isFavorite = isFavorite,
                             onFavoriteClick = {
-                                viewModel.toggleFavorite(recipe)
+                                //viewModel.toggleFavorite(recipe)
                             }
                         )
+                        if (currentUserId == it.createdBy) {
+                            IconButton(
+                                onClick = {
+                                    navController.navigate("editRecipe/${it.id}")
+                                }
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = android.R.drawable.ic_menu_edit),
+                                    contentDescription = "Edit Recipe",
+                                    tint = Color.Black
+                                )
+                            }
+                        }
 
                         IconButton(
-                            onClick = { viewModel.addIngredientsToShoppingList(recipe.ingredients) },
+                            onClick = {
+                                //viewModel.addIngredientsToShoppingList(recipe.ingredients)
+                            },
                             modifier = Modifier.size(60.dp)
                         ) {
                             Icon(
@@ -242,7 +278,16 @@ fun RecipeScreen(
                         }
                     }
                 }
-            }
+                } ?: run {
+                    Text(
+                        text = "Loading...",
+                        modifier = Modifier.align(Alignment.Center),
+                        style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray)
+                    )
+                }
+
+
+                }
         }
     )
 }

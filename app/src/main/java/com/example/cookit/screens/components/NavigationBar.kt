@@ -69,17 +69,19 @@ fun NavigationBar(navController: NavHostController) {
         IconButton(
             onClick = {
                 //---SHOULD GO TO FAVORITES SCREEN BUT FOR NOW IT GOES TO RECIPE SCREEN TO SEE WHAT HAPPENS
-                val testRecipe = Recipe(
-                    title = "Test Recipe",
-                    estimatedTime = 30,
-                    ingredients = listOf("1 cup flour", "2 eggs", "1 cup milk"),
-                    serves = 4,
-                    steps = listOf("Mix ingredients", "Pour into pan", "Bake at 180°C for 25 minutes"),
-                    type = "Dessert",
-                )
+//                val testRecipe = Recipe(
+//                    title = "Test Recipe",
+//                    estimatedTime = 30,
+//                    ingredients = listOf("1 cup flour", "2 eggs", "1 cup milk"),
+//                    serves = 4,
+//                    steps = listOf("Mix ingredients", "Pour into pan", "Bake at 180°C for 25 minutes"),
+//                    type = "Dessert",
+//                )
 
-                val recipeJson = Uri.encode(Gson().toJson(testRecipe))
-                navController.navigate("showRecipe/$recipeJson")
+                navController.navigate("listRecipes")
+
+                //val recipeJson = Uri.encode(Gson().toJson(testRecipe))
+                //navController.navigate("showRecipe/$recipeJson")
             }
         ) {
             Icon(
