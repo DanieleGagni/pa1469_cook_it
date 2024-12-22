@@ -23,12 +23,11 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -61,14 +60,57 @@ class RecipeViewModel : ViewModel() {
     private val _isFavorite = MutableStateFlow(false)
     val isFavorite: StateFlow<Boolean> = _isFavorite
 
-    //TODO fix this
-    fun toggleFavorite(recipe: Recipe) {
-        val newFavoriteState = !_isFavorite.value
-        _isFavorite.value = newFavoriteState
+    fun loadFavoriteStatus(recipeId: String) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
-        // Update favorite state in Firestore
-        db.collection("favorites").document(recipe.title)
-            .set(mapOf("isFavorite" to newFavoriteState))
+        val favoritesRef = db.collection("favorites").document(userId)
+
+        favoritesRef.get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val currentFavorites = document.get("recipes") as? List<String> ?: listOf()
+                    _isFavorite.value = recipeId in currentFavorites
+                } else {
+                    _isFavorite.value = false
+                }
+            }
+            .addOnFailureListener { e ->
+                e.printStackTrace()
+                _isFavorite.value = false
+            }
+    }
+
+    fun toggleFavorite(recipe: Recipe) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        val favoritesRef = db.collection("favorites").document(userId)
+
+        // Check if the favorites document exists
+        favoritesRef.get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    // If the document exists, retrieve the current list of favorite recipes
+                    val currentFavorites = document.get("recipes") as? List<String> ?: listOf()
+
+                    if (recipe.id in currentFavorites) {
+                        // If the recipe is already a favorite, remove it
+                        favoritesRef.update("recipes", FieldValue.arrayRemove(recipe.id))
+                            .addOnSuccessListener { _isFavorite.value = false }
+                            .addOnFailureListener { it.printStackTrace() }
+                    } else {
+                        // If the recipe is not a favorite, add it
+                        favoritesRef.update("recipes", FieldValue.arrayUnion(recipe.id))
+                            .addOnSuccessListener { _isFavorite.value = true }
+                            .addOnFailureListener { it.printStackTrace() }
+                    }
+                } else {
+                    // If no document exists, create a new one with the current recipe as the first favorite
+                    favoritesRef.set(mapOf("recipes" to listOf(recipe.id)))
+                        .addOnSuccessListener { _isFavorite.value = true }
+                        .addOnFailureListener { it.printStackTrace() }
+                }
+            }
+            .addOnFailureListener { it.printStackTrace() }
     }
 
     fun addIngredientsToShoppingList(
@@ -118,20 +160,15 @@ class RecipeViewModel : ViewModel() {
 @Composable
 fun FavoriteButton(
     isFavorite: Boolean,
-    onFavoriteClick: (Boolean) -> Unit
+    onFavoriteClick: () -> Unit
 ) {
-    var isFavoriteState by remember { mutableStateOf(isFavorite) }
-
     IconButton(
-        onClick = {
-            isFavoriteState = !isFavoriteState
-            onFavoriteClick(isFavoriteState)
-        },
+        onClick = onFavoriteClick,
         modifier = Modifier.size(60.dp)
     ) {
         Icon(
-            painter = if (isFavoriteState) painterResource(id = R.drawable.ic_favorite) else painterResource(id = R.drawable.ic_favourite_outlined),
-            contentDescription = if (isFavoriteState) "Remove from favorites" else "Add to favorites",
+            painter = if (isFavorite) painterResource(id = R.drawable.ic_favorite) else painterResource(id = R.drawable.ic_favourite_outlined),
+            contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
             tint = Color.Unspecified,
             modifier = Modifier.size(60.dp)
         )
@@ -154,10 +191,13 @@ fun RecipeScreen(
 ) {
     val isFavorite by viewModel.isFavorite.collectAsState()
 
+    LaunchedEffect(recipe.id) {
+        viewModel.loadFavoriteStatus(recipe.id)
+    }
+
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
 
-    // Snackbar state
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
@@ -176,7 +216,6 @@ fun RecipeScreen(
             ) {
                 val scrollState = rememberScrollState()
 
-                // Make the outer Column scrollable
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
