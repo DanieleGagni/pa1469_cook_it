@@ -129,22 +129,25 @@ class RecipeViewModel : ViewModel() {
                 if (document != null) {
                     val shoppingListRef = document.reference
 
-                    // Create a list of structured ingredient objects
-                    val ingredientObjects = ingredients.map { ingredient ->
-                        mapOf(
-                            "entry" to ingredient,
-                            "done" to false
-                        )
-                    }
+                    shoppingListRef.get().addOnSuccessListener { documentSnapshot ->
+                        val currentItems = documentSnapshot.get("items") as? List<Map<String, Any>> ?: emptyList()
 
-                    // Update the items field with the new ingredients
-                    shoppingListRef.update("items", FieldValue.arrayUnion(*ingredientObjects.toTypedArray()))
-                        .addOnSuccessListener {
-                            onSuccess()
+                        // Add the new ingredients to the list
+                        val updatedItems = currentItems.toMutableList()
+                        ingredients.forEach { ingredient ->
+                            val newItem = mapOf("done" to false, "entry" to ingredient)
+                            updatedItems.add(newItem)
                         }
-                        .addOnFailureListener { exception ->
-                            onFailure(exception)
-                        }
+
+                        // Write the updated list back to Firestore
+                        shoppingListRef.update("items", updatedItems)
+                            .addOnSuccessListener { onSuccess() }
+                            .addOnFailureListener { exception ->
+                                onFailure(exception)
+                            }
+                    }.addOnFailureListener { exception ->
+                        onFailure(exception)
+                    }
                 } else {
                     // No document found for the user
                     onFailure(Exception("No shopping list found for userId: $userId"))
