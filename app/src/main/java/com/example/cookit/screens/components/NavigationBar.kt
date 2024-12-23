@@ -98,6 +98,8 @@ fun NavigationBar(navController: NavHostController) {
         }
         // Settings Icon with Dropdown Menu
         var isMenuExpanded by remember { mutableStateOf(false) }
+        var showDeleteAccountConfirmation by remember { mutableStateOf(false) }
+
         Box {
             IconButton(
                 onClick = { isMenuExpanded = true }
@@ -117,7 +119,7 @@ fun NavigationBar(navController: NavHostController) {
                     text = { Text("Recipes created") },
                     onClick = {
                         isMenuExpanded = false
-                        // Handle logout action
+                        // Handle recipes created action
                         navController.navigate("listRecipes")
                     }
                 )
@@ -129,14 +131,51 @@ fun NavigationBar(navController: NavHostController) {
                         navController.navigate("login")
                     }
                 )
+
+
                 DropdownMenuItem(
                     text = { Text("Delete account") },
                     onClick = {
-                        isMenuExpanded = false
-                        // Handle logout action
-                        navController.navigate("signUp")
+                        isMenuExpanded = true
+                        showDeleteAccountConfirmation = true
                     }
                 )
+                // Confirmation Dialog
+                if (showDeleteAccountConfirmation) {
+                    androidx.compose.material3.AlertDialog(
+                        onDismissRequest = { showDeleteAccountConfirmation = false },
+                        title = {
+                            Text(text = "Delete Account")
+                        },
+                        text = {
+                            Text("Are you sure you want to delete your account? This action cannot be undone.")
+                        },
+                        confirmButton = {
+                            androidx.compose.material3.TextButton(
+                                onClick = {
+                                    isMenuExpanded = false
+                                    showDeleteAccountConfirmation = false
+                                    // Navigate to the sign-up screen or handle delete logic here
+                                    navController.navigate("signUp")
+                                }
+                            ) {
+                                Text("Delete")
+                            }
+                        },
+                        dismissButton = {
+                            androidx.compose.material3.TextButton(
+                                onClick = {
+                                    isMenuExpanded = false
+                                    showDeleteAccountConfirmation = false
+                                }
+                            ) {
+                                Text("Cancel")
+                            }
+                        },
+
+                        containerColor = Color(0xFFF5F5F5)
+                    )
+                }
             }
         }
     }
