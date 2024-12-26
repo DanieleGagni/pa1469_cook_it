@@ -32,9 +32,12 @@ fun HomeScreen(navController: NavHostController) {
     val currentUser = auth.currentUser
     val userName = currentUser?.displayName ?: "User" // Fallback to "User" if name is not set
 
-    // Handle the login logic
-    fun handleSearch() {
-        //Navigate to the search screen
+    fun handleSearchByCategory() {
+        // Navigate to the search by category screen
+    }
+
+    fun handleSearchByIngredients() {
+        // Navigate to the search by ingredients screen
     }
 
     Scaffold(
@@ -53,14 +56,13 @@ fun HomeScreen(navController: NavHostController) {
 
                 Spacer(modifier = Modifier.height(24.dp)) // Más espacio superior
 
-                //Saludo en columna
+                // Saludo en columna
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 ) {
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        //TEXT SHOULD CALL TO VIEWMODEL TO GET THE USER'S NAME
                         text = "Hello $userName!",
                         style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
                         color = Color.Black,
@@ -87,27 +89,41 @@ fun HomeScreen(navController: NavHostController) {
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(24.dp)) // Espacio entre eslogan y búsqueda
+                Spacer(modifier = Modifier.height(24.dp)) // Espacio entre eslogan y botones
 
-                //Search button
+                // Botón "Search by Category"
                 Button(
-                    onClick = { handleSearch() },
+                    onClick = { handleSearchByCategory() },
                     modifier = Modifier
-                        .height(80.dp)
-                        .width(80.dp)
+                        .fillMaxWidth(0.8f)
                         .padding(vertical = 8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF5F5F5)) // Set the background color
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF58D1E)) // Set the background color
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_search),
-                        contentDescription = "Search Icon",
-                        modifier = Modifier
-                            .size(40.dp),
-                        tint = Color.Unspecified
+                    Text(
+                        text = "Search by Category",
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                        color = Color.White
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp)) // Espacio entre búsqueda y categorías
+                Spacer(modifier = Modifier.height(16.dp)) // Espacio entre botones
+
+                // Botón "Search by Ingredients"
+                Button(
+                    onClick = { handleSearchByIngredients() },
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .padding(vertical = 8.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF58D1E)) // Set the background color
+                ) {
+                    Text(
+                        text = "Search by Ingredients",
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                        color = Color.White
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp)) // Espacio entre botones y categorías
 
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
