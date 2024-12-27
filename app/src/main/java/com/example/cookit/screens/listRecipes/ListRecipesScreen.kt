@@ -64,7 +64,7 @@ class ListRecipesViewModel : ViewModel() {
 @Composable
 fun ListRecipesScreen(
     navController: NavHostController,
-    //recipes: List<Recipe>
+    recipeIDs: List<String>,
     viewModel: ListRecipesViewModel = viewModel()
 ) {
     val recipes by viewModel.recipes.collectAsState()
