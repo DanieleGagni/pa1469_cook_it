@@ -56,7 +56,16 @@ fun App() {
             RecipeScreen(navController, recipe)
         }
         composable("shoppingList") { ShoppingListScreen(navController) }
-        composable("listRecipes") { ListRecipesScreen(navController) }
+
+        composable(
+            route = "listRecipes?ids={ids}",
+            arguments = listOf(navArgument("ids") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val ids = backStackEntry.arguments?.getString("ids")
+            val recipeIds = ids?.split(",") ?: emptyList()
+            ListRecipesScreen(navController, recipeIds)
+        }
+
         composable("editRecipe/{recipeId}") { backStackEntry ->
             val recipeId = backStackEntry.arguments?.getString("recipeId")
             recipeId?.let {
