@@ -1,6 +1,5 @@
 package com.example.cookit.screens.components
 
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,11 +24,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.cookit.R
-import com.example.cookit.screens.components.Recipe
-import com.google.gson.Gson
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 
-// Barra inferior de navegación
 @Composable
 fun NavigationBar(navController: NavHostController) {
     Row(
@@ -37,7 +35,7 @@ fun NavigationBar(navController: NavHostController) {
             .fillMaxWidth()
             .background(Color(0xFFF5F5F5))
             .padding(horizontal = 16.dp, vertical = 4.dp)
-            .navigationBarsPadding(), // Reducir padding vertical
+            .navigationBarsPadding(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         // Home
@@ -83,20 +81,9 @@ fun NavigationBar(navController: NavHostController) {
         // List favorite recipes
         IconButton(
             onClick = {
-                //---SHOULD GO TO FAVORITES SCREEN BUT FOR NOW IT GOES TO RECIPE SCREEN TO SEE WHAT HAPPENS
-//                val testRecipe = Recipe(
-//                    title = "Test Recipe",
-//                    estimatedTime = 30,
-//                    ingredients = listOf("1 cup flour", "2 eggs", "1 cup milk"),
-//                    serves = 4,
-//                    steps = listOf("Mix ingredients", "Pour into pan", "Bake at 180°C for 25 minutes"),
-//                    type = "Dessert",
-//                )
-
-                navController.navigate("listRecipes")
-
-                //val recipeJson = Uri.encode(Gson().toJson(testRecipe))
-                //navController.navigate("showRecipe/$recipeJson")
+                retrieveFavoriteRecipes { favoriteRecipeIds ->
+                    navController.navigate("listRecipes?ids=${favoriteRecipeIds.joinToString(",")}")
+                }
             }
         ) {
             Icon(
@@ -188,5 +175,30 @@ fun NavigationBar(navController: NavHostController) {
                 }
             }
         }
+    }
+}
+
+fun retrieveFavoriteRecipes(onResult: (List<String>) -> Unit) {
+    val user = FirebaseAuth.getInstance().currentUser
+    if (user != null) {
+        val userId = user.uid
+        val db = FirebaseFirestore.getInstance()
+        val docRef = db.collection("favorites").document(userId)
+        docRef.get()
+            .addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
+                    val recipeIds = document.get("recipes") as? List<String> ?: emptyList()
+                    onResult(recipeIds)
+                } else {
+                    onResult(emptyList())
+                }
+            }
+            .addOnFailureListener { exception ->
+                // Handle the error (e.g., show a toast or log the error)
+                onResult(emptyList())
+            }
+    } else {
+        // Handle case where user is not authenticated
+        onResult(emptyList())
     }
 }
