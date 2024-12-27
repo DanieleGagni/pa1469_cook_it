@@ -12,6 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import java.util.UUID
 
 @Parcelize
 data class Recipe(
@@ -24,6 +25,7 @@ data class Recipe(
     val serves: Int = 0,
     val steps: List<String> = emptyList(),
     val type: String = "",
+    val createdBy: String = ""
 ) : Parcelable {
     companion object {
         fun create(
@@ -32,10 +34,11 @@ data class Recipe(
             estimatedTime: Int = 0,
             serves: Int = 0,
             steps: List<String> = emptyList(),
-            type: String = ""
+            type: String = "",
+            createdBy: String = ""
         ): Recipe {
             return Recipe(
-                id = "",
+                id = UUID.randomUUID().toString(),
                 title = title,
                 title_keywords = emptyList(),
                 ingredients = ingredients,
@@ -43,7 +46,8 @@ data class Recipe(
                 estimatedTime = estimatedTime,
                 serves = serves,
                 steps = steps,
-                type = type
+                type = type,
+                createdBy = createdBy
             )
         }
     }

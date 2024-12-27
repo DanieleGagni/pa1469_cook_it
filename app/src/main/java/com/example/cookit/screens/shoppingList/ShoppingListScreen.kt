@@ -172,6 +172,7 @@ class ShoppingListViewModel : ViewModel() {
                 println("Error updating item status in Firestore: $e")
             }
     }
+
     fun removeShoppingItem(navController: NavHostController, index: Int) {
         val userId = currentUserId
         if (userId == null) {

@@ -1,5 +1,6 @@
 package com.example.cookit.screens.createRecipe
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -42,6 +44,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -54,10 +57,13 @@ import androidx.navigation.compose.rememberNavController
 import com.example.cookit.screens.components.Recipe
 import com.example.cookit.screens.logIn.LoginUiState
 import com.example.cookit.screens.logIn.LoginViewModel
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.gson.Gson
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import java.util.UUID
 import kotlin.math.truncate
 
 class CreateRecipeViewModel : ViewModel() {
@@ -66,18 +72,31 @@ class CreateRecipeViewModel : ViewModel() {
     private val recipesCollection = db.collection("recipes")
 
     fun addRecipe(recipe: Recipe) {
+        val id = UUID.randomUUID().toString()
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+
+        if (currentUserId == null) {
+            Log.e("[ERROR]", "User is not authenticated.")
+            return
+        }
 
         val updatedRecipe = recipe
+            .copy(
+                id = id,
+                createdBy = currentUserId
+            )
             .withTitleKeywords( extractTitleKeywords(recipe.title) )
             .withIngredientsKeywords( extractIngredientsKeywords(recipe.ingredients) )
 
         // TODO: recipe.id is not initialized
 
         recipesCollection
-            .add(updatedRecipe)
-            .addOnSuccessListener { documentReference ->
-                Log.d("[------------------------- DEBUG]", "Recipe '${updatedRecipe.title}' added successfully.")
-                Log.d("[------------------------- DEBUG]", "Recipe added with ID: ${documentReference.id}")
+            .document(id)
+            .set(updatedRecipe)
+            .addOnSuccessListener {
+                Log.d("[DEBUG]", "Recipe '${updatedRecipe.title}' added successfully with ID: $id")
+                //Log.d("[------------------------- DEBUG]", "Recipe '${updatedRecipe.title}' added successfully.")
+                //Log.d("[------------------------- DEBUG]", "Recipe added with ID: ${documentReference.id}")
             }
             .addOnFailureListener { e ->
                 Log.e("[------------------------- DEBUG]", "Error adding recipe '${updatedRecipe.title}': ${e.message}")
@@ -256,7 +275,7 @@ fun AddEditIngredients( ingredients: MutableList<String>) {
 fun AddEditStepsScreen(steps: MutableList<String>) {
     var currentStep by remember { mutableStateOf("") }
     var editIndex by remember { mutableStateOf(-1) }
-    var insertIndex by remember { mutableStateOf(-1) }
+    //var insertIndex by remember { mutableStateOf(-1) }
     //val steps = remember { mutableStateListOf<String>() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -273,7 +292,7 @@ fun AddEditStepsScreen(steps: MutableList<String>) {
                 Text(
                     text = when {
                         editIndex >= 0 -> "Edit Step"
-                        insertIndex >= 0 -> "Insert Step"
+                        //insertIndex >= 0 -> "Insert Step"
                         else -> "Enter Step"
                     }
                 )
@@ -288,10 +307,10 @@ fun AddEditStepsScreen(steps: MutableList<String>) {
                                 steps[editIndex] = currentStep
                                 editIndex = -1
                             }
-                            insertIndex >= 0 -> {
-                                steps.add(insertIndex, currentStep)
-                                insertIndex = -1
-                            }
+//                            insertIndex >= 0 -> {
+//                                steps.add(insertIndex, currentStep)
+//                                insertIndex = -1
+//                            }
                             else -> {
                                 steps.add(currentStep)
                             }
@@ -339,26 +358,26 @@ fun AddEditStepsScreen(steps: MutableList<String>) {
                             modifier = Modifier.size(24.dp)
                         )
                     }
-                    Button(
-                        onClick = {
-                            currentStep = ""
-                            insertIndex = index + 1
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.LightGray,
-                            contentColor = Color.Black
-                        ),
-                        modifier = Modifier
-                            .padding(horizontal = 4.dp)
-                            .size(48.dp),
-                        contentPadding = PaddingValues(0.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = android.R.drawable.ic_input_add),
-                            contentDescription = "Insert Step",
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+//                    Button(
+//                        onClick = {
+//                            currentStep = ""
+//                            insertIndex = index + 1
+//                        },
+//                        colors = ButtonDefaults.buttonColors(
+//                            containerColor = Color.LightGray,
+//                            contentColor = Color.Black
+//                        ),
+//                        modifier = Modifier
+//                            .padding(horizontal = 4.dp)
+//                            .size(48.dp),
+//                        contentPadding = PaddingValues(0.dp)
+//                    ) {
+//                        Icon(
+//                            painter = painterResource(id = android.R.drawable.ic_input_add),
+//                            contentDescription = "Insert Step",
+//                            modifier = Modifier.size(24.dp)
+//                        )
+//                    }
                     Button(
                         onClick = {
                             steps.removeAt(index)
@@ -448,7 +467,7 @@ fun CreateRecipeScreen(
                         .padding(16.dp),
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text(text = "Enter Menu Name") },
+                    label = { Text(text = "Enter Recipe Name") },
                     maxLines = 1,
                     singleLine = true,
                     keyboardActions = KeyboardActions(
@@ -503,10 +522,17 @@ fun CreateRecipeScreen(
                         .fillMaxWidth()
                         .padding(16.dp),
                     value = estimatedTime,
-                    onValueChange = { estimatedTime = it },
+                    onValueChange = {
+                            newValue ->
+                        if(newValue.all { it.isDigit() }) {
+                            estimatedTime = newValue
+                        } },
                     label = { Text(text = "Enter Estimated Time (minutes)") },
                     maxLines = 1,
                     singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                    ),
                     keyboardActions = KeyboardActions(
                         onDone = {
                             keyboardController?.hide()
@@ -531,10 +557,17 @@ fun CreateRecipeScreen(
                         .fillMaxWidth()
                         .padding(16.dp),
                     value = serves,
-                    onValueChange = { serves = it },
+                    onValueChange = {
+                            newValue ->
+                        if(newValue.all { it.isDigit() }) {
+                            serves = newValue
+                        } },
                     label = { Text(text = "Enter Servings") },
                     maxLines = 1,
                     singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                    ),
                     keyboardActions = KeyboardActions(
                         onDone = {
                             keyboardController?.hide()
@@ -602,6 +635,15 @@ fun CreateRecipeScreen(
 
         // Post Button
         item {
+            val isEnabled = title.isNotBlank() &&
+                    estimatedTime.isNotBlank() &&
+                    estimatedTime.all { it.isDigit() } &&
+                    serves.isNotBlank() &&
+                    serves.all { it.isDigit() } &&
+                    type.isNotBlank() &&
+                    ingredients.isNotEmpty() &&
+                    steps.isNotEmpty()
+
             Button(
                 onClick = {
 
@@ -624,11 +666,17 @@ fun CreateRecipeScreen(
                     }
 
                     viewModel.addRecipe(recipe)
-                    navController.navigate("home")
 
+                    val recipeJson = Uri.encode(Gson().toJson(recipe))
+                    navController.navigate("showRecipe/$recipeJson")
                 },
+                enabled = isEnabled,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFF58D1E),
+                    containerColor = if (isEnabled) {
+                        Color(0xFFF58D1E)
+                    } else {
+                        Color.Gray
+                    },
                     contentColor = Color.Black
                 ),
                 modifier = Modifier.padding(16.dp)

@@ -19,7 +19,7 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.cookit.screens.listRecipes.ListRecipesScreen
 import com.example.cookit.screens.components.Recipe
-import com.example.cookit.screens.listRecipes.Recipe as ListRecipe
+import com.example.cookit.screens.editRecipe.EditRecipeScreen
 import com.google.gson.Gson
 
 class MainActivity : ComponentActivity() {
@@ -35,34 +35,13 @@ class MainActivity : ComponentActivity() {
 }
 
 
-val recipes = listOf(
-    ListRecipe(
-        id = "1",
-        name = "Spaghetti Carbonara",
-        //imageUrl = "https://via.placeholder.com/150",
-        description = "A creamy Italian pasta dish."
-    ),
-    ListRecipe(
-        id = "2",
-        name = "Chicken Alfredo",
-        //imageUrl = "https://via.placeholder.com/150",
-        description = "Rich and creamy pasta with chicken."
-    ),
-    ListRecipe(
-        id = "3",
-        name = "Taco Salad",
-        //imageUrl = "https://via.placeholder.com/150",
-        description = "A refreshing salad with taco flavors."
-    )
-)
-
 @Composable
 fun App() {
     val navController = rememberNavController()
 
     NavHost(
         navController = navController,
-        startDestination = "logIn"
+        startDestination = "logIn",
     ) {
         composable("logIn") { LogInScreen(navController) }
         composable("signUp") { SignUpScreen(navController) }
@@ -77,7 +56,13 @@ fun App() {
             RecipeScreen(navController, recipe)
         }
         composable("shoppingList") { ShoppingListScreen(navController) }
-        composable("listRecipes") { ListRecipesScreen(navController, recipes = recipes) }
+        composable("listRecipes") { ListRecipesScreen(navController) }
+        composable("editRecipe/{recipeId}") { backStackEntry ->
+            val recipeId = backStackEntry.arguments?.getString("recipeId")
+            recipeId?.let {
+                EditRecipeScreen(navController, recipeId)
+            }
+        }
     }
 }
 

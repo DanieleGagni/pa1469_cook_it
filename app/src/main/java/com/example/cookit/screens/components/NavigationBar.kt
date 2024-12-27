@@ -40,6 +40,7 @@ fun NavigationBar(navController: NavHostController) {
             .navigationBarsPadding(), // Reducir padding vertical
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
+        // Home
         IconButton(
             onClick = {
                 navController.navigate("home")
@@ -51,6 +52,8 @@ fun NavigationBar(navController: NavHostController) {
                 tint = Color.Unspecified
             )
         }
+
+        // Shopping list
         IconButton(
             onClick = {
                 navController.navigate("shoppingList")
@@ -62,6 +65,8 @@ fun NavigationBar(navController: NavHostController) {
                 tint = Color.Unspecified
             )
         }
+
+        // Create new recipe
         IconButton(
             onClick = {
                 navController.navigate("createRecipe")
@@ -74,20 +79,24 @@ fun NavigationBar(navController: NavHostController) {
                 tint = Color.Unspecified
             )
         }
+
+        // List favorite recipes
         IconButton(
             onClick = {
                 //---SHOULD GO TO FAVORITES SCREEN BUT FOR NOW IT GOES TO RECIPE SCREEN TO SEE WHAT HAPPENS
-                val testRecipe = Recipe(
-                    title = "Test Recipe",
-                    estimatedTime = 30,
-                    ingredients = listOf("1 cup flour", "2 eggs", "1 cup milk"),
-                    serves = 4,
-                    steps = listOf("Mix ingredients", "Pour into pan", "Bake at 180°C for 25 minutes"),
-                    type = "Dessert",
-                )
+//                val testRecipe = Recipe(
+//                    title = "Test Recipe",
+//                    estimatedTime = 30,
+//                    ingredients = listOf("1 cup flour", "2 eggs", "1 cup milk"),
+//                    serves = 4,
+//                    steps = listOf("Mix ingredients", "Pour into pan", "Bake at 180°C for 25 minutes"),
+//                    type = "Dessert",
+//                )
 
-                val recipeJson = Uri.encode(Gson().toJson(testRecipe))
-                navController.navigate("showRecipe/$recipeJson")
+                navController.navigate("listRecipes")
+
+                //val recipeJson = Uri.encode(Gson().toJson(testRecipe))
+                //navController.navigate("showRecipe/$recipeJson")
             }
         ) {
             Icon(
@@ -96,6 +105,7 @@ fun NavigationBar(navController: NavHostController) {
                 tint = Color.Unspecified
             )
         }
+
         // Settings Icon with Dropdown Menu
         var isMenuExpanded by remember { mutableStateOf(false) }
         var showDeleteAccountConfirmation by remember { mutableStateOf(false) }

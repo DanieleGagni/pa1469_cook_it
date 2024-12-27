@@ -192,6 +192,8 @@ fun RecipeScreen(
     recipe: Recipe,
     viewModel: RecipeViewModel = viewModel()
 ) {
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+
     val isFavorite by viewModel.isFavorite.collectAsState()
 
     LaunchedEffect(recipe.id) {
@@ -306,6 +308,22 @@ fun RecipeScreen(
                             }
                         )
 
+                        // Button to edit the recipe, appears only if current user is creator
+                        if (currentUserId == recipe.createdBy) {
+                            IconButton(
+                                onClick = {
+                                    navController.navigate("editRecipe/${recipe.id}")
+                                }
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = android.R.drawable.ic_menu_edit),
+                                    contentDescription = "Edit Recipe",
+                                    tint = Color.Black
+                                )
+                            }
+                        }
+
+                        // Button to automatically transfer ingredients to shopping list
                         IconButton(
                             onClick = {
                                 viewModel.addIngredientsToShoppingList(
