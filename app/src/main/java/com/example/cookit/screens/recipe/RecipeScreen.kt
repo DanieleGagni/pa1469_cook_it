@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -20,14 +19,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -51,49 +51,110 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 
 class RecipeViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
 
-    private val _recipe = MutableStateFlow<Recipe?>(null)
-    val recipe: StateFlow<Recipe?> = _recipe
-
     private val _isFavorite = MutableStateFlow(false)
     val isFavorite: StateFlow<Boolean> = _isFavorite
 
-    fun loadRecipe(recipeId: String) {
-        db.collection("recipes").document(recipeId).get()
-            .addOnSuccessListener { document ->
-                val fetchedRecipe = document.toObject(Recipe::class.java)
-                _recipe.value = fetchedRecipe
-            }
-            .addOnFailureListener {
-                it.printStackTrace()
-            }
-    }
-
-    //TODO fix this
-    fun toggleFavorite(recipe: Recipe) {
-        val newFavoriteState = !_isFavorite.value
-        _isFavorite.value = newFavoriteState
-
-        // Update favorite state in Firestore
-        db.collection("favorites").document(recipe.title)
-            .set(mapOf("isFavorite" to newFavoriteState))
-    }
-
-    fun addIngredientsToShoppingList(ingredients: List<String>) {
+    fun loadFavoriteStatus(recipeId: String) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val shoppingListRef = db.collection("shoppingLists").document(userId)
 
-        //TODO fix this
-        shoppingListRef.update("items", FieldValue.arrayUnion(*ingredients.toTypedArray()))
-            .addOnSuccessListener {
-                // Handle success
+        val favoritesRef = db.collection("favorites").document(userId)
+
+        favoritesRef.get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val currentFavorites = document.get("recipes") as? List<String> ?: listOf()
+                    _isFavorite.value = recipeId in currentFavorites
+                } else {
+                    _isFavorite.value = false
+                }
             }
-            .addOnFailureListener {
-                // Handle error
+            .addOnFailureListener { e ->
+                e.printStackTrace()
+                _isFavorite.value = false
+            }
+    }
+
+    fun toggleFavorite(recipe: Recipe) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        val favoritesRef = db.collection("favorites").document(userId)
+
+        // Check if the favorites document exists
+        favoritesRef.get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    // If the document exists, retrieve the current list of favorite recipes
+                    val currentFavorites = document.get("recipes") as? List<String> ?: listOf()
+
+                    if (recipe.id in currentFavorites) {
+                        // If the recipe is already a favorite, remove it
+                        favoritesRef.update("recipes", FieldValue.arrayRemove(recipe.id))
+                            .addOnSuccessListener { _isFavorite.value = false }
+                            .addOnFailureListener { it.printStackTrace() }
+                    } else {
+                        // If the recipe is not a favorite, add it
+                        favoritesRef.update("recipes", FieldValue.arrayUnion(recipe.id))
+                            .addOnSuccessListener { _isFavorite.value = true }
+                            .addOnFailureListener { it.printStackTrace() }
+                    }
+                } else {
+                    // If no document exists, create a new one with the current recipe as the first favorite
+                    favoritesRef.set(mapOf("recipes" to listOf(recipe.id)))
+                        .addOnSuccessListener { _isFavorite.value = true }
+                        .addOnFailureListener { it.printStackTrace() }
+                }
+            }
+            .addOnFailureListener { it.printStackTrace() }
+    }
+
+    fun addIngredientsToShoppingList(
+        ingredients: List<String>,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        // Query the shoppingLists collection to find the document for the user
+        db.collection("shoppingLists")
+            .whereEqualTo("userId", userId)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val document = querySnapshot.documents.firstOrNull()
+                if (document != null) {
+                    val shoppingListRef = document.reference
+
+                    shoppingListRef.get().addOnSuccessListener { documentSnapshot ->
+                        val currentItems = documentSnapshot.get("items") as? List<Map<String, Any>> ?: emptyList()
+
+                        // Add the new ingredients to the list
+                        val updatedItems = currentItems.toMutableList()
+                        ingredients.forEach { ingredient ->
+                            val newItem = mapOf("done" to false, "entry" to ingredient)
+                            updatedItems.add(newItem)
+                        }
+
+                        // Write the updated list back to Firestore
+                        shoppingListRef.update("items", updatedItems)
+                            .addOnSuccessListener { onSuccess() }
+                            .addOnFailureListener { exception ->
+                                onFailure(exception)
+                            }
+                    }.addOnFailureListener { exception ->
+                        onFailure(exception)
+                    }
+                } else {
+                    // No document found for the user
+                    onFailure(Exception("No shopping list found for userId: $userId"))
+                }
+            }
+            .addOnFailureListener { exception ->
+                onFailure(exception)
             }
     }
 }
@@ -102,20 +163,15 @@ class RecipeViewModel : ViewModel() {
 @Composable
 fun FavoriteButton(
     isFavorite: Boolean,
-    onFavoriteClick: (Boolean) -> Unit
+    onFavoriteClick: () -> Unit
 ) {
-    var isFavoriteState by remember { mutableStateOf(isFavorite) }
-
     IconButton(
-        onClick = {
-            isFavoriteState = !isFavoriteState
-            onFavoriteClick(isFavoriteState)
-        },
+        onClick = onFavoriteClick,
         modifier = Modifier.size(60.dp)
     ) {
         Icon(
-            painter = if (isFavoriteState) painterResource(id = R.drawable.ic_favorite) else painterResource(id = R.drawable.ic_favourite_outlined),
-            contentDescription = if (isFavoriteState) "Remove from favorites" else "Add to favorites",
+            painter = if (isFavorite) painterResource(id = R.drawable.ic_favorite) else painterResource(id = R.drawable.ic_favourite_outlined),
+            contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
             tint = Color.Unspecified,
             modifier = Modifier.size(60.dp)
         )
@@ -133,42 +189,43 @@ fun FavoriteButton(
 @Composable
 fun RecipeScreen(
     navController: NavHostController,
-    recipeId: String,
+    recipe: Recipe,
     viewModel: RecipeViewModel = viewModel()
 ) {
-    val recipe by viewModel.recipe.collectAsState()
-    val isFavorite by viewModel.isFavorite.collectAsState()
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+
+    val isFavorite by viewModel.isFavorite.collectAsState()
+
+    LaunchedEffect(recipe.id) {
+        viewModel.loadFavoriteStatus(recipe.id)
+    }
 
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
 
-    LaunchedEffect(recipeId) {
-        viewModel.loadRecipe(recipeId)
-    }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             NavigationBar(navController)
         },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         content = { innerPadding ->
-
             Box(
                 modifier = Modifier
-                    .wrapContentHeight()
+                    .fillMaxSize()
                     .padding(innerPadding)
                     .background(Color.White)
             ) {
                 val scrollState = rememberScrollState()
 
-                recipe?.let {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
+                        .verticalScroll(scrollState)
                         .padding(16.dp)
-                        //.padding(top = 30.dp)
-                    //horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Recipe title
                     Text(
@@ -179,23 +236,23 @@ fun RecipeScreen(
                                     fontWeight = FontWeight.Bold
                                 )
                             ) {
-                                append(it.title)
+                                append(recipe.title)
                             }
                         },
                         style = MaterialTheme.typography.bodyMedium.copy(fontSize = 30.sp),
                         color = Color.Black,
                     )
+
                     // Recipe content
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(screenHeight * 0.75f)
                             .padding(top = 16.dp)
-                            .verticalScroll(scrollState)
                             .border(
-                                width = 2.dp,                // Border thickness
-                                color = Color.Green,         // Border color
-                                shape = RoundedCornerShape(8.dp) // Optional: Rounded corners
+                                width = 2.dp,
+                                color = Color.Green,
+                                shape = RoundedCornerShape(8.dp)
                             ),
                     ) {
                         // Ingredients section
@@ -206,7 +263,7 @@ fun RecipeScreen(
                             fontWeight = FontWeight.Bold
                         )
 
-                        it.ingredients.forEach { ingredient ->
+                        recipe.ingredients.forEach { ingredient ->
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier
@@ -227,7 +284,7 @@ fun RecipeScreen(
                             fontWeight = FontWeight.Bold
                         )
 
-                        it.steps.forEachIndexed { index, step ->
+                        recipe.steps.forEachIndexed { index, step ->
                             Text(
                                 text = "${index + 1}. $step",
                                 textAlign = TextAlign.Justify,
@@ -235,6 +292,7 @@ fun RecipeScreen(
                             )
                         }
                     }
+
                     // Actions Row
                     Row(
                         modifier = Modifier
@@ -246,13 +304,15 @@ fun RecipeScreen(
                         FavoriteButton(
                             isFavorite = isFavorite,
                             onFavoriteClick = {
-                                //viewModel.toggleFavorite(recipe)
+                                viewModel.toggleFavorite(recipe)
                             }
                         )
-                        if (currentUserId == it.createdBy) {
+
+                        // Button to edit the recipe, appears only if current user is creator
+                        if (currentUserId == recipe.createdBy) {
                             IconButton(
                                 onClick = {
-                                    navController.navigate("editRecipe/${it.id}")
+                                    navController.navigate("editRecipe/${recipe.id}")
                                 }
                             ) {
                                 Icon(
@@ -263,9 +323,22 @@ fun RecipeScreen(
                             }
                         }
 
+                        // Button to automatically transfer ingredients to shopping list
                         IconButton(
                             onClick = {
-                                //viewModel.addIngredientsToShoppingList(recipe.ingredients)
+                                viewModel.addIngredientsToShoppingList(
+                                    recipe.ingredients,
+                                    onSuccess = {
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar("Ingredients added to shopping list!")
+                                        }
+                                    },
+                                    onFailure = { exception ->
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar("Failed to add ingredients: ${exception.message}")
+                                        }
+                                    }
+                                )
                             },
                             modifier = Modifier.size(60.dp)
                         ) {
@@ -278,16 +351,7 @@ fun RecipeScreen(
                         }
                     }
                 }
-                } ?: run {
-                    Text(
-                        text = "Loading...",
-                        modifier = Modifier.align(Alignment.Center),
-                        style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray)
-                    )
-                }
-
-
-                }
+            }
         }
     )
 }

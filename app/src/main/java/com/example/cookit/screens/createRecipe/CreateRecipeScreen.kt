@@ -1,5 +1,6 @@
 package com.example.cookit.screens.createRecipe
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -59,6 +60,7 @@ import com.example.cookit.screens.logIn.LoginViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.gson.Gson
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.UUID
@@ -465,7 +467,7 @@ fun CreateRecipeScreen(
                         .padding(16.dp),
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text(text = "Enter Menu Name") },
+                    label = { Text(text = "Enter Recipe Name") },
                     maxLines = 1,
                     singleLine = true,
                     keyboardActions = KeyboardActions(
@@ -664,8 +666,9 @@ fun CreateRecipeScreen(
                     }
 
                     viewModel.addRecipe(recipe)
-                    navController.navigate("home")
 
+                    val recipeJson = Uri.encode(Gson().toJson(recipe))
+                    navController.navigate("showRecipe/$recipeJson")
                 },
                 enabled = isEnabled,
                 colors = ButtonDefaults.buttonColors(

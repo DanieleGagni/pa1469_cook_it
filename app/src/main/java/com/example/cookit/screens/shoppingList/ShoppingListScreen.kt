@@ -9,17 +9,21 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -168,6 +172,54 @@ class ShoppingListViewModel : ViewModel() {
                 println("Error updating item status in Firestore: $e")
             }
     }
+
+    fun removeShoppingItem(navController: NavHostController, index: Int) {
+        val userId = currentUserId
+        if (userId == null) {
+            println("User not logged in.")
+            navController.navigate("login")
+        }
+
+        val updatedList = _shoppingList.value.toMutableList().apply {
+            removeAt(index)
+        }
+        _shoppingList.value = updatedList
+
+        // Sync with Firestore
+        db.collection("shoppingLists")
+            .whereEqualTo("userId", userId)
+            .get()
+            .addOnSuccessListener { documents ->
+                documents.firstOrNull()?.reference?.update(
+                    "items",
+                    updatedList.map { mapOf("entry" to it.entry, "done" to it.done) }
+                )
+            }
+            .addOnFailureListener { e ->
+                println("Error removing item from Firestore: $e")
+            }
+    }
+
+    fun removeAllItems(navController: NavHostController) {
+        val userId = currentUserId
+        if (userId == null) {
+            println("User not logged in.")
+            navController.navigate("login")
+        }
+
+        _shoppingList.value = emptyList()
+
+        // Sync with Firestore
+        db.collection("shoppingLists")
+            .whereEqualTo("userId", userId)
+            .get()
+            .addOnSuccessListener { documents ->
+                documents.firstOrNull()?.reference?.update("items", emptyList<Map<String, Any>>())
+            }
+            .addOnFailureListener { e ->
+                println("Error clearing shopping list in Firestore: $e")
+            }
+    }
 }
 
 
@@ -186,19 +238,24 @@ fun ShoppingListScreen(
 
     Scaffold (
         modifier = Modifier.fillMaxSize(),
-        bottomBar = { NavigationBar(navController) },
+        bottomBar = {
+            NavigationBar(navController)
+        },
         content = { innerPadding ->
-            Box(
+            Column(
                 modifier = Modifier
-                    .wrapContentHeight()
-                    .padding(innerPadding)
+                    .fillMaxSize()
                     .background(Color.White)
+                    .padding(innerPadding),
+                verticalArrangement = Arrangement.SpaceBetween // Ensure button stays visible
             ) {
                 val scrollState = rememberScrollState()
 
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .verticalScroll(scrollState)
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -228,30 +285,35 @@ fun ShoppingListScreen(
                             textAlign = TextAlign.Center
                         )
                     } else {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(LocalConfiguration.current.screenHeightDp.dp * 0.80f)
-                                .padding(16.dp)
-                                .verticalScroll(scrollState),
-                        ) {
-                            shoppingList.forEachIndexed { index, item ->
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 4.dp)
+                        shoppingList.forEachIndexed { index, item ->
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp)
+                            ) {
+                                Checkbox(
+                                    checked = item.done,
+                                    onCheckedChange = {
+                                        viewModel.toggleItemStatus(
+                                            navController,
+                                            index
+                                        )
+                                    }
+                                )
+                                Text(
+                                    text = item.entry,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                IconButton(
+                                    onClick = { viewModel.removeShoppingItem(navController, index) }
                                 ) {
-                                    Checkbox(
-                                        checked = item.done,
-                                        onCheckedChange = {
-                                            viewModel.toggleItemStatus(
-                                                navController,
-                                                index
-                                            )
-                                        }
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.remove),
+                                        contentDescription = "Remove Icon",
+                                        modifier = Modifier.size(18.dp), // Smaller trash icon
+                                        tint = Color.Unspecified
                                     )
-                                    Text(item.entry)
                                 }
                             }
                         }
@@ -259,7 +321,8 @@ fun ShoppingListScreen(
 
                     Row(
                         modifier = Modifier
-                            .fillMaxWidth(),
+                            .fillMaxWidth()
+                            .padding(top = 16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         OutlinedTextField(
@@ -287,6 +350,20 @@ fun ShoppingListScreen(
                             )
                         }
                     }
+                }
+
+                Button(
+                    onClick = { viewModel.removeAllItems(navController) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF58D1E))
+                ) {
+                    Text(
+                        text = "REMOVE ALL",
+                        color = Color.White,
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp)
+                    )
                 }
             }
         }
