@@ -78,17 +78,22 @@ fun App() {
         composable("shoppingList") { ShoppingListScreen(navController) }
 
         composable(
-            route = "listRecipes/{recipeIdList}?isFavorites={isFavorites}",
+            route = "listRecipes/{recipeIdList}?isFavorites={isFavorites}&type={type}",
             arguments = listOf(
                 navArgument("recipeIdList") {type = NavType.StringType},
                 navArgument("isFavorites") {
                     type = NavType.BoolType
                     defaultValue = false
+                },
+                navArgument("type") {
+                    type = NavType.StringType
+                    defaultValue = ""
                 }
             )
         ) { backStackEntry ->
             val recipeIdListJson = backStackEntry.arguments?.getString("recipeIdList")
             val isFavorites = backStackEntry.arguments?.getBoolean("isFavorites") ?: false
+            val type = backStackEntry.arguments?.getString("type") ?: ""
 
             val recipeIdList = recipeIdListJson?.let {
                 gson.fromJson(it, Array<String>::class.java).toList()
@@ -97,7 +102,8 @@ fun App() {
             ListRecipesScreen(
                 navController = navController,
                 recipeIds = recipeIdList,
-                isFavorites = isFavorites
+                isFavorites = isFavorites,
+                type = type
             )
         }
 

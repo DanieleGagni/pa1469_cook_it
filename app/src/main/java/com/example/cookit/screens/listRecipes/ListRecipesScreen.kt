@@ -59,6 +59,59 @@ class ListRecipesViewModel : ViewModel() {
     private val _recipes = MutableStateFlow<List<Recipe>>(emptyList())
     val recipes: StateFlow<List<Recipe>> = _recipes
 
+    fun fetchRecipesByType(type: String) {
+
+        val t = type.lowercase()
+
+        if(t == "all") {
+            viewModelScope.launch {
+                recipesCollection
+                    .get()
+                    .addOnSuccessListener { documents ->
+                        val recipeList = documents.map { document ->
+                            val recipe = document.toObject(Recipe::class.java)
+                            recipe.copy(id = document.id)  // assign recipe.id
+                        }
+
+                        _recipes.value = recipeList
+                        _recipes.value.forEach { recipe ->
+                            Log.d(
+                                "[------------------------- DEBUG]",
+                                "------------------------- ${recipe.title}"
+                            )
+                        }
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.e("ListRecipesViewModel", "Error fetching recipes", exception)
+                    }
+            }
+        } else {
+
+            viewModelScope.launch {
+                recipesCollection
+                    .whereEqualTo("type", t)
+                    .get()
+                    .addOnSuccessListener { documents ->
+                        val recipeList = documents.map { document ->
+                            val recipe = document.toObject(Recipe::class.java)
+                            recipe.copy(id = document.id)  // assign recipe.id
+                        }
+
+                        _recipes.value = recipeList
+                        _recipes.value.forEach { recipe ->
+                            Log.d(
+                                "[------------------------- DEBUG]",
+                                "------------------------- ${recipe.title}"
+                            )
+                        }
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.e("ListRecipesViewModel", "Error fetching recipes", exception)
+                    }
+            }
+        }
+    }
+
     fun fetchRecipesByIds(ids: List<String>) {
 
         if (!ids.isEmpty()) {
@@ -104,13 +157,18 @@ fun ListRecipesScreen(
     navController: NavHostController,
     recipeIds: List<String>,
     isFavorites: Boolean,
+    type: String,
     viewModel: ListRecipesViewModel = viewModel()
 ) {
 
     val recipes by viewModel.recipes.collectAsState()
 
     LaunchedEffect(recipeIds) {
-        viewModel.fetchRecipesByIds(recipeIds)
+        if(type.isNotEmpty()) {
+            viewModel.fetchRecipesByType(type)
+        } else {
+            viewModel.fetchRecipesByIds(recipeIds)
+        }
     }
 
     Scaffold (
@@ -196,6 +254,7 @@ fun ListRecipesScreen(
                             recipe = recipes[index],
                             onClick = {
                                 val recipeJson = Gson().toJson(recipes[index])
+                                Log.d("-------------- RecipeItem", recipeJson)
                                 navController.navigate("showRecipe/$recipeJson")
                             }
                         )
