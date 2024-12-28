@@ -83,7 +83,7 @@ fun NavigationBar(navController: NavHostController) {
         IconButton(
             onClick = {
                 retrieveFavoriteRecipes { favoriteRecipeIds ->
-                    navController.navigate("listRecipes/$favoriteRecipeIds")
+                    navController.navigate("listRecipes/$favoriteRecipeIds?isFavorites=true")
                 }
             }
         ) {

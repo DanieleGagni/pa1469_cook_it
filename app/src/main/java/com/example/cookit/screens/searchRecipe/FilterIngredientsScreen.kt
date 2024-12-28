@@ -112,28 +112,25 @@ fun FilterIngredientsScreen(navController: NavHostController, viewModel: SearchR
                 content = { Icon(imageVector = Icons.Default.Add, contentDescription = "Add Ingredient") }
             )
         }
-    ) { paddingValues ->
+    ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(innerPadding)
                 .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
                 .padding(8.dp)
         ) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                if (ingredients.isEmpty()) {
-                    item {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("No ingredients added", color = Color.Gray)
-                        }
-                    }
-                } else {
+            if(ingredients.isEmpty()) {
+                Text(
+                    text = "No ingredients added",
+                    modifier = Modifier.align(Alignment.Center),
+                    style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray)
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     items(ingredients) { ingredient ->
                         Card(
                             modifier = Modifier.fillMaxWidth(),
