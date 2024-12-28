@@ -1,22 +1,16 @@
 package com.example.cookit.screens.shoppingList
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -41,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -76,42 +69,37 @@ class ShoppingListViewModel : ViewModel() {
             println("User not logged in.")
             navController.navigate("login")
         } else {
-            viewModelScope.launch {
-                db.collection("shoppingLists")
-                    .whereEqualTo("userId", userId)
-                    .get()
-                    .addOnSuccessListener { documents ->
-                        if (documents.isEmpty) {
-                            createEmptyShoppingList(userId)
-                        } else {
-                            val items = documents.flatMap { document ->
-                                val rawItems =
-                                    document.get("items") as? List<Map<String, Any>> ?: emptyList()
-                                rawItems.map {
-                                    ShoppingItem(
-                                        entry = it["entry"] as String,
-                                        done = it["done"] as Boolean
-                                    )
-                                }
-                            }
-                            _shoppingList.value = items
+            db.collection("shoppingLists")
+                .document(userId)
+                .get()
+                .addOnSuccessListener { document ->
+                    if (!document.exists()) {
+                        createEmptyShoppingList(userId)
+                    } else {
+                        val rawItems = document.get("items") as? List<Map<String, Any>> ?: emptyList()
+                        val items = rawItems.map {
+                            ShoppingItem(
+                                entry = it["entry"] as String,
+                                done = it["done"] as Boolean
+                            )
                         }
+                        _shoppingList.value = items
                     }
-                    .addOnFailureListener { e ->
-                        println("Error fetching shopping list: $e")
-                    }
-            }
+                }
+                .addOnFailureListener { e ->
+                    println("Error fetching shopping list: $e")
+                }
         }
     }
 
     private fun createEmptyShoppingList(userId: String) {
         val newShoppingList = hashMapOf(
-            "userId" to userId,
             "items" to emptyList<Map<String, Any>>() // No items initially
         )
 
         db.collection("shoppingLists")
-            .add(newShoppingList)
+            .document(userId)
+            .set(newShoppingList)
             .addOnSuccessListener {
                 println("Created empty shopping list for user: $userId")
                 _shoppingList.value = emptyList() // Reflect empty list in UI
@@ -126,21 +114,18 @@ class ShoppingListViewModel : ViewModel() {
         if (userId == null) {
             println("User not logged in.")
             navController.navigate("login")
+            return
         }
 
         val newItem = ShoppingItem(entry = itemText, done = false)
         _shoppingList.value += newItem
 
-        // Update Firestore (Add item to a specific shopping list)
         db.collection("shoppingLists")
-            .whereEqualTo("userId", userId)
-            .get()
-            .addOnSuccessListener { documents ->
-                documents.firstOrNull()?.reference?.update(
-                    "items",
-                    _shoppingList.value.map { mapOf("entry" to it.entry, "done" to it.done) }
-                )
-            }
+            .document(userId)
+            .update(
+                "items",
+                _shoppingList.value.map { mapOf("entry" to it.entry, "done" to it.done) }
+            )
             .addOnFailureListener { e ->
                 println("Error updating Firestore: $e")
             }
@@ -151,6 +136,7 @@ class ShoppingListViewModel : ViewModel() {
         if (userId == null) {
             println("User not logged in.")
             navController.navigate("login")
+            return
         }
 
         val updatedList = _shoppingList.value.toMutableList().apply {
@@ -158,16 +144,12 @@ class ShoppingListViewModel : ViewModel() {
         }
         _shoppingList.value = updatedList
 
-        // Sync with Firestore
         db.collection("shoppingLists")
-            .whereEqualTo("userId", userId)
-            .get()
-            .addOnSuccessListener { documents ->
-                documents.firstOrNull()?.reference?.update(
-                    "items",
-                    updatedList.map { mapOf("entry" to it.entry, "done" to it.done) }
-                )
-            }
+            .document(userId)
+            .update(
+                "items",
+                updatedList.map { mapOf("entry" to it.entry, "done" to it.done) }
+            )
             .addOnFailureListener { e ->
                 println("Error updating item status in Firestore: $e")
             }
@@ -178,6 +160,7 @@ class ShoppingListViewModel : ViewModel() {
         if (userId == null) {
             println("User not logged in.")
             navController.navigate("login")
+            return
         }
 
         val updatedList = _shoppingList.value.toMutableList().apply {
@@ -185,16 +168,12 @@ class ShoppingListViewModel : ViewModel() {
         }
         _shoppingList.value = updatedList
 
-        // Sync with Firestore
         db.collection("shoppingLists")
-            .whereEqualTo("userId", userId)
-            .get()
-            .addOnSuccessListener { documents ->
-                documents.firstOrNull()?.reference?.update(
-                    "items",
-                    updatedList.map { mapOf("entry" to it.entry, "done" to it.done) }
-                )
-            }
+            .document(userId)
+            .update(
+                "items",
+                updatedList.map { mapOf("entry" to it.entry, "done" to it.done) }
+            )
             .addOnFailureListener { e ->
                 println("Error removing item from Firestore: $e")
             }
@@ -205,22 +184,20 @@ class ShoppingListViewModel : ViewModel() {
         if (userId == null) {
             println("User not logged in.")
             navController.navigate("login")
+            return
         }
 
         _shoppingList.value = emptyList()
 
-        // Sync with Firestore
         db.collection("shoppingLists")
-            .whereEqualTo("userId", userId)
-            .get()
-            .addOnSuccessListener { documents ->
-                documents.firstOrNull()?.reference?.update("items", emptyList<Map<String, Any>>())
-            }
+            .document(userId)
+            .update("items", emptyList<Map<String, Any>>())
             .addOnFailureListener { e ->
                 println("Error clearing shopping list in Firestore: $e")
             }
     }
 }
+
 
 
 @Composable
