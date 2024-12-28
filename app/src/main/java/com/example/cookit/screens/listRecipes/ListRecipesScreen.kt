@@ -303,55 +303,63 @@ fun RecipeItem(
                     )
                 )
 
-                Text(
-                    text = recipe.type,
-                    style = MaterialTheme.typography.bodySmall.copy(color = Color.Gray),
-                    maxLines = 2
-                )
+                Row (
+                    modifier = Modifier
+                        .padding(top = 5.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    when (recipe.type) {
+                        "vegetarian" -> {
+                            Icon(
+                                painter = painterResource(id = R.drawable.vegetarian),
+                                contentDescription = "Vegetarian",
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(25.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                        }
+
+                        "quick" -> {
+                            Icon(
+                                painter = painterResource(id = R.drawable.quick),
+                                contentDescription = "Vegetarian",
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(25.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                        }
+                        "complex"-> {
+                            Icon(
+                                painter = painterResource(id = R.drawable.complex),
+                                contentDescription = "Vegetarian",
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                        }
+
+                        else -> {
+                            Icon(
+                                painter = painterResource(id = R.drawable.other),
+                                contentDescription = "Vegetarian",
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                        }
+                    }
+                    Text(
+                        text = recipe.type,
+                        style = MaterialTheme.typography.bodySmall.copy(color = Color.Gray),
+                        maxLines = 2
+                    )
+                }
 
             }
             Column {
 
-                when (recipe.type) {
-                    "vegetarian" -> {
-                        Icon(
-                            painter = painterResource(id = R.drawable.vegetarian),
-                            contentDescription = "Vegetarian",
-                            tint = Color.Unspecified,
-                            modifier = Modifier.size(40.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                    }
+                //HERE SHOULD GO THE OPTION TO ADD TO FAVOURITES
 
-                    "quick" -> {
-                        Icon(
-                            painter = painterResource(id = R.drawable.quick),
-                            contentDescription = "Vegetarian",
-                            tint = Color.Unspecified,
-                            modifier = Modifier.size(40.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                    }
-                    "complex"-> {
-                        Icon(
-                            painter = painterResource(id = R.drawable.complex),
-                            contentDescription = "Vegetarian",
-                            tint = Color.Unspecified,
-                            modifier = Modifier.size(35.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                    }
-
-                    else -> {
-                        Icon(
-                            painter = painterResource(id = R.drawable.other),
-                            contentDescription = "Vegetarian",
-                            tint = Color.Unspecified,
-                            modifier = Modifier.size(35.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                    }
-                }
             }
         }
     }
