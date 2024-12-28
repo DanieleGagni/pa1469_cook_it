@@ -17,12 +17,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.cookit.ui.theme.CookItTheme
 import com.google.gson.Gson
+import com.example.cookit.screens.components.NavigationBar
 
 class SearchRecipeScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,64 +47,96 @@ fun SearchRecipeScreen(navController: NavHostController, viewModel: SearchRecipe
 
     var text by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
-
     val searchHistory by viewModel.searchHistory.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        SearchBar(
-            modifier = Modifier.fillMaxWidth(),
-            query = text,
-            onQueryChange = {
-                text = it
-            },
-            onSearch = {
-                active = false
-                viewModel.updateSearchHistory(text)
-                viewModel.searchByTitle(navController, text)
-            },
-            active = active,
-            onActiveChange = { active = it },
-            placeholder = {
-                Text(text = "Search Recipe")
-            },
-            leadingIcon = {
-                Icon(imageVector = Icons.Default.Search, contentDescription = "Search Icon")
-            },
-            trailingIcon = {
-                if (active) {
-                    Icon(
-                        modifier = Modifier.clickable {
-                            if (text.isNotEmpty()) {
-                                text = ""
-                            } else {
-                                active = false
-                            }
-                        },
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Close Icon"
-                    )
-                }
-            }
-        ) { }
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-
-            // Display Search History
-            Spacer(modifier = Modifier.height(16.dp))
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+    Scaffold(
+        topBar = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(WindowInsets.statusBars.asPaddingValues())
+                    .padding(top = 8.dp)
             ) {
-                items(searchHistory) { searchItem ->
-                    SearchHistoryItem(navController, searchItem, viewModel)
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(
+                            style = SpanStyle(
+                                color = Color(0xFFF58D1E),
+                                fontWeight = FontWeight.Bold
+                            )
+                        ) {
+                            append("Find ")
+                        }
+                        append("your next recipe")
+                    },
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 25.sp),
+                    color = Color.Black,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        bottomBar = {
+            NavigationBar(navController)
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .padding(WindowInsets.navigationBars.asPaddingValues()),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            SearchBar(
+                modifier = Modifier.fillMaxWidth(),
+                query = text,
+                onQueryChange = {
+                    text = it
+                },
+                onSearch = {
+                    active = false
+                    viewModel.updateSearchHistory(text)
+                    viewModel.searchByTitle(navController, text)
+                },
+                active = active,
+                onActiveChange = { active = it },
+                placeholder = {
+                    Text(text = "Search Recipe")
+                },
+                leadingIcon = {
+                    Icon(imageVector = Icons.Default.Search, contentDescription = "Search Icon")
+                },
+                trailingIcon = {
+                    if (active) {
+                        Icon(
+                            modifier = Modifier.clickable {
+                                if (text.isNotEmpty()) {
+                                    text = ""
+                                } else {
+                                    active = false
+                                }
+                            },
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close Icon"
+                        )
+                    }
+                }
+            ) { }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+
+                // Display Search History
+                Spacer(modifier = Modifier.height(16.dp))
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(searchHistory) { searchItem ->
+                        SearchHistoryItem(navController, searchItem, viewModel)
+                    }
                 }
             }
         }
