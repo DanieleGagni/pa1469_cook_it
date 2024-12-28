@@ -120,37 +120,36 @@ class RecipeViewModel : ViewModel() {
     ) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
-        // Query the shoppingLists collection to find the document for the user
-        db.collection("shoppingLists")
-            .whereEqualTo("userId", userId)
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                val document = querySnapshot.documents.firstOrNull()
-                if (document != null) {
-                    val shoppingListRef = document.reference
+        val shoppingListRef = db.collection("shoppingLists").document(userId)
 
-                    shoppingListRef.get().addOnSuccessListener { documentSnapshot ->
-                        val currentItems = documentSnapshot.get("items") as? List<Map<String, Any>> ?: emptyList()
+        shoppingListRef.get()
+            .addOnSuccessListener { documentSnapshot ->
+                if (documentSnapshot.exists()) {
+                    val currentItems = documentSnapshot.get("items") as? List<Map<String, Any>> ?: emptyList()
 
-                        // Add the new ingredients to the list
-                        val updatedItems = currentItems.toMutableList()
-                        ingredients.forEach { ingredient ->
-                            val newItem = mapOf("done" to false, "entry" to ingredient)
-                            updatedItems.add(newItem)
-                        }
-
-                        // Write the updated list back to Firestore
-                        shoppingListRef.update("items", updatedItems)
-                            .addOnSuccessListener { onSuccess() }
-                            .addOnFailureListener { exception ->
-                                onFailure(exception)
-                            }
-                    }.addOnFailureListener { exception ->
-                        onFailure(exception)
+                    // Add the new ingredients to the list
+                    val updatedItems = currentItems.toMutableList()
+                    ingredients.forEach { ingredient ->
+                        val newItem = mapOf("done" to false, "entry" to ingredient)
+                        updatedItems.add(newItem)
                     }
+
+                    // Write the updated list back to Firestore
+                    shoppingListRef.update("items", updatedItems)
+                        .addOnSuccessListener { onSuccess() }
+                        .addOnFailureListener { exception ->
+                            onFailure(exception)
+                        }
                 } else {
-                    // No document found for the user
-                    onFailure(Exception("No shopping list found for userId: $userId"))
+                    // No document exists for the user, create one with the ingredients
+                    val initialItems = ingredients.map { ingredient ->
+                        mapOf("done" to false, "entry" to ingredient)
+                    }
+                    shoppingListRef.set(mapOf("items" to initialItems))
+                        .addOnSuccessListener { onSuccess() }
+                        .addOnFailureListener { exception ->
+                            onFailure(exception)
+                        }
                 }
             }
             .addOnFailureListener { exception ->
