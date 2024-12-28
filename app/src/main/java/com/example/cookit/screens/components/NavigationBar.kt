@@ -1,5 +1,6 @@
 package com.example.cookit.screens.components
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -82,7 +83,7 @@ fun NavigationBar(navController: NavHostController) {
         IconButton(
             onClick = {
                 retrieveFavoriteRecipes { favoriteRecipeIds ->
-                    navController.navigate("listRecipes?ids=${favoriteRecipeIds.joinToString(",")}")
+                    navController.navigate("listRecipes/$favoriteRecipeIds")
                 }
             }
         ) {
@@ -180,6 +181,7 @@ fun NavigationBar(navController: NavHostController) {
 
 fun retrieveFavoriteRecipes(onResult: (List<String>) -> Unit) {
     val user = FirebaseAuth.getInstance().currentUser
+
     if (user != null) {
         val userId = user.uid
         val db = FirebaseFirestore.getInstance()
