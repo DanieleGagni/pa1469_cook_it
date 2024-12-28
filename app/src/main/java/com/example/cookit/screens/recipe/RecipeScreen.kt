@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -218,42 +219,90 @@ fun RecipeScreen(
                     .padding(innerPadding)
                     .background(Color.White)
             ) {
+
                 val scrollState = rememberScrollState()
 
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .verticalScroll(scrollState)
                         .padding(16.dp)
                 ) {
-                    // Recipe title
-                    Text(
-                        text = buildAnnotatedString {
-                            withStyle(
-                                style = SpanStyle(
-                                    color = Color(0xFFF58D1E),
-                                    fontWeight = FontWeight.Bold
-                                )
-                            ) {
-                                append(recipe.title)
-                            }
-                        },
-                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 30.sp),
-                        color = Color.Black,
-                    )
 
-                    // Recipe content
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(screenHeight * 0.75f)
-                            .padding(top = 16.dp)
-                            .border(
-                                width = 2.dp,
-                                color = Color.Green,
-                                shape = RoundedCornerShape(8.dp)
-                            ),
+                            .weight(1f) // Use weight to allow the scrollable content to take available space
+                            .verticalScroll(rememberScrollState())
                     ) {
+
+                        // Category Icon Row
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+
+                            // Recipe title
+                            Text(
+                                text = buildAnnotatedString {
+                                    withStyle(
+                                        style = SpanStyle(
+                                            color = Color(0xFFF58D1E),
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    ) {
+                                        append(recipe.title)
+                                    }
+                                },
+                                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 30.sp),
+                                color = Color.Black,
+                                modifier = Modifier.weight(1f)
+                            )
+                            when (recipe.type) {
+                                "vegetarian" -> {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.vegetarian),
+                                        contentDescription = "Vegetarian",
+                                        tint = Color.Unspecified,
+                                        modifier = Modifier.size(40.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                }
+
+                                "quick" -> {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.quick),
+                                        contentDescription = "Vegetarian",
+                                        tint = Color.Unspecified,
+                                        modifier = Modifier.size(40.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                }
+                                "complex"-> {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.complex),
+                                        contentDescription = "Vegetarian",
+                                        tint = Color.Unspecified,
+                                        modifier = Modifier.size(35.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                }
+
+                                else -> {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.other),
+                                        contentDescription = "Vegetarian",
+                                        tint = Color.Unspecified,
+                                        modifier = Modifier.size(35.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                }
+                            }
+                        }
+
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
                         // Ingredients section
                         Text(
                             text = "INGREDIENTS",
@@ -292,11 +341,13 @@ fun RecipeScreen(
                         }
                     }
 
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     // Actions Row
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 20.dp),
+                            .padding(bottom = 10.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
@@ -350,6 +401,7 @@ fun RecipeScreen(
                         }
                     }
                 }
+
             }
         }
     )

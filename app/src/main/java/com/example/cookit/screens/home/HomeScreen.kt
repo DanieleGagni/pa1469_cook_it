@@ -133,7 +133,7 @@ fun HomeScreen(navController: NavHostController) {
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 16.dp)
-                        .weight(1f) // Asegurar que ocupe el espacio restante
+                        .weight(1f)
                 ) {
                     val categoryImages = mapOf(
                         "VEGETARIAN" to R.drawable.ic_category_vegetarian,
@@ -157,6 +157,7 @@ fun HomeScreen(navController: NavHostController) {
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .background(Color.White)
+                                    .padding(8.dp)
                             ) {
                                 val imageRes = categoryImages[category] ?: R.drawable.ic_category_add
                                 Image(
@@ -167,18 +168,64 @@ fun HomeScreen(navController: NavHostController) {
                                         .height(120.dp),
                                     contentScale = ContentScale.Crop
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = category,
+
+                                Row(
                                     modifier = Modifier
-                                        .padding(8.dp)
-                                        .align(Alignment.CenterHorizontally),
-                                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp)
-                                )
+                                        .fillMaxWidth()
+                                        .padding(top = 8.dp),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    when (category) {
+                                        "VEGETARIAN" -> {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.vegetarian),
+                                                contentDescription = "Vegetarian",
+                                                tint = Color.Unspecified,
+                                                modifier = Modifier.size(40.dp)
+                                            )
+                                        }
+                                        "QUICK" -> {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.quick),
+                                                contentDescription = "Quick",
+                                                tint = Color.Unspecified,
+                                                modifier = Modifier.size(40.dp)
+                                            )
+                                        }
+                                        "COMPLEX" -> {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.complex),
+                                                contentDescription = "Complex",
+                                                tint = Color.Unspecified,
+                                                modifier = Modifier.size(35.dp)
+                                            )
+                                        }
+                                        else -> {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.other),
+                                                contentDescription = "Other",
+                                                tint = Color.Unspecified,
+                                                modifier = Modifier.size(35.dp)
+                                            )
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.width(8.dp))
+
+                                    Text(
+                                        text = category,
+                                        modifier = Modifier
+                                            .align(Alignment.CenterVertically), // Vertically align with icon
+                                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp)
+                                    )
+                                }
                             }
                         }
                     }
                 }
+
+
             }
         }
     )
