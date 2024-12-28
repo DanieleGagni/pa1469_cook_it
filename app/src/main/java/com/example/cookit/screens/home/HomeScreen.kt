@@ -34,10 +34,12 @@ fun HomeScreen(navController: NavHostController) {
 
     fun handleSearchByCategory() {
         // Navigate to the search by category screen
+        navController.navigate("searchRecipes")
     }
 
     fun handleSearchByIngredients() {
         // Navigate to the search by ingredients screen
+        navController.navigate("filterIngredients")
     }
 
     Scaffold(

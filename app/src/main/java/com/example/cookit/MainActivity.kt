@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -20,6 +21,11 @@ import androidx.navigation.navArgument
 import com.example.cookit.screens.listRecipes.ListRecipesScreen
 import com.example.cookit.screens.components.Recipe
 import com.example.cookit.screens.editRecipe.EditRecipeScreen
+import com.example.cookit.screens.searchRecipe.FilterIngredientsScreen
+import com.example.cookit.screens.searchRecipe.SearchRecipeScreen
+//import com.example.cookit.screens.searchRecipe.FilterIngredientsScreen
+//import com.example.cookit.screens.searchRecipe.SearchRecipeScreen
+import com.example.cookit.screens.searchRecipe.SearchRecipeViewModel
 import com.google.gson.Gson
 
 class MainActivity : ComponentActivity() {
@@ -38,6 +44,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun App() {
     val navController = rememberNavController()
+    val gson = Gson()
 
     NavHost(
         navController = navController,
@@ -46,24 +53,37 @@ fun App() {
         composable("logIn") { LogInScreen(navController) }
         composable("signUp") { SignUpScreen(navController) }
         composable("home") { HomeScreen(navController) }
+
+        composable("searchRecipes") {
+            val recipeViewModel: SearchRecipeViewModel = viewModel()
+            SearchRecipeScreen(navController, recipeViewModel)
+        }
+
+        composable("filterIngredients") {
+            val recipeViewModel: SearchRecipeViewModel = viewModel()
+            FilterIngredientsScreen(navController, recipeViewModel)
+        }
+
         composable("createRecipe") { CreateRecipeScreen(navController) }
+
         composable(
-            route = "showRecipe/{recipe}",
-            arguments = listOf(navArgument("recipe") { type = NavType.StringType })
+            route = "showRecipe/{recipeJson}",
+            arguments = listOf(navArgument("recipeJson") { type = NavType.StringType })
         ) { backStackEntry ->
-            val recipeJson = backStackEntry.arguments?.getString("recipe")
+            val recipeJson = backStackEntry.arguments?.getString("recipeJson")
             val recipe = Gson().fromJson(recipeJson, Recipe::class.java)
             RecipeScreen(navController, recipe)
         }
+
         composable("shoppingList") { ShoppingListScreen(navController) }
 
-        composable(
-            route = "listRecipes?ids={ids}",
-            arguments = listOf(navArgument("ids") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val ids = backStackEntry.arguments?.getString("ids")
-            val recipeIds = ids?.split(",") ?: emptyList()
-            ListRecipesScreen(navController, recipeIds)
+        composable("listRecipes/{recipeIdList}") { backStackEntry ->
+            val recipeIdListJson = backStackEntry.arguments?.getString("recipeIdList")
+            val recipeIdList = recipeIdListJson?.let {
+                gson.fromJson(it, Array<String>::class.java).toList()
+            } ?: emptyList()
+
+            ListRecipesScreen(navController, recipeIdList)
         }
 
         composable("editRecipe/{recipeId}") { backStackEntry ->
