@@ -40,7 +40,6 @@ class SearchRecipeViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-
     fun searchByTitle(navController: NavHostController, title: String) {
         if(title.isEmpty()) {
             return

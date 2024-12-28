@@ -8,9 +8,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -25,7 +28,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
@@ -46,11 +53,64 @@ import kotlinx.coroutines.launch
 // ViewModel for the ListRecipes screen
 class ListRecipesViewModel : ViewModel() {
 
-    private val db = com.google.firebase.ktx.Firebase.firestore
+    private val db = Firebase.firestore
     private val recipesCollection = db.collection("recipes")
 
     private val _recipes = MutableStateFlow<List<Recipe>>(emptyList())
     val recipes: StateFlow<List<Recipe>> = _recipes
+
+    fun fetchRecipesByType(type: String) {
+
+        val t = type.lowercase()
+
+        if(t == "all") {
+            viewModelScope.launch {
+                recipesCollection
+                    .get()
+                    .addOnSuccessListener { documents ->
+                        val recipeList = documents.map { document ->
+                            val recipe = document.toObject(Recipe::class.java)
+                            recipe.copy(id = document.id)  // assign recipe.id
+                        }
+
+                        _recipes.value = recipeList
+                        _recipes.value.forEach { recipe ->
+                            Log.d(
+                                "[------------------------- DEBUG]",
+                                "------------------------- ${recipe.title}"
+                            )
+                        }
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.e("ListRecipesViewModel", "Error fetching recipes", exception)
+                    }
+            }
+        } else {
+
+            viewModelScope.launch {
+                recipesCollection
+                    .whereEqualTo("type", t)
+                    .get()
+                    .addOnSuccessListener { documents ->
+                        val recipeList = documents.map { document ->
+                            val recipe = document.toObject(Recipe::class.java)
+                            recipe.copy(id = document.id)  // assign recipe.id
+                        }
+
+                        _recipes.value = recipeList
+                        _recipes.value.forEach { recipe ->
+                            Log.d(
+                                "[------------------------- DEBUG]",
+                                "------------------------- ${recipe.title}"
+                            )
+                        }
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.e("ListRecipesViewModel", "Error fetching recipes", exception)
+                    }
+            }
+        }
+    }
 
     fun fetchRecipesByIds(ids: List<String>) {
 
@@ -96,57 +156,117 @@ class ListRecipesViewModel : ViewModel() {
 fun ListRecipesScreen(
     navController: NavHostController,
     recipeIds: List<String>,
+    isFavorites: Boolean,
+    type: String,
     viewModel: ListRecipesViewModel = viewModel()
 ) {
 
     val recipes by viewModel.recipes.collectAsState()
 
     LaunchedEffect(recipeIds) {
-        viewModel.fetchRecipesByIds(recipeIds)
+        if(type.isNotEmpty()) {
+            viewModel.fetchRecipesByType(type)
+        } else {
+            viewModel.fetchRecipesByIds(recipeIds)
+        }
     }
 
     Scaffold (
         modifier = Modifier.fillMaxSize(),
-        bottomBar = {
-            // TODO
-            // NavigationBar(navController) // Barra de navegación inferior
-        },
-        content = { innerPadding ->
+        topBar = {
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
+                    .fillMaxWidth()
+                    .padding(WindowInsets.statusBars.asPaddingValues())
+                    .padding(top = 8.dp)
             ) {
-                if (recipes.isEmpty()) {
+                if(isFavorites) {
                     Text(
-                        text = "No recipes found. ",
+                        text = buildAnnotatedString {
+                            withStyle(
+                                style = SpanStyle(
+                                    color = Color(0xFFF58D1E),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            ) {
+                                append("Your ")
+                            }
+                            append("favorites")
+                        },
+                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 25.sp),
+                        color = Color.Black,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                } else {
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(
+                                style = SpanStyle(
+                                    color = Color(0xFFF58D1E),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            ) {
+                                append("Your ")
+                            }
+                            append("results")
+                        },
+                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 25.sp),
+                        color = Color.Black,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        },
+        bottomBar = {
+            NavigationBar(navController)
+        },
+
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            if (recipes.isEmpty()) {
+
+                if(isFavorites) {
+                    Text(
+                        text = "Save recipes you love and find them here",
                         modifier = Modifier.align(Alignment.Center),
                         style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray)
                     )
                 } else {
-                    LazyColumn(
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(recipes.size) { index ->
-                            RecipeItem(
-                                recipe = recipes[index],
-                                onClick = {
-                                    // Navigate to the recipe details screen
-                                    val recipeJson = Gson().toJson(recipes[index])
-                                    navController.navigate("showRecipe/$recipeJson")
-                                }
-                            )
-                        }
+                    Text(
+                        text = "No recipes found.",
+                        modifier = Modifier.align(Alignment.Center),
+                        style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray)
+                    )
+                }
+            } else {
+                LazyColumn(
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(recipes.size) { index ->
+                        RecipeItem(
+                            recipe = recipes[index],
+                            onClick = {
+                                val recipeJson = Gson().toJson(recipes[index])
+                                Log.d("-------------- RecipeItem", recipeJson)
+                                navController.navigate("showRecipe/$recipeJson")
+                            }
+                        )
                     }
                 }
             }
         }
-    )
+    }
 }
 
+
 // TODO recipe should display title, type and estimated time
-// TODO onClick -> ShowRecipeScreen
 @Composable
 fun RecipeItem(
     recipe: Recipe,

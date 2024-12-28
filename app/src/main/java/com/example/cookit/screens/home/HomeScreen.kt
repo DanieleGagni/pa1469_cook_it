@@ -1,5 +1,6 @@
 package com.example.cookit.screens.home
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -108,7 +109,7 @@ fun HomeScreen(navController: NavHostController) {
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp)) // Espacio entre botones
+                Spacer(modifier = Modifier.height(5.dp)) // Espacio entre botones
 
                 // Botón "Search by Ingredients"
                 Button(
@@ -147,7 +148,7 @@ fun HomeScreen(navController: NavHostController) {
                             modifier = Modifier
                                 .padding(8.dp)
                                 .clickable {
-                                    navController.navigate("listRecipes")
+                                    navController.navigate("listRecipes/[]?type=${category}")
                                 }
                                 .fillMaxWidth(),
                             elevation = CardDefaults.cardElevation(4.dp),
