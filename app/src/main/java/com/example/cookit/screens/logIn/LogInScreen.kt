@@ -39,7 +39,6 @@ data class LoginUiState(
 class LoginViewModel : ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
-    // UI State
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> get() = _uiState
 
@@ -61,7 +60,9 @@ class LoginViewModel : ViewModel() {
         auth.signInWithEmailAndPassword(username, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    navController.navigate("home")
+                    navController.navigate("home") {
+                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                    }
                 } else {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
