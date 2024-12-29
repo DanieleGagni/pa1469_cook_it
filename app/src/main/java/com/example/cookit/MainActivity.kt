@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -26,6 +27,7 @@ import com.example.cookit.screens.searchRecipe.SearchRecipeScreen
 //import com.example.cookit.screens.searchRecipe.FilterIngredientsScreen
 //import com.example.cookit.screens.searchRecipe.SearchRecipeScreen
 import com.example.cookit.screens.searchRecipe.SearchRecipeViewModel
+import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 
 class MainActivity : ComponentActivity() {
@@ -44,7 +46,21 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun App() {
     val navController = rememberNavController()
+    val firebaseAuth = FirebaseAuth.getInstance()
     val gson = Gson()
+
+    LaunchedEffect(Unit) {
+        val currentUser = firebaseAuth.currentUser
+        if (currentUser != null) {
+            navController.navigate("home") {
+                popUpTo("logIn") { inclusive = true }
+            }
+        } else {
+            navController.navigate("logIn") {
+                popUpTo("home") { inclusive = true }
+            }
+        }
+    }
 
     NavHost(
         navController = navController,
