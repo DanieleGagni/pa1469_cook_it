@@ -99,7 +99,9 @@ class SignUpViewModel : ViewModel() {
                             }
                             it.updateProfile(profileUpdates).addOnCompleteListener { updateTask ->
                                 if (updateTask.isSuccessful) {
-                                    navController.navigate("home")
+                                    navController.navigate("home") {
+                                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                    }
                                 } else {
                                     _uiState.value = _uiState.value.copy(
                                         isLoading = false,
