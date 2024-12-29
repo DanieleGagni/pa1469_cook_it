@@ -4,6 +4,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,6 +24,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -416,6 +419,7 @@ fun CreateRecipeScreen(
     val steps = remember { mutableStateListOf<String>() }
 
     val keyboardController = LocalSoftwareKeyboardController.current
+    val typeOptions = listOf("vegetarian", "quick", "complex", "other")
 
 
     LazyColumn(
@@ -489,21 +493,50 @@ fun CreateRecipeScreen(
                     color = Color.Black,
                     modifier = Modifier.padding(start = 16.dp)
                 )
-                TextField(
+                var expanded by remember { mutableStateOf(false) }
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
-                    value = type,
-                    onValueChange = { type = it },
-                    label = { Text(text = "Enter Type") },
-                    maxLines = 1,
-                    singleLine = true,
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            keyboardController?.hide()
-                        }
+                        .padding(16.dp)
+                        .background(Color.White, shape = RoundedCornerShape(8.dp))
+                        .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                        .clickable { expanded = true }
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        text = if (type.isBlank()) "Select Type" else type,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp)
                     )
-                )
+                }
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    typeOptions.forEach { option ->
+                        DropdownMenuItem(
+                            text = { Text(text = option) },
+                            onClick = {
+                                type = option
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+//                TextField(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(16.dp),
+//                    value = type,
+//                    onValueChange = { type = it },
+//                    label = { Text(text = "Enter Type") },
+//                    maxLines = 1,
+//                    singleLine = true,
+//                    keyboardActions = KeyboardActions(
+//                        onDone = {
+//                            keyboardController?.hide()
+//                        }
+//                    )
+//                )
             }
         }
 
