@@ -109,7 +109,7 @@ fun NavigationBar(navController: NavHostController) {
                     onClick = {
                         isMenuExpanded = false
                         fetchUserCreatedRecipes { recipeIds ->
-                            navController.navigate("listRecipes?ids=${recipeIds.joinToString(",")}")
+                            navController.navigate("listRecipes/$recipeIds")
                         }
                     }
                 )
