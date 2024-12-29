@@ -48,6 +48,7 @@ import com.example.cookit.R
 import com.example.cookit.screens.components.NavigationBar
 import com.example.cookit.screens.components.Recipe
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.gson.Gson
@@ -61,9 +62,13 @@ class ListRecipesViewModel : ViewModel() {
 
     private val db = Firebase.firestore
     private val recipesCollection = db.collection("recipes")
+    private val favoritesCollection = db.collection("favorites")
 
     private val _recipes = MutableStateFlow<List<Recipe>>(emptyList())
     val recipes: StateFlow<List<Recipe>> = _recipes
+
+    private val _favoriteStatuses = MutableStateFlow<Map<String, Boolean>>(emptyMap())
+    val favoriteStatuses: StateFlow<Map<String, Boolean>> = _favoriteStatuses
 
     fun fetchRecipesByType(type: String) {
 
@@ -86,6 +91,7 @@ class ListRecipesViewModel : ViewModel() {
                                 "------------------------- ${recipe.title}"
                             )
                         }
+                        fetchFavoriteStatuses()
                     }
                     .addOnFailureListener { exception ->
                         Log.e("ListRecipesViewModel", "Error fetching recipes", exception)
@@ -110,6 +116,7 @@ class ListRecipesViewModel : ViewModel() {
                                 "------------------------- ${recipe.title}"
                             )
                         }
+                        fetchFavoriteStatuses()
                     }
                     .addOnFailureListener { exception ->
                         Log.e("ListRecipesViewModel", "Error fetching recipes", exception)
@@ -147,6 +154,7 @@ class ListRecipesViewModel : ViewModel() {
 
                             // Update the Flow with the complete list
                             _recipes.value = allRecipes
+                            fetchFavoriteStatuses()
                         }
                         .addOnFailureListener { exception ->
                             Log.e("ListRecipesViewModel", "Error fetching recipes", exception)
@@ -154,6 +162,17 @@ class ListRecipesViewModel : ViewModel() {
                 }
             }
         }
+    }
+
+    fun fetchFavoriteStatuses() {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        favoritesCollection.document(userId).get()
+            .addOnSuccessListener { document ->
+                val favoriteIds = document.get("recipes") as? List<String> ?: emptyList()
+                val favoriteMap = favoriteIds.associateWith { true }
+                _favoriteStatuses.value = favoriteMap
+            }
+            .addOnFailureListener { it.printStackTrace() }
     }
 
 }
@@ -168,6 +187,7 @@ fun ListRecipesScreen(
 ) {
 
     val recipes by viewModel.recipes.collectAsState()
+    val favoriteStatuses by viewModel.favoriteStatuses.collectAsState()
 
     LaunchedEffect(recipeIds) {
         if(type.isNotEmpty()) {
@@ -258,6 +278,7 @@ fun ListRecipesScreen(
                     items(recipes.size) { index ->
                         RecipeItem(
                             recipe = recipes[index],
+                            isFavorite = favoriteStatuses[recipes[index].id] == true,
                             onClick = {
                                 val recipeJson = Gson().toJson(recipes[index])
                                 Log.d("-------------- RecipeItem", recipeJson)
@@ -276,6 +297,7 @@ fun ListRecipesScreen(
 @Composable
 fun RecipeItem(
     recipe: Recipe,
+    isFavorite: Boolean,
     onClick: () -> Unit
 ) {
     Card(
@@ -357,9 +379,17 @@ fun RecipeItem(
 
             }
             Column {
-
                 //HERE SHOULD GO THE OPTION TO ADD TO FAVOURITES
-
+                Icon(
+                    painter =
+                    if (isFavorite)
+                        painterResource(id = R.drawable.ic_favorite)
+                    else
+                        painterResource(id = R.drawable.ic_favourite_outlined),
+                    contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+                    tint = Color.Unspecified,
+                    modifier = Modifier.size(30.dp)
+                )
             }
         }
     }
