@@ -522,21 +522,6 @@ fun CreateRecipeScreen(
                         )
                     }
                 }
-//                TextField(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(16.dp),
-//                    value = type,
-//                    onValueChange = { type = it },
-//                    label = { Text(text = "Enter Type") },
-//                    maxLines = 1,
-//                    singleLine = true,
-//                    keyboardActions = KeyboardActions(
-//                        onDone = {
-//                            keyboardController?.hide()
-//                        }
-//                    )
-//                )
             }
         }
 
