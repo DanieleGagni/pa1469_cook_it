@@ -28,6 +28,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldColors
@@ -60,6 +61,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.cookit.screens.components.Recipe
 import com.example.cookit.screens.logIn.LoginUiState
 import com.example.cookit.screens.logIn.LoginViewModel
+import com.example.cookit.ui.theme.darkOrange
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -478,6 +480,10 @@ fun CreateRecipeScreen(
                         onDone = {
                             keyboardController?.hide()
                         }
+                    ),
+                    shape = RoundedCornerShape(25.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = darkOrange
                     )
                 )
             }

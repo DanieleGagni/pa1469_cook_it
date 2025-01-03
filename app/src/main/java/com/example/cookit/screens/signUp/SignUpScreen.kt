@@ -22,7 +22,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import com.example.cookit.R
+import com.example.cookit.ui.theme.darkOrange
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.userProfileChangeRequest
 
@@ -226,7 +228,11 @@ fun SignUpScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp),
-                        enabled = !uiState.isLoading
+                        enabled = !uiState.isLoading,
+                        colors = ButtonDefaults.filledTonalButtonColors(
+                            containerColor = darkOrange,
+                            contentColor = Color.White
+                        )
                     ) {
                         if (uiState.isLoading) {
                             CircularProgressIndicator(
@@ -234,7 +240,10 @@ fun SignUpScreen(
                                 modifier = Modifier.size(16.dp)
                             )
                         } else {
-                            Text("Create Account")
+                            Text(
+                                text = "Create Account",
+                                style = MaterialTheme.typography.labelLarge
+                            )
                         }
                     }
 
@@ -271,9 +280,10 @@ fun SignUpScreen(
                                 Box(contentAlignment = Alignment.Center) {
                                     Text(
                                         text = "Log In",
+                                        //style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                                         modifier = Modifier.padding(8.dp),
-                                        color = Color.Blue,
-                                        fontSize = 16.sp
+                                        color = darkOrange
                                     )
                                 }
                             }
