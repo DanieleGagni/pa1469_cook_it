@@ -1,6 +1,7 @@
 package com.example.cookit.screens.searchRecipe
 
 import android.app.Application
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,8 +22,6 @@ class SearchRecipeViewModel(application: Application) : AndroidViewModel(applica
     private val db = Firebase.firestore
     private val recipesCollection = db.collection("recipes")
 
-    private val gson = Gson()
-
     private val _searchHistory = MutableStateFlow<List<String>>(emptyList())
     val searchHistory: StateFlow<List<String>> get() = _searchHistory
 
@@ -38,6 +37,35 @@ class SearchRecipeViewModel(application: Application) : AndroidViewModel(applica
                 (listOf(text) + currentList).take(10)
             }
         }
+    }
+
+    // extract meaningful words from user input query
+    private fun extractKeywords(title: String): List<String> {
+
+        val TITLE_STOP_WORDS = setOf(
+            "a", "an", "and", "at", "by", "for", "from", "in", "into", "of",
+            "on", "or", "the", "to", "with", "your", "my", "our", "their", "this",
+            "that", "these", "those", "over", "under", "around", "inside", "outside",
+            "through", "onto", "off", "how", "make", "recipe", "easy", "quick",
+            "best", "delicious", "simple", "perfect", "classic", "homemade",
+            "ultimate", "basic", "favorite", "authentic"
+        )
+
+        // \b([A-Za-z]+)\b --> matches only alphabetic characters
+        val wordPattern = "\\b([A-Za-z]+)\\b".toRegex()
+
+        val  extractedKeywords =  wordPattern.findAll(title)
+            .map { it.groupValues[1] } //extracts ONLY the captured word group
+            .map { it.lowercase() }
+            .filter { it !in TITLE_STOP_WORDS }
+            .filter { it.length != 1}
+            .toList()
+
+        extractedKeywords.forEach { keyword ->
+            Log.d("[------------------------- DEBUG ]", "------------------------- $keyword")
+        }
+
+        return extractedKeywords
     }
 
     fun searchByTitle(navController: NavHostController, title: String) {
@@ -65,7 +93,7 @@ class SearchRecipeViewModel(application: Application) : AndroidViewModel(applica
                                 }
 
                                 _recipeIds.value = recipeIds
-                                val recipeIdsJson = gson.toJson(recipeIds) // serialize
+                                val recipeIdsJson = Uri.encode(Gson().toJson(recipeIds)) // serialize
                                 Log.d("[------------------------- DEBUG]", "Recipe IDs JSON: $recipeIdsJson")
 
                                 navController.navigate("listRecipes/$recipeIdsJson")
@@ -83,7 +111,6 @@ class SearchRecipeViewModel(application: Application) : AndroidViewModel(applica
         }
 
     }
-
 
     fun addIngredient(ingredient: String) {
         _ingredients.update { currentList ->
@@ -122,7 +149,7 @@ class SearchRecipeViewModel(application: Application) : AndroidViewModel(applica
                         }
 
                         _recipeIds.value = recipeIds
-                        val recipeIdsJson = gson.toJson(recipeIds) // serialize
+                        val recipeIdsJson = Uri.encode(Gson().toJson(recipeIds)) // serialize
                         Log.d("[------------------------- DEBUG]", "Recipe IDs JSON: $recipeIdsJson")
 
                         navController.navigate("listRecipes/$recipeIdsJson")
@@ -138,34 +165,9 @@ class SearchRecipeViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    // extract meaningful words from user input query
-    private fun extractKeywords(title: String): List<String> {
-
-        val TITLE_STOP_WORDS = setOf(
-            "a", "an", "and", "as", "at", "by", "for", "from", "in", "into", "of",
-            "on", "or", "the", "to", "with", "your", "my", "our", "their", "this",
-            "that", "these", "those", "over", "under", "around", "up", "down", "out",
-            "inside", "outside", "through", "onto", "off"
-        )
-
-        // \b([A-Za-z]+)\b --> matches only alphabetic characters
-        val wordPattern = "\\b([A-Za-z]+)\\b".toRegex()
-
-        val  extractedKeywords =  wordPattern.findAll(title)
-            .map { it.groupValues[1] } //extracts ONLY the captured word group
-            .map { it.lowercase() }
-            .filter { it !in TITLE_STOP_WORDS }
-            .toList()
-
-        extractedKeywords.forEach { keyword ->
-            Log.d("[------------------------- DEBUG]", "------------------------- $keyword")
-        }
-
-        return extractedKeywords
-    }
 
     // ======================================================================================================================
-
+    // TODO remove
     fun storeRecipesInFirebase() {
 
         Log.d("[------------------------- DEBUG]", "------------------------------ INIZIO")
