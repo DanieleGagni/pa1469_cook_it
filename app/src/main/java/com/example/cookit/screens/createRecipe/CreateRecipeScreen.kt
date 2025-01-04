@@ -187,15 +187,6 @@ class CreateRecipeViewModel : ViewModel() {
             "liter",
             "tsp",
             "tbsp",
-            "flour",
-            "salt",
-            "pepper",
-            "oil",
-            "water",
-            "sugar",
-            "butter",
-            "cheese",
-            "egg"
         )
 
 
