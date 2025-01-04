@@ -103,7 +103,7 @@ fun HomeScreen(navController: NavHostController) {
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF58D1E)) // Set the background color
                 ) {
                     Text(
-                        text = "Search by Category",
+                        text = "Search by Name",
                         style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
                         color = Color.White
                     )

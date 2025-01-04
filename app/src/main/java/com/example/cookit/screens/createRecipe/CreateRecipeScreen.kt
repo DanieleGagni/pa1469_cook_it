@@ -1,5 +1,6 @@
 package com.example.cookit.screens.createRecipe
 
+
 import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.background
@@ -69,29 +70,36 @@ import kotlinx.coroutines.flow.StateFlow
 import java.util.UUID
 import kotlin.math.truncate
 
+
 class CreateRecipeViewModel : ViewModel() {
+
 
     private val db = Firebase.firestore
     private val recipesCollection = db.collection("recipes")
 
+
     fun addRecipe(recipe: Recipe) {
         val id = UUID.randomUUID().toString()
         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+
 
         if (currentUserId == null) {
             Log.e("[ERROR]", "User is not authenticated.")
             return
         }
 
+
         val updatedRecipe = recipe
             .copy(
                 id = id,
                 createdBy = currentUserId
             )
-            .withTitleKeywords( extractTitleKeywords(recipe.title) )
-            .withIngredientsKeywords( extractIngredientsKeywords(recipe.ingredients) )
+            .withTitleKeywords(extractTitleKeywords(recipe.title))
+            .withIngredientsKeywords(extractIngredientsKeywords(recipe.ingredients))
+
 
         // TODO: recipe.id is not initialized
+
 
         recipesCollection
             .document(id)
@@ -102,15 +110,21 @@ class CreateRecipeViewModel : ViewModel() {
                 //Log.d("[------------------------- DEBUG]", "Recipe added with ID: ${documentReference.id}")
             }
             .addOnFailureListener { e ->
-                Log.e("[------------------------- DEBUG]", "Error adding recipe '${updatedRecipe.title}': ${e.message}")
+                Log.e(
+                    "[------------------------- DEBUG]",
+                    "Error adding recipe '${updatedRecipe.title}': ${e.message}"
+                )
             }
     }
+
 
     // extract keywords from recipe title
     private fun extractTitleKeywords(title: String): List<String> {
 
+
         // \b([A-Za-z]+)\b --> matches only alphabetic characters
         val wordPattern = "\\b([A-Za-z]+)\\b".toRegex()
+
 
         val STOP_WORDS = setOf(
             "a", "an", "and", "as", "at", "by", "for", "from", "in", "into", "of",
@@ -119,39 +133,84 @@ class CreateRecipeViewModel : ViewModel() {
             "inside", "outside", "through", "onto", "off"
         )
 
-        val  extractedKeywords =  wordPattern.findAll(title)
+
+        val extractedKeywords = wordPattern.findAll(title)
             .map { it.groupValues[1] } //extracts ONLY the captured word group
             .map { it.lowercase() }
             .filter { it !in STOP_WORDS }
             .toList()
 
+
         extractedKeywords.forEach { keyword ->
             Log.d("[------------------------- DEBUG]", "------------------------- $keyword")
         }
 
+
         return extractedKeywords
     }
 
+
     // extract keywords from ingredients
-    private fun extractIngredientsKeywords(ingredients: List<String>):MutableList<String> {
+    private fun extractIngredientsKeywords(ingredients: List<String>): MutableList<String> {
+
 
         val regex = """(?:\d+\s*[^a-zA-Z]*|\b)([a-zA-Z\s]+?)(?=\b\d*[^a-zA-Z]*$|\b)""".toRegex()
 
+
         val STOP_WORDS = setOf(
-            "cup", "teaspoon", "tablespoon", "small", "medium", "large", "chopped", "diced", "minced", "fresh",
-            "optional", "to", "taste", "and", "or", "any", "half", "cooked", "ounces", "pounds", "g", "mg", "ml",
-            "liter", "kilogram", "gram", "liter", "tsp", "tbsp", "flour", "salt", "pepper", "oil", "water", "sugar",
-            "butter", "cheese", "egg"
+            "cup",
+            "teaspoon",
+            "tablespoon",
+            "small",
+            "medium",
+            "large",
+            "chopped",
+            "diced",
+            "minced",
+            "fresh",
+            "optional",
+            "to",
+            "taste",
+            "and",
+            "or",
+            "any",
+            "half",
+            "cooked",
+            "ounces",
+            "pounds",
+            "g",
+            "mg",
+            "ml",
+            "liter",
+            "kilogram",
+            "gram",
+            "liter",
+            "tsp",
+            "tbsp",
+            "flour",
+            "salt",
+            "pepper",
+            "oil",
+            "water",
+            "sugar",
+            "butter",
+            "cheese",
+            "egg"
         )
 
+
         val allKeywords = mutableListOf<String>()
+
 
         ingredients.forEach { ingredient ->
             val extractedKeywords = mutableListOf<String>()
 
+
             regex.findAll(ingredient).forEach { matchResult ->
 
+
                 val keyword = matchResult.groupValues[1].trim().lowercase()
+
 
                 if (keyword.isNotBlank() && keyword !in STOP_WORDS) {
                     allKeywords.add(keyword)
@@ -159,12 +218,15 @@ class CreateRecipeViewModel : ViewModel() {
             }
         }
 
+
         return allKeywords
     }
+
 
     fun Recipe.withTitleKeywords(titleKeywords: List<String>): Recipe {
         return this.copy(title_keywords = titleKeywords)
     }
+
 
     fun Recipe.withIngredientsKeywords(ingredientsKeywords: List<String>): Recipe {
         return this.copy(ingredients_keywords = ingredientsKeywords)
@@ -172,24 +234,27 @@ class CreateRecipeViewModel : ViewModel() {
 
 
 
+
 }
 
+
 @Composable
-fun AddEditIngredients( ingredients: MutableList<String>) {
+fun AddEditIngredients(ingredients: MutableList<String>) {
     var currentIngredient by remember { mutableStateOf("") }
     var editIndex by remember { mutableStateOf(-1) }
     //val ingredients = remember { mutableStateListOf<String>() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    Column (
+
+    Column(
         horizontalAlignment = Alignment.CenterHorizontally
-    ){
+    ) {
         TextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             value = currentIngredient,
-            onValueChange = { newText -> currentIngredient = newText},
+            onValueChange = { newText -> currentIngredient = newText },
             label = {
                 Text(
                     text = if (editIndex >= 0) "Edit Ingredient" else "Enter Ingredient"
@@ -197,6 +262,15 @@ fun AddEditIngredients( ingredients: MutableList<String>) {
             },
             maxLines = 1,
             singleLine = true,
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel al enfocar
+                unfocusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel sin enfocar
+                disabledContainerColor = Color(0xFFE0E0E0), // Fondo gris si está deshabilitado
+                errorContainerColor = Color(0xFFFFCDD2), // Fondo rojo en caso de error
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                errorIndicatorColor = Color.Transparent
+            ),
             keyboardActions = KeyboardActions(
                 onDone = {
                     if (currentIngredient.isNotBlank()) {
@@ -210,7 +284,8 @@ fun AddEditIngredients( ingredients: MutableList<String>) {
                         keyboardController?.hide()
                     }
                 }
-            )
+            ),
+            shape = RoundedCornerShape(12.dp),
         )
         Column(
             Modifier
@@ -274,6 +349,7 @@ fun AddEditIngredients( ingredients: MutableList<String>) {
     }
 }
 
+
 @Composable
 fun AddEditStepsScreen(steps: MutableList<String>) {
     var currentStep by remember { mutableStateOf("") }
@@ -282,15 +358,16 @@ fun AddEditStepsScreen(steps: MutableList<String>) {
     //val steps = remember { mutableStateListOf<String>() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    Column (
+
+    Column(
         horizontalAlignment = Alignment.CenterHorizontally
-    ){
+    ) {
         TextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             value = currentStep,
-            onValueChange = { newText -> currentStep = newText},
+            onValueChange = { newText -> currentStep = newText },
             label = {
                 Text(
                     text = when {
@@ -302,6 +379,15 @@ fun AddEditStepsScreen(steps: MutableList<String>) {
             },
             maxLines = 1,
             singleLine = true,
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel al enfocar
+                unfocusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel sin enfocar
+                disabledContainerColor = Color(0xFFE0E0E0), // Fondo gris si está deshabilitado
+                errorContainerColor = Color(0xFFFFCDD2), // Fondo rojo en caso de error
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                errorIndicatorColor = Color.Transparent
+            ),
             keyboardActions = KeyboardActions(
                 onDone = {
                     if (currentStep.isNotBlank()) {
@@ -322,7 +408,8 @@ fun AddEditStepsScreen(steps: MutableList<String>) {
                         keyboardController?.hide()
                     }
                 }
-            )
+            ),
+            shape = RoundedCornerShape(12.dp),
         )
         Column(
             Modifier
@@ -338,7 +425,7 @@ fun AddEditStepsScreen(steps: MutableList<String>) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "${index+1}.$step",
+                        text = "${index + 1}.$step",
                         Modifier.weight(1f)
                     )
                     Button(
@@ -406,6 +493,7 @@ fun AddEditStepsScreen(steps: MutableList<String>) {
     }
 }
 
+
 @Composable
 fun CreateRecipeScreen(
     navController: NavHostController,
@@ -418,8 +506,11 @@ fun CreateRecipeScreen(
     val ingredients = remember { mutableStateListOf<String>() }
     val steps = remember { mutableStateListOf<String>() }
 
+
     val keyboardController = LocalSoftwareKeyboardController.current
     val typeOptions = listOf("vegetarian", "quick", "complex", "other")
+
+
 
 
     LazyColumn(
@@ -432,7 +523,8 @@ fun CreateRecipeScreen(
             Spacer(modifier = Modifier.height(20.dp))
         }
 
-        item{
+
+        item {
             Box {
                 Text(
                     text = buildAnnotatedString {
@@ -440,7 +532,8 @@ fun CreateRecipeScreen(
                         withStyle(
                             style = SpanStyle(
                                 color = Color(0xFFF58D1E),
-                                fontWeight = FontWeight.Bold)
+                                fontWeight = FontWeight.Bold
+                            )
                         ) {
                             append(" Recipe")
                         }
@@ -455,6 +548,7 @@ fun CreateRecipeScreen(
             }
         }
 
+
         // TextField to enter the recipe name
         item {
             Spacer(modifier = Modifier.height(20.dp))
@@ -463,7 +557,7 @@ fun CreateRecipeScreen(
                     text = "TITLE",
                     style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
                     color = Color.Black,
-                    modifier = Modifier.padding(start = 16.dp)
+                    modifier = Modifier.padding(start = 15.dp)
                 )
                 TextField(
                     modifier = Modifier
@@ -474,14 +568,26 @@ fun CreateRecipeScreen(
                     label = { Text(text = "Enter Recipe Name") },
                     maxLines = 1,
                     singleLine = true,
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel al enfocar
+                        unfocusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel sin enfocar
+                        disabledContainerColor = Color(0xFFE0E0E0), // Fondo gris si está deshabilitado
+                        errorContainerColor = Color(0xFFFFCDD2), // Fondo rojo en caso de error
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        errorIndicatorColor = Color.Transparent
+                    ),
                     keyboardActions = KeyboardActions(
                         onDone = {
                             keyboardController?.hide()
                         }
-                    )
-                )
+                    ),
+
+                    shape = RoundedCornerShape(12.dp), // Bordes redondeados
+                   )
             }
         }
+
 
         // TextField to enter the type of dish
         item {
@@ -525,6 +631,7 @@ fun CreateRecipeScreen(
             }
         }
 
+
         // TextField to enter estimated time
         item {
             Spacer(modifier = Modifier.height(20.dp))
@@ -540,14 +647,23 @@ fun CreateRecipeScreen(
                         .fillMaxWidth()
                         .padding(16.dp),
                     value = estimatedTime,
-                    onValueChange = {
-                            newValue ->
-                        if(newValue.all { it.isDigit() }) {
+                    onValueChange = { newValue ->
+                        if (newValue.all { it.isDigit() }) {
                             estimatedTime = newValue
-                        } },
+                        }
+                    },
                     label = { Text(text = "Enter Estimated Time (minutes)") },
                     maxLines = 1,
                     singleLine = true,
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel al enfocar
+                        unfocusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel sin enfocar
+                        disabledContainerColor = Color(0xFFE0E0E0), // Fondo gris si está deshabilitado
+                        errorContainerColor = Color(0xFFFFCDD2), // Fondo rojo en caso de error
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        errorIndicatorColor = Color.Transparent
+                    ),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
                     ),
@@ -555,10 +671,12 @@ fun CreateRecipeScreen(
                         onDone = {
                             keyboardController?.hide()
                         }
-                    )
+                    ),
+                    shape = RoundedCornerShape(12.dp),
                 )
             }
         }
+
 
         // TextField to enter how many people it serves
         item {
@@ -575,14 +693,23 @@ fun CreateRecipeScreen(
                         .fillMaxWidth()
                         .padding(16.dp),
                     value = serves,
-                    onValueChange = {
-                            newValue ->
-                        if(newValue.all { it.isDigit() }) {
+                    onValueChange = { newValue ->
+                        if (newValue.all { it.isDigit() }) {
                             serves = newValue
-                        } },
+                        }
+                    },
                     label = { Text(text = "Enter Servings") },
                     maxLines = 1,
                     singleLine = true,
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel al enfocar
+                        unfocusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel sin enfocar
+                        disabledContainerColor = Color(0xFFE0E0E0), // Fondo gris si está deshabilitado
+                        errorContainerColor = Color(0xFFFFCDD2), // Fondo rojo en caso de error
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        errorIndicatorColor = Color.Transparent
+                    ),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
                     ),
@@ -590,10 +717,12 @@ fun CreateRecipeScreen(
                         onDone = {
                             keyboardController?.hide()
                         }
-                    )
+                    ),
+                    shape = RoundedCornerShape(12.dp),
                 )
             }
         }
+
 
         // Add ingredients section
         item {
@@ -623,6 +752,7 @@ fun CreateRecipeScreen(
             }
         }
 
+
         // Add steps section
         item {
             Spacer(modifier = Modifier.height(20.dp))
@@ -646,10 +776,12 @@ fun CreateRecipeScreen(
                     style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
                     color = Color.Black,
                     modifier = Modifier.padding(start = 16.dp)
+
                 )
                 AddEditStepsScreen(steps)
             }
         }
+
 
         // Post Button
         item {
@@ -662,8 +794,10 @@ fun CreateRecipeScreen(
                     ingredients.isNotEmpty() &&
                     steps.isNotEmpty()
 
+
             Button(
                 onClick = {
+
 
                     val recipe = Recipe.create(
                         title = title,
@@ -675,15 +809,28 @@ fun CreateRecipeScreen(
                     )
 
 
-                    Log.d("[------------------------- DEBUG]", "------------------------- ${recipe.title}")
+
+
+                    Log.d(
+                        "[------------------------- DEBUG]",
+                        "------------------------- ${recipe.title}"
+                    )
                     recipe.ingredients.forEach { ingredient ->
-                        Log.d("[------------------------- DEBUG]", "------------------------- $ingredient")
+                        Log.d(
+                            "[------------------------- DEBUG]",
+                            "------------------------- $ingredient"
+                        )
                     }
                     steps.forEach { step ->
-                        Log.d("[------------------------- DEBUG]", "------------------------- $step")
+                        Log.d(
+                            "[------------------------- DEBUG]",
+                            "------------------------- $step"
+                        )
                     }
 
+
                     viewModel.addRecipe(recipe)
+
 
                     val recipeJson = Uri.encode(Gson().toJson(recipe))
                     navController.navigate("showRecipe/$recipeJson")
@@ -705,9 +852,11 @@ fun CreateRecipeScreen(
     }
 }
 
+
 @Preview(showBackground = true)
 @Composable
 fun CreateRecipeScreenPreview() {
     val navController = rememberNavController() // Dummy NavController for preview
     CreateRecipeScreen(navController)
 }
+
