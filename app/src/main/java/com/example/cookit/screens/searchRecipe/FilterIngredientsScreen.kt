@@ -44,6 +44,8 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
 import com.example.cookit.ui.theme.CookItTheme
 import com.example.cookit.screens.components.NavigationBar
+import com.example.cookit.ui.theme.darkOrange
+import com.example.cookit.ui.theme.lightOrange
 
 class FilterIngredientsScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,7 +77,7 @@ fun FilterIngredientsScreen(navController: NavHostController, viewModel: SearchR
                     text = buildAnnotatedString {
                         withStyle(
                             style = SpanStyle(
-                                color = Color(0xFFF58D1E),
+                                color = darkOrange,
                                 fontWeight = FontWeight.Bold
                             )
                         ) {
@@ -85,7 +87,7 @@ fun FilterIngredientsScreen(navController: NavHostController, viewModel: SearchR
 
                         withStyle(
                             style = SpanStyle(
-                                color = Color(0xFFF58D1E),
+                                color = darkOrange,
                                 fontWeight = FontWeight.Bold
                             )
                         ) {
@@ -93,10 +95,14 @@ fun FilterIngredientsScreen(navController: NavHostController, viewModel: SearchR
                         }
                         append(" your recipe!")
                     },
+                    /*
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontSize = 25.sp,
                         lineHeight = 32.sp
                     ),
+
+                     */
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 25.sp),
                     color = Color.Black,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
@@ -109,6 +115,8 @@ fun FilterIngredientsScreen(navController: NavHostController, viewModel: SearchR
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { isDialogOpen = true },
+                containerColor = lightOrange,
+                contentColor = Color.Black,
                 content = { Icon(imageVector = Icons.Default.Add, contentDescription = "Add Ingredient") }
             )
         }

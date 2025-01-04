@@ -193,7 +193,7 @@ fun LogInScreen(
                         Text(
                             text = "Don't have an account?",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Black,
+                            //color = Color.Black,
                             modifier = Modifier.padding(end = 8.dp)
                         )
 

@@ -10,6 +10,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.navigation.NavHostController
@@ -126,7 +129,7 @@ class SignUpViewModel : ViewModel() {
 @Composable
 fun SignUpScreen(
     navController: NavHostController,
-    viewModel: SignUpViewModel = viewModel() // Default ViewModel instance
+    viewModel: SignUpViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val configuration = LocalConfiguration.current
@@ -174,35 +177,53 @@ fun SignUpScreen(
                     OutlinedTextField(
                         value = uiState.name,
                         onValueChange = { viewModel.onNameChange(it) },
-                        placeholder = { Text("Your Name") },
+                        placeholder = {
+                            Text(
+                                text = "John Doe",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp),
                         singleLine = true,
                         shape = RoundedCornerShape(25.dp),
+                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Username Icon") },
                     )
 
                     OutlinedTextField(
                         value = uiState.username,
                         onValueChange = { viewModel.onUsernameChange(it) },
-                        placeholder = { Text("john.doe@example.com") },
+                        placeholder = {
+                            Text(
+                                text = "john.doe@example.com",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp),
                         singleLine = true,
                         shape = RoundedCornerShape(25.dp),
+                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Username Icon") },
                     )
 
                     OutlinedTextField(
                         value = uiState.password,
                         onValueChange = { viewModel.onPasswordChange(it) },
-                        placeholder = { Text("Password") },
+                        placeholder = {
+                            Text(
+                                text = "Password",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp),
                         singleLine = true,
                         shape = RoundedCornerShape(25.dp),
-                        visualTransformation = PasswordVisualTransformation()
+                        visualTransformation = PasswordVisualTransformation(),
+                        leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password Icon") }
                     )
 
                     if (uiState.passwordError.isNotEmpty()) {
@@ -262,8 +283,7 @@ fun SignUpScreen(
                         ) {
                             Text(
                                 text = "Already have an account?",
-                                color = Color.Black,
-                                fontSize = 16.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier.padding(end = 8.dp)
                             )
 
@@ -280,7 +300,6 @@ fun SignUpScreen(
                                 Box(contentAlignment = Alignment.Center) {
                                     Text(
                                         text = "Log In",
-                                        //style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                                         modifier = Modifier.padding(8.dp),
                                         color = darkOrange
