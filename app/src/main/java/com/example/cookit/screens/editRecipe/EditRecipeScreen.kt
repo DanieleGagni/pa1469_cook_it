@@ -2,7 +2,9 @@ package com.example.cookit.screens.editRecipe
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,9 +16,12 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -94,16 +99,6 @@ fun EditRecipeScreen(
         viewModel.loadRecipe(recipeId)
     }
 
-//    recipe?.let {
-//        loadedRecipe ->
-//        var title by remember { mutableStateOf(loadedRecipe.title) }
-//        var estimatedTime by remember { mutableStateOf(loadedRecipe.estimatedTime.toString()) }
-//        var type by remember { mutableStateOf(loadedRecipe.type) }
-//        var serves by remember { mutableStateOf(loadedRecipe.serves.toString()) }
-//        val ingredients = remember { mutableStateListOf(*loadedRecipe.ingredients.toTypedArray()) }
-//        val steps = remember { mutableStateListOf(*loadedRecipe.steps.toTypedArray()) }
-//    }
-
     if (recipe == null) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -123,6 +118,7 @@ fun EditRecipeScreen(
         val steps = remember { mutableStateListOf(*recipe!!.steps.toTypedArray()) }
 
         val keyboardController = LocalSoftwareKeyboardController.current
+        val typeOptions = listOf("vegetarian", "quick", "complex", "other")
 
         LazyColumn(
             modifier = Modifier
@@ -135,7 +131,13 @@ fun EditRecipeScreen(
             }
 
             item{
-                Box {
+                Spacer(modifier = Modifier.height(20.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ){
                     Text(
                         text = buildAnnotatedString {
                             append("Edit")
@@ -159,7 +161,11 @@ fun EditRecipeScreen(
 
             item {
                 Spacer(modifier = Modifier.height(20.dp))
-                Box {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                ) {
                     Text(
                         text = "TITLE",
                         style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
@@ -168,62 +174,91 @@ fun EditRecipeScreen(
                     )
                     TextField(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
+                            .fillMaxWidth(),
                         value = title,
                         onValueChange = { title = it },
                         label = { Text(text = "Enter Menu Name") },
                         maxLines = 1,
                         singleLine = true,
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel al enfocar
+                            unfocusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel sin enfocar
+                            disabledContainerColor = Color(0xFFE0E0E0), // Fondo gris si está deshabilitado
+                            errorContainerColor = Color(0xFFFFCDD2), // Fondo rojo en caso de error
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            errorIndicatorColor = Color.Transparent
+                        ),
                         keyboardActions = KeyboardActions(
                             onDone = {
                                 keyboardController?.hide()
                             }
-                        )
+                        ),
+                        shape = RoundedCornerShape(12.dp),
                     )
                 }
             }
 
             item {
                 Spacer(modifier = Modifier.height(20.dp))
-                Box {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                )  {
                     Text(
                         text = "TYPE",
                         style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
                         color = Color.Black,
-                        modifier = Modifier.padding(start = 16.dp)
+                        modifier = Modifier.padding(start = 5.dp)
                     )
-                    TextField(
+                    var expanded by remember { mutableStateOf(false) }
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
-                        value = type,
-                        onValueChange = { type = it },
-                        label = { Text(text = "Enter Type") },
-                        maxLines = 1,
-                        singleLine = true,
-                        keyboardActions = KeyboardActions(
-                            onDone = {
-                                keyboardController?.hide()
-                            }
+                            .background(Color.White, shape = RoundedCornerShape(8.dp))
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                            .clickable { expanded = true }
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            text = if (type.isBlank()) "Select Type" else type,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp)
                         )
-                    )
+                    }
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        typeOptions.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(text = option) },
+                                onClick = {
+                                    type = option
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
                 }
             }
 
             item {
                 Spacer(modifier = Modifier.height(20.dp))
-                Box {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                ) {
                     Text(
                         text = "TIME",
                         style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
                         color = Color.Black,
-                        modifier = Modifier.padding(start = 16.dp)
+                        modifier = Modifier.padding(start = 5.dp)
                     )
                     TextField(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
+                            .fillMaxWidth(),
                         value = estimatedTime,
                         onValueChange = {
                                 newValue ->
@@ -233,6 +268,15 @@ fun EditRecipeScreen(
                         label = { Text(text = "Enter Estimated Time (minutes)") },
                         maxLines = 1,
                         singleLine = true,
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel al enfocar
+                            unfocusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel sin enfocar
+                            disabledContainerColor = Color(0xFFE0E0E0), // Fondo gris si está deshabilitado
+                            errorContainerColor = Color(0xFFFFCDD2), // Fondo rojo en caso de error
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            errorIndicatorColor = Color.Transparent
+                        ),
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Number,
                         ),
@@ -240,24 +284,28 @@ fun EditRecipeScreen(
                             onDone = {
                                 keyboardController?.hide()
                             }
-                        )
+                        ),
+                        shape = RoundedCornerShape(12.dp),
                     )
                 }
             }
 
             item {
                 Spacer(modifier = Modifier.height(20.dp))
-                Box {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                ) {
                     Text(
                         text = "SERVES",
                         style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
                         color = Color.Black,
-                        modifier = Modifier.padding(start = 16.dp)
+                        modifier = Modifier.padding(start = 5.dp)
                     )
                     TextField(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
+                            .fillMaxWidth(),
                         value = serves,
                         onValueChange = {
                                 newValue ->
@@ -267,6 +315,15 @@ fun EditRecipeScreen(
                         label = { Text(text = "Enter Servings") },
                         maxLines = 1,
                         singleLine = true,
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel al enfocar
+                            unfocusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel sin enfocar
+                            disabledContainerColor = Color(0xFFE0E0E0), // Fondo gris si está deshabilitado
+                            errorContainerColor = Color(0xFFFFCDD2), // Fondo rojo en caso de error
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            errorIndicatorColor = Color.Transparent
+                        ),
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Number,
                         ),
@@ -274,14 +331,15 @@ fun EditRecipeScreen(
                             onDone = {
                                 keyboardController?.hide()
                             }
-                        )
+                        ),
+                        shape = RoundedCornerShape(12.dp),
                     )
                 }
             }
 
             item {
                 Spacer(modifier = Modifier.height(20.dp))
-                Box(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
@@ -295,12 +353,12 @@ fun EditRecipeScreen(
                             shape = RoundedCornerShape(16.dp)
                         )
                         .padding(16.dp)
-                ) {
+                )  {
                     Text(
                         text = "INGREDIENTS",
                         style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
                         color = Color.Black,
-                        modifier = Modifier.padding(start = 16.dp)
+                        modifier = Modifier.padding(start = 8.dp)
                     )
                     AddEditIngredients(ingredients)
                 }
@@ -308,7 +366,7 @@ fun EditRecipeScreen(
 
             item {
                 Spacer(modifier = Modifier.height(20.dp))
-                Box(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
@@ -356,7 +414,7 @@ fun EditRecipeScreen(
                         viewModel.updateRecipe(
                             recipeId = recipeId,
                             updatedRecipe = updatedRecipe,
-                            onSuccess = { navController.navigate("listRecipes") },
+                            onSuccess = { navController.navigate("home") },
                             onFailure = { e -> println("Error updating recipe: ${e.message}") }
                         )
                     },
