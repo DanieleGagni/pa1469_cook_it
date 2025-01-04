@@ -28,7 +28,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.cookit.R
+import com.example.cookit.ui.theme.backOrange
 import com.example.cookit.ui.theme.darkOrange
+import com.example.cookit.ui.theme.lightOrange
 import com.google.firebase.auth.FirebaseAuth
 
 
@@ -89,7 +91,7 @@ fun LogInScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color(0xFFFFF5DD))
+                    .background(Color.White)
             ) {
 
                 val scrollState = rememberScrollState()
@@ -106,7 +108,7 @@ fun LogInScreen(
                     Spacer(modifier = Modifier.height(50.dp))
 
                     Image(
-                        painter = painterResource(id = R.drawable.logo),
+                        painter = painterResource(id = R.drawable.cookit),
                         contentDescription = "App Logo",
                         modifier = Modifier
                             .fillMaxWidth()
@@ -206,7 +208,7 @@ fun LogInScreen(
                                 .clip(RoundedCornerShape(24.dp))
                                 .padding(vertical = 4.dp),
                             //screen's background color
-                            color = Color(0xFFFFF5DD)
+                            color = Color.White
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Text(

@@ -61,6 +61,9 @@ import com.example.cookit.screens.components.Recipe
 import com.example.cookit.screens.logIn.LoginUiState
 import com.example.cookit.screens.logIn.LoginViewModel
 import com.example.cookit.ui.theme.darkOrange
+import com.example.cookit.ui.theme.lightGrey
+import com.example.cookit.ui.theme.lightOrange
+import com.example.cookit.ui.theme.lightRed
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -204,10 +207,10 @@ fun AddEditIngredients(ingredients: MutableList<String>) {
             maxLines = 1,
             singleLine = true,
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel al enfocar
-                unfocusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel sin enfocar
-                disabledContainerColor = Color(0xFFE0E0E0), // Fondo gris si está deshabilitado
-                errorContainerColor = Color(0xFFFFCDD2), // Fondo rojo en caso de error
+                focusedContainerColor = lightOrange, // Fondo naranja pastel al enfocar
+                unfocusedContainerColor = lightOrange, // Fondo naranja pastel sin enfocar
+                disabledContainerColor = lightGrey, // Fondo gris si está deshabilitado
+                errorContainerColor = lightRed, // Fondo rojo en caso de error
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 errorIndicatorColor = Color.Transparent
@@ -320,10 +323,10 @@ fun AddEditStepsScreen(steps: MutableList<String>) {
             maxLines = 1,
             singleLine = true,
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel al enfocar
-                unfocusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel sin enfocar
-                disabledContainerColor = Color(0xFFE0E0E0), // Fondo gris si está deshabilitado
-                errorContainerColor = Color(0xFFFFCDD2), // Fondo rojo en caso de error
+                focusedContainerColor = lightOrange, // Fondo naranja pastel al enfocar
+                unfocusedContainerColor = lightOrange, // Fondo naranja pastel sin enfocar
+                disabledContainerColor = lightGrey, // Fondo gris si está deshabilitado
+                errorContainerColor = lightRed, // Fondo rojo en caso de error
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 errorIndicatorColor = Color.Transparent
@@ -473,7 +476,7 @@ fun CreateRecipeScreen(
                         append("Create")
                         withStyle(
                             style = SpanStyle(
-                                color = Color(0xFFF58D1E),
+                                color = darkOrange,
                                 fontWeight = FontWeight.Bold
                             )
                         ) {
@@ -513,10 +516,10 @@ fun CreateRecipeScreen(
                     maxLines = 1,
                     singleLine = true,
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel al enfocar
-                        unfocusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel sin enfocar
-                        disabledContainerColor = Color(0xFFE0E0E0), // Fondo gris si está deshabilitado
-                        errorContainerColor = Color(0xFFFFCDD2), // Fondo rojo en caso de error
+                        focusedContainerColor = lightOrange, // Fondo naranja pastel al enfocar
+                        unfocusedContainerColor = lightOrange, // Fondo naranja pastel sin enfocar
+                        disabledContainerColor = lightGrey, // Fondo gris si está deshabilitado
+                        errorContainerColor = lightRed, // Fondo rojo en caso de error
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                         errorIndicatorColor = Color.Transparent
@@ -605,10 +608,10 @@ fun CreateRecipeScreen(
                     maxLines = 1,
                     singleLine = true,
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel al enfocar
-                        unfocusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel sin enfocar
-                        disabledContainerColor = Color(0xFFE0E0E0), // Fondo gris si está deshabilitado
-                        errorContainerColor = Color(0xFFFFCDD2), // Fondo rojo en caso de error
+                        focusedContainerColor = lightOrange, // Fondo naranja pastel al enfocar
+                        unfocusedContainerColor = lightOrange, // Fondo naranja pastel sin enfocar
+                        disabledContainerColor = lightGrey, // Fondo gris si está deshabilitado
+                        errorContainerColor = lightRed, // Fondo rojo en caso de error
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                         errorIndicatorColor = Color.Transparent
@@ -653,10 +656,10 @@ fun CreateRecipeScreen(
                     maxLines = 1,
                     singleLine = true,
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel al enfocar
-                        unfocusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel sin enfocar
-                        disabledContainerColor = Color(0xFFE0E0E0), // Fondo gris si está deshabilitado
-                        errorContainerColor = Color(0xFFFFCDD2), // Fondo rojo en caso de error
+                        focusedContainerColor = lightOrange, // Fondo naranja pastel al enfocar
+                        unfocusedContainerColor = lightOrange, // Fondo naranja pastel sin enfocar
+                        disabledContainerColor = lightGrey, // Fondo gris si está deshabilitado
+                        errorContainerColor = lightRed, // Fondo rojo en caso de error
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                         errorIndicatorColor = Color.Transparent
@@ -789,7 +792,7 @@ fun CreateRecipeScreen(
                 enabled = isEnabled,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (isEnabled) {
-                        Color(0xFFF58D1E)
+                        darkOrange
                     } else {
                         Color.Gray
                     },

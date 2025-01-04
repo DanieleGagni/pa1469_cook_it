@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import com.example.cookit.R
+import com.example.cookit.ui.theme.backOrange
 import com.example.cookit.ui.theme.darkOrange
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.userProfileChangeRequest
@@ -142,7 +143,7 @@ fun SignUpScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color(0xFFFFF5DD))
+                    .background(Color.White)
             ) {
 
                 val scrollState = rememberScrollState()
@@ -159,7 +160,7 @@ fun SignUpScreen(
                     Spacer(modifier = Modifier.height(screenHeight * 0.1f))
 
                     Image(
-                        painter = painterResource(id = R.drawable.logo),
+                        painter = painterResource(id = R.drawable.cookit),
                         contentDescription = "App Logo",
                         modifier = Modifier
                             .fillMaxWidth(0.6f)
@@ -295,7 +296,7 @@ fun SignUpScreen(
                                     .height(48.dp)
                                     .clip(RoundedCornerShape(24.dp))
                                     .padding(vertical = 4.dp),
-                                color = Color(0xFFFFF5DD)
+                                color = Color.White
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Text(

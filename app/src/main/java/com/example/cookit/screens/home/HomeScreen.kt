@@ -68,7 +68,7 @@ fun HomeScreen(navController: NavHostController) {
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         text = "Hello $userName!",
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.labelLarge,
                         color = Color.Black,
                         textAlign = TextAlign.Center
                     )
@@ -88,7 +88,7 @@ fun HomeScreen(navController: NavHostController) {
                         }
                         append(".")
                     },
-                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 25.sp),
+                    style = MaterialTheme.typography.labelLarge.copy(fontSize = 25.sp),
                     color = Color.Black,
                     textAlign = TextAlign.Center
                 )
