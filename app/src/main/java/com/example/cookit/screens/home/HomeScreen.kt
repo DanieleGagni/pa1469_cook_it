@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import com.example.cookit.R
 import com.google.firebase.auth.FirebaseAuth
 import com.example.cookit.screens.components.NavigationBar
+import com.example.cookit.ui.theme.darkOrange
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
@@ -67,7 +68,7 @@ fun HomeScreen(navController: NavHostController) {
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         text = "Hello $userName!",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                        style = MaterialTheme.typography.labelLarge,
                         color = Color.Black,
                         textAlign = TextAlign.Center
                     )
@@ -78,16 +79,16 @@ fun HomeScreen(navController: NavHostController) {
                 // Eslogan separado
                 Text(
                     text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(color = Color(0xFFF58D1E))) { // Color naranja para "Cook"
+                        withStyle(style = SpanStyle(color = darkOrange)) { // Color naranja para "Cook"
                             append("Cook")
                         }
                         append(" with ease, connect\n\nthrough ")
-                        withStyle(style = SpanStyle(color = Color(0xFFF58D1E))) { // Color naranja para "Cook"
+                        withStyle(style = SpanStyle(color = darkOrange)) { // Color naranja para "Cook"
                             append("flavours")
                         }
                         append(".")
                     },
-                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 25.sp),
+                    style = MaterialTheme.typography.labelLarge.copy(fontSize = 25.sp),
                     color = Color.Black,
                     textAlign = TextAlign.Center
                 )
@@ -100,11 +101,11 @@ fun HomeScreen(navController: NavHostController) {
                     modifier = Modifier
                         .fillMaxWidth(0.8f)
                         .padding(vertical = 8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF58D1E)) // Set the background color
+                    colors = ButtonDefaults.buttonColors(containerColor = darkOrange) // Set the background color
                 ) {
                     Text(
                         text = "Search by Name",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                        style = MaterialTheme.typography.labelLarge,
                         color = Color.White
                     )
                 }
@@ -117,11 +118,11 @@ fun HomeScreen(navController: NavHostController) {
                     modifier = Modifier
                         .fillMaxWidth(0.8f)
                         .padding(vertical = 8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF58D1E)) // Set the background color
+                    colors = ButtonDefaults.buttonColors(containerColor = darkOrange) // Set the background color
                 ) {
                     Text(
                         text = "Search by Ingredients",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                        style = MaterialTheme.typography.labelLarge,
                         color = Color.White
                     )
                 }
@@ -217,7 +218,7 @@ fun HomeScreen(navController: NavHostController) {
                                         text = category,
                                         modifier = Modifier
                                             .align(Alignment.CenterVertically), // Vertically align with icon
-                                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp)
+                                        style = MaterialTheme.typography.bodyMedium
                                     )
                                 }
                             }

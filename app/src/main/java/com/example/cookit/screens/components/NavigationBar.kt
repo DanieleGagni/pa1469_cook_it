@@ -15,6 +15,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import com.example.cookit.ui.theme.lightGrey
 
 
 @Composable
@@ -27,7 +28,7 @@ fun NavigationBar(navController: NavHostController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFFF5F5F5))
+            .background(lightGrey)
             .padding(horizontal = 16.dp, vertical = 4.dp)
             .navigationBarsPadding(),
         horizontalArrangement = Arrangement.SpaceBetween
@@ -101,7 +102,7 @@ fun NavigationBar(navController: NavHostController) {
             DropdownMenu(
                 expanded = isMenuExpanded,
                 onDismissRequest = { isMenuExpanded = false },
-                modifier = Modifier.background(Color(0xFFF5F5F5))
+                modifier = Modifier.background(lightGrey)
             ) {
 
                 DropdownMenuItem(

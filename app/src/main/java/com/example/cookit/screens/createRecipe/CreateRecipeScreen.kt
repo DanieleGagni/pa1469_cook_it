@@ -1,6 +1,5 @@
 package com.example.cookit.screens.createRecipe
 
-
 import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.background
@@ -61,6 +60,10 @@ import androidx.navigation.compose.rememberNavController
 import com.example.cookit.screens.components.Recipe
 import com.example.cookit.screens.logIn.LoginUiState
 import com.example.cookit.screens.logIn.LoginViewModel
+import com.example.cookit.ui.theme.darkOrange
+import com.example.cookit.ui.theme.lightGrey
+import com.example.cookit.ui.theme.lightOrange
+import com.example.cookit.ui.theme.lightRed
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -70,24 +73,19 @@ import kotlinx.coroutines.flow.StateFlow
 import java.util.UUID
 import kotlin.math.truncate
 
-
 class CreateRecipeViewModel : ViewModel() {
-
 
     private val db = Firebase.firestore
     private val recipesCollection = db.collection("recipes")
-
 
     fun addRecipe(recipe: Recipe) {
         val id = UUID.randomUUID().toString()
         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
 
-
         if (currentUserId == null) {
             Log.e("[ERROR]", "User is not authenticated.")
             return
         }
-
 
         val updatedRecipe = recipe
             .copy(
@@ -97,9 +95,7 @@ class CreateRecipeViewModel : ViewModel() {
             .withTitleKeywords(extractTitleKeywords(recipe.title))
             .withIngredientsKeywords(extractIngredientsKeywords(recipe.ingredients))
 
-
         // TODO: recipe.id is not initialized
-
 
         recipesCollection
             .document(id)
@@ -117,14 +113,11 @@ class CreateRecipeViewModel : ViewModel() {
             }
     }
 
-
     // extract keywords from recipe title
     private fun extractTitleKeywords(title: String): List<String> {
 
-
         // \b([A-Za-z]+)\b --> matches only alphabetic characters
         val wordPattern = "\\b([A-Za-z]+)\\b".toRegex()
-
 
         val STOP_WORDS = setOf(
             "a", "an", "and", "as", "at", "by", "for", "from", "in", "into", "of",
@@ -140,77 +133,33 @@ class CreateRecipeViewModel : ViewModel() {
             .filter { it !in STOP_WORDS }
             .toList()
 
-
         extractedKeywords.forEach { keyword ->
             Log.d("[------------------------- DEBUG]", "------------------------- $keyword")
         }
 
-
         return extractedKeywords
     }
-
 
     // extract keywords from ingredients
     private fun extractIngredientsKeywords(ingredients: List<String>): MutableList<String> {
 
-
         val regex = """(?:\d+\s*[^a-zA-Z]*|\b)([a-zA-Z\s]+?)(?=\b\d*[^a-zA-Z]*$|\b)""".toRegex()
 
-
         val STOP_WORDS = setOf(
-            "cup",
-            "teaspoon",
-            "tablespoon",
-            "small",
-            "medium",
-            "large",
-            "chopped",
-            "diced",
-            "minced",
-            "fresh",
-            "optional",
-            "to",
-            "taste",
-            "and",
-            "or",
-            "any",
-            "half",
-            "cooked",
-            "ounces",
-            "pounds",
-            "g",
-            "mg",
-            "ml",
-            "liter",
-            "kilogram",
-            "gram",
-            "liter",
-            "tsp",
-            "tbsp",
-            "flour",
-            "salt",
-            "pepper",
-            "oil",
-            "water",
-            "sugar",
-            "butter",
-            "cheese",
-            "egg"
+            "cup", "teaspoon", "tablespoon", "small", "medium", "large", "chopped", "diced", "minced", "fresh",
+            "optional", "to", "taste", "and", "or", "any", "half", "cooked", "ounces", "pounds", "g", "mg", "ml",
+            "liter", "kilogram", "gram", "liter", "tsp", "tbsp", "flour", "salt", "pepper", "oil", "water", "sugar",
+            "butter", "cheese", "egg"
         )
 
-
         val allKeywords = mutableListOf<String>()
-
 
         ingredients.forEach { ingredient ->
             val extractedKeywords = mutableListOf<String>()
 
-
             regex.findAll(ingredient).forEach { matchResult ->
 
-
                 val keyword = matchResult.groupValues[1].trim().lowercase()
-
 
                 if (keyword.isNotBlank() && keyword !in STOP_WORDS) {
                     allKeywords.add(keyword)
@@ -218,15 +167,12 @@ class CreateRecipeViewModel : ViewModel() {
             }
         }
 
-
         return allKeywords
     }
-
 
     fun Recipe.withTitleKeywords(titleKeywords: List<String>): Recipe {
         return this.copy(title_keywords = titleKeywords)
     }
-
 
     fun Recipe.withIngredientsKeywords(ingredientsKeywords: List<String>): Recipe {
         return this.copy(ingredients_keywords = ingredientsKeywords)
@@ -234,9 +180,7 @@ class CreateRecipeViewModel : ViewModel() {
 
 
 
-
 }
-
 
 @Composable
 fun AddEditIngredients(ingredients: MutableList<String>) {
@@ -263,10 +207,10 @@ fun AddEditIngredients(ingredients: MutableList<String>) {
             maxLines = 1,
             singleLine = true,
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel al enfocar
-                unfocusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel sin enfocar
-                disabledContainerColor = Color(0xFFE0E0E0), // Fondo gris si está deshabilitado
-                errorContainerColor = Color(0xFFFFCDD2), // Fondo rojo en caso de error
+                focusedContainerColor = lightOrange, // Fondo naranja pastel al enfocar
+                unfocusedContainerColor = lightOrange, // Fondo naranja pastel sin enfocar
+                disabledContainerColor = lightGrey, // Fondo gris si está deshabilitado
+                errorContainerColor = lightRed, // Fondo rojo en caso de error
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 errorIndicatorColor = Color.Transparent
@@ -349,7 +293,6 @@ fun AddEditIngredients(ingredients: MutableList<String>) {
     }
 }
 
-
 @Composable
 fun AddEditStepsScreen(steps: MutableList<String>) {
     var currentStep by remember { mutableStateOf("") }
@@ -380,10 +323,10 @@ fun AddEditStepsScreen(steps: MutableList<String>) {
             maxLines = 1,
             singleLine = true,
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel al enfocar
-                unfocusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel sin enfocar
-                disabledContainerColor = Color(0xFFE0E0E0), // Fondo gris si está deshabilitado
-                errorContainerColor = Color(0xFFFFCDD2), // Fondo rojo en caso de error
+                focusedContainerColor = lightOrange, // Fondo naranja pastel al enfocar
+                unfocusedContainerColor = lightOrange, // Fondo naranja pastel sin enfocar
+                disabledContainerColor = lightGrey, // Fondo gris si está deshabilitado
+                errorContainerColor = lightRed, // Fondo rojo en caso de error
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 errorIndicatorColor = Color.Transparent
@@ -493,7 +436,6 @@ fun AddEditStepsScreen(steps: MutableList<String>) {
     }
 }
 
-
 @Composable
 fun CreateRecipeScreen(
     navController: NavHostController,
@@ -506,11 +448,8 @@ fun CreateRecipeScreen(
     val ingredients = remember { mutableStateListOf<String>() }
     val steps = remember { mutableStateListOf<String>() }
 
-
     val keyboardController = LocalSoftwareKeyboardController.current
     val typeOptions = listOf("vegetarian", "quick", "complex", "other")
-
-
 
 
     LazyColumn(
@@ -537,7 +476,7 @@ fun CreateRecipeScreen(
                         append("Create")
                         withStyle(
                             style = SpanStyle(
-                                color = Color(0xFFF58D1E),
+                                color = darkOrange,
                                 fontWeight = FontWeight.Bold
                             )
                         ) {
@@ -553,7 +492,6 @@ fun CreateRecipeScreen(
                 )
             }
         }
-
 
         // TextField to enter the recipe name
         item {
@@ -578,10 +516,10 @@ fun CreateRecipeScreen(
                     maxLines = 1,
                     singleLine = true,
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel al enfocar
-                        unfocusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel sin enfocar
-                        disabledContainerColor = Color(0xFFE0E0E0), // Fondo gris si está deshabilitado
-                        errorContainerColor = Color(0xFFFFCDD2), // Fondo rojo en caso de error
+                        focusedContainerColor = lightOrange, // Fondo naranja pastel al enfocar
+                        unfocusedContainerColor = lightOrange, // Fondo naranja pastel sin enfocar
+                        disabledContainerColor = lightGrey, // Fondo gris si está deshabilitado
+                        errorContainerColor = lightRed, // Fondo rojo en caso de error
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                         errorIndicatorColor = Color.Transparent
@@ -596,7 +534,6 @@ fun CreateRecipeScreen(
                    )
             }
         }
-
 
         // TextField to enter the type of dish
         item {
@@ -671,10 +608,10 @@ fun CreateRecipeScreen(
                     maxLines = 1,
                     singleLine = true,
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel al enfocar
-                        unfocusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel sin enfocar
-                        disabledContainerColor = Color(0xFFE0E0E0), // Fondo gris si está deshabilitado
-                        errorContainerColor = Color(0xFFFFCDD2), // Fondo rojo en caso de error
+                        focusedContainerColor = lightOrange, // Fondo naranja pastel al enfocar
+                        unfocusedContainerColor = lightOrange, // Fondo naranja pastel sin enfocar
+                        disabledContainerColor = lightGrey, // Fondo gris si está deshabilitado
+                        errorContainerColor = lightRed, // Fondo rojo en caso de error
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                         errorIndicatorColor = Color.Transparent
@@ -691,7 +628,6 @@ fun CreateRecipeScreen(
                 )
             }
         }
-
 
         // TextField to enter how many people it serves
         item {
@@ -720,10 +656,10 @@ fun CreateRecipeScreen(
                     maxLines = 1,
                     singleLine = true,
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel al enfocar
-                        unfocusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel sin enfocar
-                        disabledContainerColor = Color(0xFFE0E0E0), // Fondo gris si está deshabilitado
-                        errorContainerColor = Color(0xFFFFCDD2), // Fondo rojo en caso de error
+                        focusedContainerColor = lightOrange, // Fondo naranja pastel al enfocar
+                        unfocusedContainerColor = lightOrange, // Fondo naranja pastel sin enfocar
+                        disabledContainerColor = lightGrey, // Fondo gris si está deshabilitado
+                        errorContainerColor = lightRed, // Fondo rojo en caso de error
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                         errorIndicatorColor = Color.Transparent
@@ -856,7 +792,7 @@ fun CreateRecipeScreen(
                 enabled = isEnabled,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (isEnabled) {
-                        Color(0xFFF58D1E)
+                        darkOrange
                     } else {
                         Color.Gray
                     },

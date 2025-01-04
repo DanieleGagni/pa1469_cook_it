@@ -49,6 +49,7 @@ import androidx.navigation.NavHostController
 import com.example.cookit.screens.components.Recipe
 import com.example.cookit.screens.createRecipe.AddEditIngredients
 import com.example.cookit.screens.createRecipe.AddEditStepsScreen
+import com.example.cookit.ui.theme.darkOrange
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -143,7 +144,7 @@ fun EditRecipeScreen(
                             append("Edit")
                             withStyle(
                                 style = SpanStyle(
-                                    color = Color(0xFFF58D1E),
+                                    color = darkOrange,
                                     fontWeight = FontWeight.Bold)
                             ) {
                                 append(" Recipe")
@@ -421,7 +422,7 @@ fun EditRecipeScreen(
                     enabled = isEnabled,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (isEnabled) {
-                            Color(0xFFF58D1E)
+                            darkOrange
                         } else {
                             Color.Gray
                         },

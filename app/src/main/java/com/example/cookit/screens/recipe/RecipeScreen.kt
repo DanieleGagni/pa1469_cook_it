@@ -47,6 +47,7 @@ import androidx.navigation.NavHostController
 import com.example.cookit.R
 import com.example.cookit.screens.components.NavigationBar
 import com.example.cookit.screens.components.Recipe
+import com.example.cookit.ui.theme.darkOrange
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -247,7 +248,7 @@ fun RecipeScreen(
                                 text = buildAnnotatedString {
                                     withStyle(
                                         style = SpanStyle(
-                                            color = Color(0xFFF58D1E),
+                                            color = darkOrange,
                                             fontWeight = FontWeight.Bold
                                         )
                                     ) {

@@ -48,6 +48,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.cookit.R
 import com.example.cookit.screens.components.NavigationBar
+import com.example.cookit.ui.theme.darkOrange
 
 
 data class ShoppingItem(
@@ -240,15 +241,14 @@ fun ShoppingListScreen(
                         text = buildAnnotatedString {
                             withStyle(
                                 style = SpanStyle(
-                                    color = Color(0xFFF58D1E),
-                                    fontWeight = FontWeight.Bold
+                                    color = darkOrange
                                 )
                             ) {
                                 append("SHOPPING ")
                             }
                             append("LIST")
                         },
-                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 25.sp),
+                        style = MaterialTheme.typography.labelLarge.copy(fontSize = 25.sp),
                         color = Color.Black,
                         textAlign = TextAlign.Center
                     )
@@ -256,7 +256,7 @@ fun ShoppingListScreen(
                     if (shoppingList.isEmpty()) {
                         Text(
                             text = "Your shopping list is empty. Start adding items!",
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = Color.Gray,
                             modifier = Modifier.padding(16.dp),
                             textAlign = TextAlign.Center
@@ -295,37 +295,38 @@ fun ShoppingListScreen(
                             }
                         }
                     }
+                }
 
-                    Row(
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp)
+                        .padding(horizontal = 20.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    OutlinedTextField(
+                        value = newIngredient,
+                        onValueChange = { newIngredient = it },
+                        placeholder = { Text("Add ingredients") },
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        OutlinedTextField(
-                            value = newIngredient,
-                            onValueChange = { newIngredient = it },
-                            placeholder = { Text("Add ingredients") },
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(vertical = 6.dp),
-                            singleLine = true,
-                            shape = RoundedCornerShape(25.dp),
-                        )
+                            .weight(1f)
+                            .padding(vertical = 6.dp),
+                        singleLine = true,
+                        shape = RoundedCornerShape(25.dp),
+                    )
 
-                        IconButton(
-                            onClick = {
-                                viewModel.addShoppingItem(navController, newIngredient.text)
-                                newIngredient = TextFieldValue("") // Clear input
-                            },
-                            modifier = Modifier
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_add_black),
-                                contentDescription = "Add Icon",
-                                tint = Color.Unspecified
-                            )
-                        }
+                    IconButton(
+                        onClick = {
+                            viewModel.addShoppingItem(navController, newIngredient.text)
+                            newIngredient = TextFieldValue("") // Clear input
+                        },
+                        modifier = Modifier
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_add_black),
+                            contentDescription = "Add Icon",
+                            tint = Color.Unspecified
+                        )
                     }
                 }
 
@@ -334,12 +335,12 @@ fun ShoppingListScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF58D1E))
+                    colors = ButtonDefaults.buttonColors(containerColor = darkOrange)
                 ) {
                     Text(
                         text = "REMOVE ALL",
                         color = Color.White,
-                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp)
+                        style = MaterialTheme.typography.labelLarge
                     )
                 }
             }
