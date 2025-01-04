@@ -525,7 +525,13 @@ fun CreateRecipeScreen(
 
 
         item {
-            Box {
+            Spacer(modifier = Modifier.height(20.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+            ){
                 Text(
                     text = buildAnnotatedString {
                         append("Create")
