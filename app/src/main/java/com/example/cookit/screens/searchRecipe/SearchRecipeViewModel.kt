@@ -42,7 +42,10 @@ class SearchRecipeViewModel(application: Application) : AndroidViewModel(applica
     // extract meaningful words from user input query
     private fun extractKeywords(title: String): List<String> {
 
-        val TITLE_STOP_WORDS = setOf(
+        // \b[\w]+\b --> match alphanumeric words
+        val regex = "\\b[\\w]+\\b".toRegex()
+
+        val STOP_WORDS = setOf(
             "a", "an", "and", "at", "by", "for", "from", "in", "into", "of",
             "on", "or", "the", "to", "with", "your", "my", "our", "their", "this",
             "that", "these", "those", "over", "under", "around", "inside", "outside",
@@ -51,18 +54,15 @@ class SearchRecipeViewModel(application: Application) : AndroidViewModel(applica
             "ultimate", "basic", "favorite", "authentic"
         )
 
-        // \b([A-Za-z]+)\b --> matches only alphabetic characters
-        val wordPattern = "\\b([A-Za-z]+)\\b".toRegex()
-
-        val  extractedKeywords =  wordPattern.findAll(title)
-            .map { it.groupValues[1] } //extracts ONLY the captured word group
+        val extractedKeywords = regex.findAll(title)
+            .map { it.value }
             .map { it.lowercase() }
-            .filter { it !in TITLE_STOP_WORDS }
-            .filter { it.length != 1}
+            .filter { it.any { char -> char.isLetter() } } // exclude numbers
+            .filter { it !in STOP_WORDS }
             .toList()
 
         extractedKeywords.forEach { keyword ->
-            Log.d("[------------------------- DEBUG ]", "------------------------- $keyword")
+            Log.d("extractTitleKeywords ------------ ", keyword)
         }
 
         return extractedKeywords
