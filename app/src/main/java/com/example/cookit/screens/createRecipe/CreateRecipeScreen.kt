@@ -552,17 +552,20 @@ fun CreateRecipeScreen(
         // TextField to enter the recipe name
         item {
             Spacer(modifier = Modifier.height(20.dp))
-            Box {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
                 Text(
                     text = "TITLE",
                     style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
                     color = Color.Black,
-                    modifier = Modifier.padding(start = 15.dp)
+                    modifier = Modifier.padding(start = 5.dp)
                 )
                 TextField(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
+                        .fillMaxWidth(),
                     value = title,
                     onValueChange = { title = it },
                     label = { Text(text = "Enter Recipe Name") },
@@ -592,18 +595,21 @@ fun CreateRecipeScreen(
         // TextField to enter the type of dish
         item {
             Spacer(modifier = Modifier.height(20.dp))
-            Box {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
                 Text(
                     text = "TYPE",
                     style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
                     color = Color.Black,
-                    modifier = Modifier.padding(start = 16.dp)
+                    modifier = Modifier.padding(start = 5.dp)
                 )
                 var expanded by remember { mutableStateOf(false) }
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
                         .background(Color.White, shape = RoundedCornerShape(8.dp))
                         .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
                         .clickable { expanded = true }
@@ -635,17 +641,20 @@ fun CreateRecipeScreen(
         // TextField to enter estimated time
         item {
             Spacer(modifier = Modifier.height(20.dp))
-            Box {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
                 Text(
                     text = "TIME",
                     style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
                     color = Color.Black,
-                    modifier = Modifier.padding(start = 16.dp)
+                    modifier = Modifier.padding(start = 5.dp)
                 )
                 TextField(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
+                        .fillMaxWidth(),
                     value = estimatedTime,
                     onValueChange = { newValue ->
                         if (newValue.all { it.isDigit() }) {
@@ -681,17 +690,20 @@ fun CreateRecipeScreen(
         // TextField to enter how many people it serves
         item {
             Spacer(modifier = Modifier.height(20.dp))
-            Box {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
                 Text(
                     text = "SERVES",
                     style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
                     color = Color.Black,
-                    modifier = Modifier.padding(start = 16.dp)
+                    modifier = Modifier.padding(start = 5.dp)
                 )
                 TextField(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
+                        .fillMaxWidth(),
                     value = serves,
                     onValueChange = { newValue ->
                         if (newValue.all { it.isDigit() }) {
@@ -727,7 +739,7 @@ fun CreateRecipeScreen(
         // Add ingredients section
         item {
             Spacer(modifier = Modifier.height(20.dp))
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
@@ -746,7 +758,7 @@ fun CreateRecipeScreen(
                     text = "INGREDIENTS",
                     style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
                     color = Color.Black,
-                    modifier = Modifier.padding(start = 16.dp)
+                    modifier = Modifier.padding(start = 8.dp)
                 )
                 AddEditIngredients(ingredients)
             }
@@ -756,7 +768,7 @@ fun CreateRecipeScreen(
         // Add steps section
         item {
             Spacer(modifier = Modifier.height(20.dp))
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
@@ -775,7 +787,7 @@ fun CreateRecipeScreen(
                     text = "STEPS",
                     style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
                     color = Color.Black,
-                    modifier = Modifier.padding(start = 16.dp)
+                    modifier = Modifier.padding(start = 8.dp)
 
                 )
                 AddEditStepsScreen(steps)
