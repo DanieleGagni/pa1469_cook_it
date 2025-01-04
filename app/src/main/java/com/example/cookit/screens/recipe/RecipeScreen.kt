@@ -249,13 +249,16 @@ fun RecipeScreen(
                                     withStyle(
                                         style = SpanStyle(
                                             color = darkOrange,
-                                            fontWeight = FontWeight.Bold
+                                            fontWeight = FontWeight.Bold,
                                         )
                                     ) {
                                         append(recipe.title)
                                     }
                                 },
-                                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 30.sp),
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontSize = 30.sp,
+                                    lineHeight = 36.sp,
+                                ),
                                 color = Color.Black,
                                 modifier = Modifier.weight(1f)
                             )
