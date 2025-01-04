@@ -13,9 +13,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -27,8 +32,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -158,6 +165,19 @@ class RecipeViewModel : ViewModel() {
                 onFailure(exception)
             }
     }
+
+    fun deleteRecipe(recipeId: String) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val recipeRef = db.collection("recipes").document(recipeId)
+        recipeRef.delete()
+            .addOnSuccessListener {
+                println("Recipe deleted successfully")
+            }
+            .addOnFailureListener { exception ->
+                println("Error deleting recipe: ${exception.message}")
+                exception.printStackTrace()
+            }
+    }
 }
 
 
@@ -178,6 +198,47 @@ fun FavoriteButton(
         )
     }
 }
+
+@Composable
+fun ConfirmDeleteDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = "Delete Recipe")
+        },
+        text = {
+            Text(
+                text = "Are you sure you want to delete this recipe?",
+                color = Color.Black
+            )
+        },
+        confirmButton = {
+            androidx.compose.material3.TextButton(
+                onClick = onConfirm,
+                modifier = Modifier
+                    .background(Color(0xFFFFE4C4), shape = RoundedCornerShape(4.dp))
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Text("Delete", color = Color.Black)
+            }
+        },
+        dismissButton = {
+            androidx.compose.material3.TextButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .background(Color(0xFFFFE4C4), shape = RoundedCornerShape(4.dp))
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Text("Cancel", color = Color.Black)
+            }
+        },
+        containerColor = Color.White
+    )
+}
+
 
 
 // when navigating to the RecipeScreen, the call must look like this:
@@ -206,6 +267,8 @@ fun RecipeScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -362,21 +425,6 @@ fun RecipeScreen(
                             }
                         )
 
-                        // Button to edit the recipe, appears only if current user is creator
-                        if (currentUserId == recipe.createdBy) {
-                            IconButton(
-                                onClick = {
-                                    navController.navigate("editRecipe/${recipe.id}")
-                                }
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = android.R.drawable.ic_menu_edit),
-                                    contentDescription = "Edit Recipe",
-                                    tint = Color.Black
-                                )
-                            }
-                        }
-
                         // Button to automatically transfer ingredients to shopping list
                         IconButton(
                             onClick = {
@@ -403,10 +451,66 @@ fun RecipeScreen(
                                 modifier = Modifier.size(60.dp)
                             )
                         }
+
+                        // Button to edit the recipe, appears only if current user is creator
+                        if (currentUserId == recipe.createdBy) {
+                            var expanded by remember { mutableStateOf(false) }
+                            Box(
+                                modifier = Modifier.wrapContentSize(Alignment.TopEnd) // 右上に固定
+                            ) {
+                                IconButton(
+                                    onClick = {
+                                        expanded = true
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.MoreVert,
+                                        contentDescription = "Edit Recipe",
+                                        tint = Color(0xFFF58D1E),
+                                        modifier = Modifier.size(35.dp)
+                                    )
+                                }
+                                DropdownMenu(
+                                    expanded = expanded,
+                                    onDismissRequest = { expanded = false },
+                                    modifier = Modifier
+                                        .background(Color(0xFFFFF5DD))
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text("Edit", color = Color.Black) },
+                                        onClick = {
+                                            expanded = false
+                                            navController.navigate("editRecipe/${recipe.id}") // 編集画面に遷移
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text("Delete", color = Color.Black) },
+                                        onClick = {
+                                            expanded = false
+                                            showDeleteDialog = true
+                                        }
+                                    )
+                                }
+                            }
+                        }
+
+
                     }
                 }
 
             }
         }
     )
+    if (showDeleteDialog) {
+        ConfirmDeleteDialog(
+            onConfirm = {
+                showDeleteDialog = false
+                viewModel.deleteRecipe(recipe.id)
+                navController.navigate("home")
+            },
+            onDismiss = {
+                showDeleteDialog = false
+            }
+        )
+    }
 }
