@@ -1,6 +1,5 @@
 package com.example.cookit.screens.editRecipe
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,6 +25,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -36,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,148 +51,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.cookit.screens.components.Recipe
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import com.google.firebase.firestore.SetOptions
-
-class EditRecipeViewModel : ViewModel() {
-
-    private val db = Firebase.firestore
-    private val recipesCollection = db.collection("recipes")
-
-    private val _editingRecipe = MutableStateFlow<Recipe?>(null)
-    val editingRecipe: StateFlow<Recipe?> = _editingRecipe
-
-    fun loadRecipe(recipeId: String) {
-        recipesCollection
-            .document(recipeId)
-            .get()
-            .addOnSuccessListener { documentSnapshot ->
-                val recipe = documentSnapshot.toObject(Recipe::class.java)
-                _editingRecipe.value = recipe
-
-                Log.d(" ---------------------------- EditRecipeViewModel - loadRecipe -------- ",
-                    "ID ${_editingRecipe.value!!.id}, TITLE ${_editingRecipe.value!!.title}")
-            }
-            .addOnFailureListener { e ->
-                Log.e("---------------------------- EditRecipeScreen, loadRecipe ------------------- ", "FIREBASE ERROR", e)
-                // TODO error handling (Snackbar)}
-            }
-    }
-
-    fun updateRecipe(
-        recipeId: String,
-        updatedRecipe: Recipe,
-        onSuccess: () -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-
-        Log.d("---------------------------- EditRecipeScreen, updateRecipe ------------------- ",
-            "${updatedRecipe.title} - ${updatedRecipe.id} - $recipeId  well well well")
-
-        recipesCollection.document(recipeId).set(updatedRecipe, SetOptions.merge())
-            .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener { e ->
-                Log.e("---------------------------- EditRecipeScreen, updateRecipe ------------------- ", "FIREBASE ERROR", e)
-                // TODO error handling (Snackbar)}
-            }
-    }
-
-    // extract keywords from recipe title
-    fun extractTitleKeywords(title: String): List<String> {
-
-        // \b[\w]+\b --> match alphanumeric words
-        val regex = "\\b[\\w]+\\b".toRegex()
-
-        val STOP_WORDS = setOf(
-            "a", "an", "and", "at", "by", "for", "from", "in", "into", "of",
-            "on", "or", "the", "to", "with", "your", "my", "our", "their", "this",
-            "that", "these", "those", "over", "under", "around", "inside", "outside",
-            "through", "onto", "off", "how", "make", "recipe", "easy", "quick",
-            "best", "delicious", "simple", "perfect", "classic", "homemade",
-            "ultimate", "basic", "favorite", "authentic"
-        )
-
-        val extractedKeywords = regex.findAll(title)
-            .map { it.value }
-            .map { it.lowercase() }
-            .filter { it.any { char -> char.isLetter() } } // exclude numbers
-            .filter { it !in STOP_WORDS }
-            .toList()
-
-        extractedKeywords.forEach { keyword ->
-            Log.d("extractTitleKeywords ------------ ", keyword)
-        }
-
-        return extractedKeywords
-    }
-
-    // extract keywords from ingredients
-    fun extractIngredientsKeywords(ingredients: List<String>): MutableList<String> {
-
-        val regex = "\\b[\\w]+\\b".toRegex()
-
-        val STOP_WORDS = setOf(
-            "cup",
-            "teaspoon",
-            "tablespoon",
-            "small",
-            "medium",
-            "large",
-            "chopped",
-            "diced",
-            "minced",
-            "fresh",
-            "optional",
-            "to",
-            "taste",
-            "and",
-            "or",
-            "any",
-            "half",
-            "cooked",
-            "ounces",
-            "pounds",
-            "g",
-            "mg",
-            "ml",
-            "liter",
-            "kilogram",
-            "gram",
-            "liter",
-            "tsp",
-            "tbsp",
-        )
-
-        val allIngredientsKeywords = mutableListOf<String>()
-
-        ingredients.forEach { ingredient ->
-
-            val keywords = regex.findAll(ingredient)
-                .map { it.value } //extracts ONLY the captured word group
-                .map { it.lowercase() }
-                .filter { it.any { char -> char.isLetter() } } // exclude numbers
-                .filter { it !in STOP_WORDS }
-                .toList()
-
-            allIngredientsKeywords.addAll(keywords)
-
-        }
-
-        allIngredientsKeywords.forEach{ keyword ->
-            Log.d("extractIngredientsKeywords ------------ " , keyword)
-        }
-
-        return allIngredientsKeywords
-    }
-
-}
+import kotlinx.coroutines.launch
 
 @Composable
 fun EditRecipeScreen(
@@ -201,10 +63,9 @@ fun EditRecipeScreen(
 ) {
     val recipe by viewModel.editingRecipe.collectAsState()
 
-    var hasBeenEdited by remember { mutableStateOf(false) } // TODO
-    var showWarningDialog by remember { mutableStateOf(false) }
-
-
+    var hasBeenEdited by remember { mutableStateOf(false) }
+    var showBackWarning by remember { mutableStateOf(false) }
+    var showSaveWarning by remember { mutableStateOf(false) }
 
     LaunchedEffect(recipeId) {
         viewModel.loadRecipe(recipeId)
@@ -212,7 +73,7 @@ fun EditRecipeScreen(
 
     // TODO
     BackHandler(enabled = hasBeenEdited) {
-        showWarningDialog = true
+        showBackWarning = true
     }
 
     if (recipe == null) {
@@ -244,11 +105,60 @@ fun EditRecipeScreen(
         val keyboardController = LocalSoftwareKeyboardController.current
         val typeOptions = listOf("vegetarian", "quick", "complex", "other")
 
-        // Show the dialog when showDialog is true
-        if (showWarningDialog) {
+        if (showBackWarning) {
             AlertDialog(
-                onDismissRequest = { showWarningDialog = false },
-                title = { Text("Update Recipe") },
+                onDismissRequest = { showBackWarning = false },
+                title = { Text("Recipe has been updated") },
+                text = { Text("Do you want to save your changes?") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+
+                            val ingrediets_keywords = viewModel.extractIngredientsKeywords(ingredients)
+                            val title_keywords = viewModel.extractTitleKeywords(title)
+
+                            val updatedRecipe = recipe!!.copy(
+                                id = recipeId,
+                                title = title,
+                                title_keywords = title_keywords,
+                                estimatedTime = estimatedTime.toIntOrNull() ?: 0,
+                                type = type,
+                                serves = serves.toIntOrNull() ?: 0,
+                                ingredients = ingredients.toList(),
+                                ingredients_keywords = ingrediets_keywords,
+                                steps = steps.toList(),
+                                createdBy = createdBy
+                            )
+
+                            viewModel.updateRecipe(
+                                recipeId = recipeId,
+                                updatedRecipe = updatedRecipe,
+                                onSuccess = { navController.navigate("home") },
+                                onFailure = { e -> println("Error updating recipe: ${e.message}") }
+                            )
+                            showBackWarning = false
+
+                        }
+                    ) {
+                        Text("Save")
+                    }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = {
+                            showBackWarning = false
+                        }
+                    ) {
+                        Text("Go Back")
+                    }
+                }
+            )
+        }
+
+        if (showSaveWarning) {
+            AlertDialog(
+                onDismissRequest = { showSaveWarning = false },
+                title = { Text("Recipe has been updated") },
                 text = { Text("Do you want to save your changes?") },
                 confirmButton = {
                     Button(
@@ -277,7 +187,8 @@ fun EditRecipeScreen(
                                 onSuccess = { navController.navigate("home") },
                                 onFailure = { e -> println("Error updating recipe: ${e.message}") }
                             )
-                            showWarningDialog = false
+
+                            showSaveWarning = false
 
                         }
                     ) {
@@ -287,10 +198,12 @@ fun EditRecipeScreen(
                 dismissButton = {
                     Button(
                         onClick = {
-                            showWarningDialog = false
+
+                            showSaveWarning = false
+                            navController.navigate("home")
                         }
                     ) {
-                        Text("Go Back")
+                        Text("Discard")
                     }
                 }
             )
@@ -807,7 +720,7 @@ fun EditRecipeScreen(
                                 hasBeenEdited
 
                 Button(
-                    onClick = { showWarningDialog = true },
+                    onClick = { showSaveWarning = true },
                     enabled = isEnabled,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (isEnabled) {
