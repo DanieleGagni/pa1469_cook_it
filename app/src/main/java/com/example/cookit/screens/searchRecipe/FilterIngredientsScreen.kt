@@ -57,7 +57,7 @@ class FilterIngredientsScreen : ComponentActivity() {
 }
 
 @Composable
-fun FilterIngredientsScreen(navController: NavHostController, viewModel: SearchRecipeViewModel = viewModel()) {
+fun FilterIngredientsScreen(navController: NavHostController, viewModel: SearchRecipeViewModel) {
 
     val ingredients by viewModel.ingredients.collectAsState()
     var isDialogOpen by remember { mutableStateOf(false) }

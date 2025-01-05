@@ -43,7 +43,7 @@ class SearchRecipeScreen : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchRecipeScreen(navController: NavHostController, viewModel: SearchRecipeViewModel = viewModel()) {
+fun SearchRecipeScreen(navController: NavHostController, viewModel: SearchRecipeViewModel) {
 
     var text by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
