@@ -1,8 +1,13 @@
 package com.example.cookit
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.printToLog
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -12,6 +17,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.cookit.screens.home.HomeScreen
 import com.example.cookit.screens.logIn.LogInScreen
 import com.example.cookit.screens.logIn.LoginViewModel
+import com.example.cookit.screens.signUp.SignUpScreen
+import com.example.cookit.screens.signUp.SignUpViewModel
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,7 +35,8 @@ class LogInScreenTest {
         val navController = TestNavHostController(ApplicationProvider.getApplicationContext())
         navController.navigatorProvider.addNavigator(ComposeNavigator())
 
-        val viewModel = LoginViewModel()
+        val logInViewModel = LoginViewModel()
+        val signUpViewModel = SignUpViewModel()
 
         // Act: Set the content with a programmatic NavHost
         composeTestRule.setContent {
@@ -36,8 +44,15 @@ class LogInScreenTest {
                 navController = navController,
                 startDestination = "login"
             ) {
-                composable("login") { LogInScreen(navController = navController, viewModel = viewModel) }
-                composable("home") { HomeScreen(navController) }
+                composable("login") {
+                    LogInScreen(navController = navController, viewModel = logInViewModel)
+                }
+                composable("signUp") {
+                    SignUpScreen(navController = navController, viewModel = signUpViewModel)
+                }
+                composable("home") {
+                    HomeScreen(navController)
+                }
             }
         }
 
@@ -47,5 +62,49 @@ class LogInScreenTest {
         composeTestRule.onNodeWithText("Log In").assertIsDisplayed()
         composeTestRule.onNodeWithText("Don't have an account?").assertIsDisplayed()
 
+    }
+
+
+
+    //NOT WORKING
+    @Test
+    fun testLoginButtonFunctionality() {
+        // Arrange: Set up the NavController and ViewModel
+        val navController = TestNavHostController(ApplicationProvider.getApplicationContext())
+        navController.navigatorProvider.addNavigator(ComposeNavigator())
+
+        val viewModel = LoginViewModel()
+
+        composeTestRule.setContent {
+            NavHost(
+                navController = navController,
+                startDestination = "logIn"
+            ) {
+                composable("login") {
+                    LogInScreen(navController = navController, viewModel = viewModel)
+                }
+                composable("home") {
+                    HomeScreen(navController)
+                }
+            }
+        }
+
+        // Interact with the UI: Input username and password
+        composeTestRule.onNodeWithText("john.doe@example.com", ignoreCase = true)
+            .performTextInput("m@example.com")
+        composeTestRule.onNodeWithText("Password", ignoreCase = true)
+            .performTextInput("00000000")
+
+        // Click the login button
+        composeTestRule.onNodeWithText("Log In", ignoreCase = true).performClick()
+
+        // Wait for any recompositions
+        composeTestRule.waitForIdle()
+
+        // Optionally, check for navigation or loading state
+        //composeTestRule.onNodeWithText("Log In", ignoreCase = true).assertIsNotEnabled() // Example: Check if the button disables during loading
+
+        // Verify navigation to "home" (assuming successful login)
+        assert(navController.currentDestination?.route == "home")
     }
 }
