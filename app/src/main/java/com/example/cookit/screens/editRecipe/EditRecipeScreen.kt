@@ -53,7 +53,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import kotlinx.coroutines.launch
 
 @Composable
 fun EditRecipeScreen(
@@ -71,7 +70,6 @@ fun EditRecipeScreen(
         viewModel.loadRecipe(recipeId)
     }
 
-    // TODO
     BackHandler(enabled = hasBeenEdited) {
         showBackWarning = true
     }
