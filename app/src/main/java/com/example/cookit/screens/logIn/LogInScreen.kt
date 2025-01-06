@@ -101,6 +101,7 @@ fun LogInScreen(
                     modifier = Modifier
                         .padding(innerPadding)
                         .fillMaxSize()
+                        .testTag("logInScreen")
                         .verticalScroll(scrollState)
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally

@@ -2,6 +2,7 @@ package com.example.cookit
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -54,11 +55,19 @@ class SignUpScreenTest {
                 }
             }
         }
+
+        // Assert: Check if UI elements are displayed correctly
+        composeTestRule.onNodeWithText("John Doe").assertIsDisplayed()
+        composeTestRule.onNodeWithText("john.doe@example.com").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Password").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Create Account").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Already have an account?").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("logInButton").assertIsDisplayed()
     }
 
 
 
-    //NOT WORKING
+    //NOT WORKING PROBLEMS WITH LOGIC I THINK (what doesnt work is the redirection to the home screen when clicking)
     @Test
     fun testSignUpButtonFunctionality() {
         val navController = TestNavHostController(ApplicationProvider.getApplicationContext())
@@ -89,7 +98,8 @@ class SignUpScreenTest {
         composeTestRule.onNodeWithText("Create Account").performClick()
 
         // Verify navigation to "home" (assuming successful sign-up)
-        assert(navController.currentDestination?.route == "home")
+        composeTestRule.onNodeWithTag("homeScreen").assertIsDisplayed()
+        //assert(navController.currentDestination?.route == "home")
     }
 
     @Test

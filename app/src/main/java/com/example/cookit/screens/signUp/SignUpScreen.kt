@@ -297,6 +297,7 @@ fun SignUpScreen(
                                 modifier = Modifier
                                     .height(48.dp)
                                     .clip(RoundedCornerShape(24.dp))
+                                    .testTag("logInButton")
                                     .padding(vertical = 4.dp),
                                 color = Color.White
                             ) {

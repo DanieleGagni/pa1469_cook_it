@@ -65,7 +65,7 @@ class LogInScreenTest {
     }
 
 
-    //NOT WORKING PROBLEMS WITH LOGIC I THINK
+    //NOT WORKING PROBLEMS WITH LOGIC I THINK (what doesnt work is the redirection to the home screen when clicking)
     @Test
     fun testLoginButtonFunctionality() {
         // Arrange: Set up the NavController and ViewModel
