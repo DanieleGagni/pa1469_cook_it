@@ -18,8 +18,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import com.example.cookit.R
@@ -29,9 +29,11 @@ import com.example.cookit.ui.theme.darkOrange
 @Composable
 fun LogInScreen(
     navController: NavHostController,
-    viewModel: AuthViewModel = viewModel() // Default ViewModel instance
+    viewModel: AuthViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -53,19 +55,23 @@ fun LogInScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
-                    Spacer(modifier = Modifier.height(50.dp))
+                    //space between the top of the screen and the app logo
+                    Spacer(modifier = Modifier.height(screenHeight * 0.001f))
 
+                    //app logo
                     Image(
                         painter = painterResource(id = R.drawable.cookit),
                         contentDescription = "App Logo",
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(LocalConfiguration.current.screenWidthDp.dp * 0.6f)
+                            .height(LocalConfiguration.current.screenWidthDp.dp * 0.7f)
                             .padding(top = 16.dp)
                     )
 
+                    //space between the logo and the text fields
                     Spacer(modifier = Modifier.height(50.dp))
 
+                    //email text field
                     OutlinedTextField(
                         value = uiState.username,
                         onValueChange = { viewModel.onUsernameChange(it) },
@@ -80,9 +86,10 @@ fun LogInScreen(
                             .padding(vertical = 8.dp),
                         singleLine = true,
                         shape = RoundedCornerShape(25.dp),
-                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Username Icon") }
+                        leadingIcon = { Icon(Icons.Default.Email, contentDescription = "Email Icon") }
                     )
 
+                    //password text field
                     OutlinedTextField(
                         value = uiState.password,
                         onValueChange = { viewModel.onPasswordChange(it) },
@@ -101,6 +108,7 @@ fun LogInScreen(
                         leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password Icon") }
                     )
 
+                    //show error message in case of log in error
                     if (uiState.loginError.isNotEmpty()) {
                         Text(
                             text = uiState.loginError,
@@ -109,6 +117,7 @@ fun LogInScreen(
                         )
                     }
 
+                    //login button
                     FilledTonalButton(
                         onClick = { viewModel.login(navController) },
                         modifier = Modifier
@@ -120,12 +129,15 @@ fun LogInScreen(
                             contentColor = Color.White
                         )
                     ) {
+                        //show button white if it is loading
                         if (uiState.isLoading) {
                             CircularProgressIndicator(
                                 color = Color.White,
                                 modifier = Modifier.size(16.dp)
                             )
-                        } else {
+                        }
+                        //else show "log in" label
+                        else {
                             Text(
                                 text = "Log In",
                                 style = MaterialTheme.typography.labelLarge
@@ -140,13 +152,14 @@ fun LogInScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
+                        //text "Don't have and account?"
                         Text(
                             text = "Don't have an account?",
                             style = MaterialTheme.typography.bodyMedium,
-                            //color = Color.Black,
                             modifier = Modifier.padding(end = 8.dp)
                         )
 
+                        //sign up button (redirects to sign up screen)
                         Surface(
                             onClick = {
                                 navController.navigate("signUp")
@@ -155,13 +168,11 @@ fun LogInScreen(
                                 .height(48.dp)
                                 .clip(RoundedCornerShape(24.dp))
                                 .padding(vertical = 4.dp),
-                            //screen's background color
                             color = Color.White
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Text(
                                     text = "Sign up",
-                                    //style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                                     modifier = Modifier.padding(8.dp),
                                     color = darkOrange

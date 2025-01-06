@@ -8,6 +8,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
@@ -57,24 +58,30 @@ fun SignUpScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
-                    Spacer(modifier = Modifier.height(screenHeight * 0.1f))
+                    //space between top of the screen and the app logo
+                    Spacer(modifier = Modifier.height(screenHeight * 0.001f))
 
+                    //app logo
                     Image(
                         painter = painterResource(id = R.drawable.cookit),
                         contentDescription = "App Logo",
                         modifier = Modifier
-                            .fillMaxWidth(0.6f)
-                            .aspectRatio(1f)
+                            .fillMaxWidth()
+                            .height(LocalConfiguration.current.screenWidthDp.dp * 0.7f)
+                            .padding(top = 16.dp)
                     )
 
+                    //space between app logo and text
                     Spacer(modifier = Modifier.height(screenHeight * 0.05f))
 
+                    //text "Just a few quick things to get started"
                     Text(
                         text = "Just a few quick things to get started",
                         fontSize = (screenWidth.value * 0.05f).sp,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
+                    //username text input
                     OutlinedTextField(
                         value = uiState.name,
                         onValueChange = { viewModel.onNameChange(it) },
@@ -92,6 +99,7 @@ fun SignUpScreen(
                         leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Username Icon") },
                     )
 
+                    //email text input
                     OutlinedTextField(
                         value = uiState.username,
                         onValueChange = { viewModel.onUsernameChange(it) },
@@ -106,9 +114,10 @@ fun SignUpScreen(
                             .padding(vertical = 8.dp),
                         singleLine = true,
                         shape = RoundedCornerShape(25.dp),
-                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Username Icon") },
+                        leadingIcon = { Icon(Icons.Default.Email, contentDescription = "Username Icon") },
                     )
 
+                    //password text input
                     OutlinedTextField(
                         value = uiState.password,
                         onValueChange = { viewModel.onPasswordChange(it) },
@@ -127,6 +136,7 @@ fun SignUpScreen(
                         leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password Icon") }
                     )
 
+                    //show error message in case of password error
                     if (uiState.passwordError.isNotEmpty()) {
                         Text(
                             text = uiState.passwordError,
@@ -136,6 +146,7 @@ fun SignUpScreen(
                         )
                     }
 
+                    //show error message in case of signup error
                     if (uiState.signUpError.isNotEmpty()) {
                         Text(
                             text = uiState.signUpError,
@@ -145,6 +156,7 @@ fun SignUpScreen(
                         )
                     }
 
+                    //create account button
                     FilledTonalButton(
                         onClick = { viewModel.handleSignUp(navController) },
                         modifier = Modifier
@@ -156,12 +168,15 @@ fun SignUpScreen(
                             contentColor = Color.White
                         )
                     ) {
+                        //show button white if it is loading
                         if (uiState.isLoading) {
                             CircularProgressIndicator(
                                 color = Color.White,
                                 modifier = Modifier.size(16.dp)
                             )
-                        } else {
+                        }
+                        //else show "Create Account" label
+                        else {
                             Text(
                                 text = "Create Account",
                                 style = MaterialTheme.typography.labelLarge
@@ -169,7 +184,8 @@ fun SignUpScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(screenHeight * 0.05f))
+                    //space between
+                    //Spacer(modifier = Modifier.height(screenHeight * 0.05f))
 
                     Column(
                         modifier = Modifier
@@ -182,12 +198,14 @@ fun SignUpScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
+                            //text "Already have an account?"
                             Text(
                                 text = "Already have an account?",
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier.padding(end = 8.dp)
                             )
 
+                            //log in button (redirects to log in screen)
                             Surface(
                                 onClick = {
                                     navController.navigate("logIn")
