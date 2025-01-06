@@ -1,16 +1,15 @@
-package com.example.cookit.screens.logIn
+package com.example.cookit.screens.auth
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.navigation.NavHostController
@@ -21,69 +20,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
 import com.example.cookit.R
-import com.example.cookit.ui.theme.backOrange
 import com.example.cookit.ui.theme.darkOrange
-import com.example.cookit.ui.theme.lightOrange
-import com.google.firebase.auth.FirebaseAuth
 
-
-data class LoginUiState(
-    val username: String = "",
-    val password: String = "",
-    val loginError: String = "",
-    val isLoading: Boolean = false
-)
-
-class LoginViewModel : ViewModel() {
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-
-    private val _uiState = MutableStateFlow(LoginUiState())
-    val uiState: StateFlow<LoginUiState> get() = _uiState
-
-    fun onUsernameChange(newUsername: String) {
-        _uiState.value = _uiState.value.copy(username = newUsername)
-    }
-
-    fun onPasswordChange(newPassword: String) {
-        _uiState.value = _uiState.value.copy(password = newPassword)
-    }
-
-    fun login(navController: NavHostController) {
-        val username = _uiState.value.username
-        val password = _uiState.value.password
-
-        // Reset error and show loading
-        _uiState.value = _uiState.value.copy(isLoading = true, loginError = "")
-
-        auth.signInWithEmailAndPassword(username, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    navController.navigate("home") {
-                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                    }
-                } else {
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        loginError = task.exception?.localizedMessage ?: "Login failed"
-                    )
-                }
-            }
-    }
-}
 
 @Composable
-fun LogInScreen(
+fun SignUpScreen(
     navController: NavHostController,
-    viewModel: LoginViewModel = viewModel() // Default ViewModel instance
+    viewModel: AuthViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val screenHeight = configuration.screenHeightDp.dp
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -105,18 +57,40 @@ fun LogInScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
-                    Spacer(modifier = Modifier.height(50.dp))
+                    Spacer(modifier = Modifier.height(screenHeight * 0.1f))
 
                     Image(
                         painter = painterResource(id = R.drawable.cookit),
                         contentDescription = "App Logo",
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(LocalConfiguration.current.screenWidthDp.dp * 0.6f)
-                            .padding(top = 16.dp)
+                            .fillMaxWidth(0.6f)
+                            .aspectRatio(1f)
                     )
 
-                    Spacer(modifier = Modifier.height(50.dp))
+                    Spacer(modifier = Modifier.height(screenHeight * 0.05f))
+
+                    Text(
+                        text = "Just a few quick things to get started",
+                        fontSize = (screenWidth.value * 0.05f).sp,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = uiState.name,
+                        onValueChange = { viewModel.onNameChange(it) },
+                        placeholder = {
+                            Text(
+                                text = "John Doe",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        singleLine = true,
+                        shape = RoundedCornerShape(25.dp),
+                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Username Icon") },
+                    )
 
                     OutlinedTextField(
                         value = uiState.username,
@@ -132,7 +106,7 @@ fun LogInScreen(
                             .padding(vertical = 8.dp),
                         singleLine = true,
                         shape = RoundedCornerShape(25.dp),
-                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Username Icon") }
+                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Username Icon") },
                     )
 
                     OutlinedTextField(
@@ -153,16 +127,26 @@ fun LogInScreen(
                         leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password Icon") }
                     )
 
-                    if (uiState.loginError.isNotEmpty()) {
+                    if (uiState.passwordError.isNotEmpty()) {
                         Text(
-                            text = uiState.loginError,
+                            text = uiState.passwordError,
                             color = Color.Red,
-                            modifier = Modifier.padding(vertical = 8.dp)
+                            fontSize = (screenWidth.value * 0.04f).sp,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
+                    }
+
+                    if (uiState.signUpError.isNotEmpty()) {
+                        Text(
+                            text = uiState.signUpError,
+                            color = Color.Red,
+                            fontSize = (screenWidth.value * 0.04f).sp,
+                            modifier = Modifier.padding(vertical = 4.dp)
                         )
                     }
 
                     FilledTonalButton(
-                        onClick = { viewModel.login(navController) },
+                        onClick = { viewModel.handleSignUp(navController) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp),
@@ -179,45 +163,49 @@ fun LogInScreen(
                             )
                         } else {
                             Text(
-                                text = "Log In",
+                                text = "Create Account",
                                 style = MaterialTheme.typography.labelLarge
                             )
                         }
                     }
 
+                    Spacer(modifier = Modifier.height(screenHeight * 0.05f))
 
-                    Row(
+                    Column(
                         modifier = Modifier
-                            .padding(top = 10.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(
-                            text = "Don't have an account?",
-                            style = MaterialTheme.typography.bodyMedium,
-                            //color = Color.Black,
-                            modifier = Modifier.padding(end = 8.dp)
-                        )
-
-                        Surface(
-                            onClick = {
-                                navController.navigate("signUp")
-                            },
-                            modifier = Modifier
-                                .height(48.dp)
-                                .clip(RoundedCornerShape(24.dp))
-                                .padding(vertical = 4.dp),
-                            //screen's background color
-                            color = Color.White
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Text(
-                                    text = "Sign up",
-                                    //style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                                    modifier = Modifier.padding(8.dp),
-                                    color = darkOrange
-                                )
+                            Text(
+                                text = "Already have an account?",
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(end = 8.dp)
+                            )
+
+                            Surface(
+                                onClick = {
+                                    navController.navigate("logIn")
+                                },
+                                modifier = Modifier
+                                    .height(48.dp)
+                                    .clip(RoundedCornerShape(24.dp))
+                                    .padding(vertical = 4.dp),
+                                color = Color.White
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(
+                                        text = "Log In",
+                                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                        modifier = Modifier.padding(8.dp),
+                                        color = darkOrange
+                                    )
+                                }
                             }
                         }
                     }
@@ -226,3 +214,4 @@ fun LogInScreen(
         }
     )
 }
+
