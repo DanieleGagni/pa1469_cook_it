@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -25,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -48,6 +50,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.cookit.R
 import com.example.cookit.screens.components.NavigationBar
+import com.example.cookit.ui.theme.darkOrange
+import com.example.cookit.ui.theme.lightGrey
+import com.example.cookit.ui.theme.lightOrange
 
 
 data class ShoppingItem(
@@ -206,14 +211,17 @@ fun ShoppingListScreen(
     viewModel: ShoppingListViewModel = viewModel()
 ) {
     val shoppingList by viewModel.shoppingList.collectAsState()
+    var newIngredient by remember { mutableStateOf(TextFieldValue("")) }
+
+    // State to manage the visibility of the warning dialog
+    var showWarningDialog by remember { mutableStateOf(false) }
+
     // Trigger data fetch when the screen is first displayed
     LaunchedEffect(Unit) {
         viewModel.fetchShoppingList(navController)
     }
 
-    var newIngredient by remember { mutableStateOf(TextFieldValue("")) }
-
-    Scaffold (
+    Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             NavigationBar(navController)
@@ -224,7 +232,7 @@ fun ShoppingListScreen(
                     .fillMaxSize()
                     .background(Color.White)
                     .padding(innerPadding),
-                verticalArrangement = Arrangement.SpaceBetween // Ensure button stays visible
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
                 val scrollState = rememberScrollState()
 
@@ -238,17 +246,12 @@ fun ShoppingListScreen(
                 ) {
                     Text(
                         text = buildAnnotatedString {
-                            withStyle(
-                                style = SpanStyle(
-                                    color = Color(0xFFF58D1E),
-                                    fontWeight = FontWeight.Bold
-                                )
-                            ) {
+                            withStyle(style = SpanStyle(color = darkOrange)) {
                                 append("SHOPPING ")
                             }
                             append("LIST")
                         },
-                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 25.sp),
+                        style = MaterialTheme.typography.labelLarge.copy(fontSize = 25.sp),
                         color = Color.Black,
                         textAlign = TextAlign.Center
                     )
@@ -256,7 +259,7 @@ fun ShoppingListScreen(
                     if (shoppingList.isEmpty()) {
                         Text(
                             text = "Your shopping list is empty. Start adding items!",
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = Color.Gray,
                             modifier = Modifier.padding(16.dp),
                             textAlign = TextAlign.Center
@@ -272,10 +275,7 @@ fun ShoppingListScreen(
                                 Checkbox(
                                     checked = item.done,
                                     onCheckedChange = {
-                                        viewModel.toggleItemStatus(
-                                            navController,
-                                            index
-                                        )
+                                        viewModel.toggleItemStatus(navController, index)
                                     }
                                 )
                                 Text(
@@ -288,60 +288,84 @@ fun ShoppingListScreen(
                                     Icon(
                                         painter = painterResource(id = R.drawable.remove),
                                         contentDescription = "Remove Icon",
-                                        modifier = Modifier.size(18.dp), // Smaller trash icon
+                                        modifier = Modifier.size(18.dp),
                                         tint = Color.Unspecified
                                     )
                                 }
                             }
                         }
                     }
+                }
 
-                    Row(
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp)
+                        .padding(horizontal = 20.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    OutlinedTextField(
+                        value = newIngredient,
+                        onValueChange = { newIngredient = it },
+                        placeholder = { Text("Add ingredients") },
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        OutlinedTextField(
-                            value = newIngredient,
-                            onValueChange = { newIngredient = it },
-                            placeholder = { Text("Add ingredients") },
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(vertical = 6.dp),
-                            singleLine = true,
-                            shape = RoundedCornerShape(25.dp),
-                        )
+                            .weight(1f)
+                            .padding(vertical = 6.dp),
+                        singleLine = true,
+                        shape = RoundedCornerShape(25.dp),
+                    )
 
-                        IconButton(
-                            onClick = {
-                                viewModel.addShoppingItem(navController, newIngredient.text)
-                                newIngredient = TextFieldValue("") // Clear input
-                            },
-                            modifier = Modifier
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_add_black),
-                                contentDescription = "Add Icon",
-                                tint = Color.Unspecified
-                            )
-                        }
+                    IconButton(
+                        onClick = {
+                            viewModel.addShoppingItem(navController, newIngredient.text)
+                            newIngredient = TextFieldValue("") // Clear input
+                        },
+                        modifier = Modifier
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_add_black),
+                            contentDescription = "Add Icon",
+                            tint = Color.Unspecified
+                        )
                     }
                 }
 
                 Button(
-                    onClick = { viewModel.removeAllItems(navController) },
+                    onClick = { showWarningDialog = true },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF58D1E))
+                    colors = ButtonDefaults.buttonColors(containerColor = darkOrange)
                 ) {
                     Text(
                         text = "REMOVE ALL",
                         color = Color.White,
-                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp)
+                        style = MaterialTheme.typography.labelLarge
                     )
                 }
+            }
+
+            // Confirmation Dialog
+            if (showWarningDialog) {
+                AlertDialog(
+                    onDismissRequest = { showWarningDialog = false },
+                    title = { Text(text = "Clear Shopping List") },
+                    text = { Text("Are you sure you want to remove all items from your shopping list? This action cannot be undone.") },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            viewModel.removeAllItems(navController)
+                            showWarningDialog = false
+                        }) {
+                            Text("Delete")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showWarningDialog = false }) {
+                            Text("Cancel")
+                        }
+                    },
+                    containerColor = lightGrey
+                )
             }
         }
     )

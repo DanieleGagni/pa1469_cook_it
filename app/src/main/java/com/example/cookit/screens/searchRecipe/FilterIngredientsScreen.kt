@@ -4,6 +4,7 @@ package com.example.cookit.screens.searchRecipe
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,6 +45,9 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
 import com.example.cookit.ui.theme.CookItTheme
 import com.example.cookit.screens.components.NavigationBar
+import com.example.cookit.ui.theme.darkOrange
+import com.example.cookit.ui.theme.lightGrey
+import com.example.cookit.ui.theme.lightOrange
 
 class FilterIngredientsScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,7 +61,7 @@ class FilterIngredientsScreen : ComponentActivity() {
 }
 
 @Composable
-fun FilterIngredientsScreen(navController: NavHostController, viewModel: SearchRecipeViewModel = viewModel()) {
+fun FilterIngredientsScreen(navController: NavHostController, viewModel: SearchRecipeViewModel) {
 
     val ingredients by viewModel.ingredients.collectAsState()
     var isDialogOpen by remember { mutableStateOf(false) }
@@ -71,32 +75,19 @@ fun FilterIngredientsScreen(navController: NavHostController, viewModel: SearchR
                     .padding(WindowInsets.statusBars.asPaddingValues())
                     .padding(top = 8.dp)
             ) {
+
                 Text(
                     text = buildAnnotatedString {
-                        withStyle(
-                            style = SpanStyle(
-                                color = Color(0xFFF58D1E),
-                                fontWeight = FontWeight.Bold
-                            )
-                        ) {
+                        withStyle(style = SpanStyle(color = darkOrange)) { // Color naranja para "Cook"
                             append("Add")
                         }
                         append(" your ingredients\n")
-
-                        withStyle(
-                            style = SpanStyle(
-                                color = Color(0xFFF58D1E),
-                                fontWeight = FontWeight.Bold
-                            )
-                        ) {
+                        withStyle(style = SpanStyle(color = darkOrange)) { // Color naranja para "Cook"
                             append("Find")
                         }
                         append(" your recipe!")
                     },
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = 25.sp,
-                        lineHeight = 32.sp
-                    ),
+                    style = MaterialTheme.typography.labelLarge.copy(fontSize = 25.sp),
                     color = Color.Black,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
@@ -109,6 +100,8 @@ fun FilterIngredientsScreen(navController: NavHostController, viewModel: SearchR
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { isDialogOpen = true },
+                containerColor = lightOrange,
+                contentColor = Color.Black,
                 content = { Icon(imageVector = Icons.Default.Add, contentDescription = "Add Ingredient") }
             )
         }
@@ -167,9 +160,12 @@ fun FilterIngredientsScreen(navController: NavHostController, viewModel: SearchR
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 13.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF58D1E))
+                        colors = ButtonDefaults.buttonColors(containerColor = darkOrange)
             ) {
-                Text("Search")
+                Text(
+                    text = "Search",
+                    style = MaterialTheme.typography.labelLarge
+                )
             }
         }
     }
@@ -187,7 +183,9 @@ fun FilterIngredientsScreen(navController: NavHostController, viewModel: SearchR
                     singleLine = true
                 )
             },
-            modifier = Modifier.padding(horizontal = 32.dp),
+            shape = RoundedCornerShape(25.dp),
+            modifier = Modifier
+                .padding(horizontal = 32.dp),
             properties = DialogProperties(usePlatformDefaultWidth = false),
             confirmButton = {
                 TextButton(
@@ -206,7 +204,8 @@ fun FilterIngredientsScreen(navController: NavHostController, viewModel: SearchR
                 TextButton(onClick = { isDialogOpen = false }) {
                     Text("Cancel")
                 }
-            }
+            },
+            //containerColor = lightGrey
         )
     }
 }

@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import com.example.cookit.R
 import com.google.firebase.auth.FirebaseAuth
 import com.example.cookit.screens.components.NavigationBar
+import com.example.cookit.ui.theme.darkOrange
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
@@ -67,7 +68,7 @@ fun HomeScreen(navController: NavHostController) {
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         text = "Hello $userName!",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                        style = MaterialTheme.typography.labelLarge,
                         color = Color.Black,
                         textAlign = TextAlign.Center
                     )
@@ -78,16 +79,16 @@ fun HomeScreen(navController: NavHostController) {
                 // Eslogan separado
                 Text(
                     text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(color = Color(0xFFF58D1E))) { // Color naranja para "Cook"
+                        withStyle(style = SpanStyle(color = darkOrange)) { // Color naranja para "Cook"
                             append("Cook")
                         }
                         append(" with ease, connect\n\nthrough ")
-                        withStyle(style = SpanStyle(color = Color(0xFFF58D1E))) { // Color naranja para "Cook"
+                        withStyle(style = SpanStyle(color = darkOrange)) { // Color naranja para "Cook"
                             append("flavours")
                         }
                         append(".")
                     },
-                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 25.sp),
+                    style = MaterialTheme.typography.labelLarge.copy(fontSize = 25.sp),
                     color = Color.Black,
                     textAlign = TextAlign.Center
                 )
@@ -100,11 +101,11 @@ fun HomeScreen(navController: NavHostController) {
                     modifier = Modifier
                         .fillMaxWidth(0.8f)
                         .padding(vertical = 8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF58D1E)) // Set the background color
+                    colors = ButtonDefaults.buttonColors(containerColor = darkOrange) // Set the background color
                 ) {
                     Text(
-                        text = "Search by Category",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                        text = "Search by Name",
+                        style = MaterialTheme.typography.labelLarge,
                         color = Color.White
                     )
                 }
@@ -117,11 +118,11 @@ fun HomeScreen(navController: NavHostController) {
                     modifier = Modifier
                         .fillMaxWidth(0.8f)
                         .padding(vertical = 8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF58D1E)) // Set the background color
+                    colors = ButtonDefaults.buttonColors(containerColor = darkOrange) // Set the background color
                 ) {
                     Text(
                         text = "Search by Ingredients",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                        style = MaterialTheme.typography.labelLarge,
                         color = Color.White
                     )
                 }
@@ -133,7 +134,7 @@ fun HomeScreen(navController: NavHostController) {
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 16.dp)
-                        .weight(1f) // Asegurar que ocupe el espacio restante
+                        .weight(1f)
                 ) {
                     val categoryImages = mapOf(
                         "VEGETARIAN" to R.drawable.ic_category_vegetarian,
@@ -157,6 +158,7 @@ fun HomeScreen(navController: NavHostController) {
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .background(Color.White)
+                                    .padding(8.dp)
                             ) {
                                 val imageRes = categoryImages[category] ?: R.drawable.ic_category_add
                                 Image(
@@ -167,18 +169,64 @@ fun HomeScreen(navController: NavHostController) {
                                         .height(120.dp),
                                     contentScale = ContentScale.Crop
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = category,
+
+                                Row(
                                     modifier = Modifier
-                                        .padding(8.dp)
-                                        .align(Alignment.CenterHorizontally),
-                                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp)
-                                )
+                                        .fillMaxWidth()
+                                        .padding(top = 8.dp),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    when (category) {
+                                        "VEGETARIAN" -> {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.vegetarian),
+                                                contentDescription = "Vegetarian",
+                                                tint = Color.Unspecified,
+                                                modifier = Modifier.size(40.dp)
+                                            )
+                                        }
+                                        "QUICK" -> {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.quick),
+                                                contentDescription = "Quick",
+                                                tint = Color.Unspecified,
+                                                modifier = Modifier.size(40.dp)
+                                            )
+                                        }
+                                        "COMPLEX" -> {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.complex),
+                                                contentDescription = "Complex",
+                                                tint = Color.Unspecified,
+                                                modifier = Modifier.size(35.dp)
+                                            )
+                                        }
+                                        else -> {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.other),
+                                                contentDescription = "Other",
+                                                tint = Color.Unspecified,
+                                                modifier = Modifier.size(35.dp)
+                                            )
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.width(8.dp))
+
+                                    Text(
+                                        text = category,
+                                        modifier = Modifier
+                                            .align(Alignment.CenterVertically), // Vertically align with icon
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
                             }
                         }
                     }
                 }
+
+
             }
         }
     )

@@ -12,9 +12,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -26,8 +32,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -46,6 +54,9 @@ import androidx.navigation.NavHostController
 import com.example.cookit.R
 import com.example.cookit.screens.components.NavigationBar
 import com.example.cookit.screens.components.Recipe
+import com.example.cookit.ui.theme.darkOrange
+import com.example.cookit.ui.theme.lightGrey
+import com.example.cookit.ui.theme.lightOrange
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -156,6 +167,19 @@ class RecipeViewModel : ViewModel() {
                 onFailure(exception)
             }
     }
+
+    fun deleteRecipe(recipeId: String) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val recipeRef = db.collection("recipes").document(recipeId)
+        recipeRef.delete()
+            .addOnSuccessListener {
+                println("Recipe deleted successfully")
+            }
+            .addOnFailureListener { exception ->
+                println("Error deleting recipe: ${exception.message}")
+                exception.printStackTrace()
+            }
+    }
 }
 
 
@@ -176,6 +200,35 @@ fun FavoriteButton(
         )
     }
 }
+
+@Composable
+fun ConfirmDeleteDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = "Delete Recipe")
+        },
+        text = {
+            Text("Are you sure you want to delete this recipe?")
+        },
+        confirmButton = {
+            androidx.compose.material3.TextButton(onClick = onConfirm) {
+                Text("Delete")
+            }
+        },
+        dismissButton = {
+            androidx.compose.material3.TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        },
+        containerColor = lightGrey
+    )
+}
+
+
 
 
 // when navigating to the RecipeScreen, the call must look like this:
@@ -205,6 +258,8 @@ fun RecipeScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
@@ -218,42 +273,93 @@ fun RecipeScreen(
                     .padding(innerPadding)
                     .background(Color.White)
             ) {
+
                 val scrollState = rememberScrollState()
 
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .verticalScroll(scrollState)
                         .padding(16.dp)
                 ) {
-                    // Recipe title
-                    Text(
-                        text = buildAnnotatedString {
-                            withStyle(
-                                style = SpanStyle(
-                                    color = Color(0xFFF58D1E),
-                                    fontWeight = FontWeight.Bold
-                                )
-                            ) {
-                                append(recipe.title)
-                            }
-                        },
-                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 30.sp),
-                        color = Color.Black,
-                    )
 
-                    // Recipe content
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(screenHeight * 0.75f)
-                            .padding(top = 16.dp)
-                            .border(
-                                width = 2.dp,
-                                color = Color.Green,
-                                shape = RoundedCornerShape(8.dp)
-                            ),
+                            .weight(1f) // Use weight to allow the scrollable content to take available space
+                            .verticalScroll(rememberScrollState())
                     ) {
+
+                        // Category Icon Row
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+
+                            // Recipe title
+                            Text(
+                                text = buildAnnotatedString {
+                                    withStyle(
+                                        style = SpanStyle(
+                                            color = darkOrange,
+                                            fontWeight = FontWeight.Bold,
+                                        )
+                                    ) {
+                                        append(recipe.title)
+                                    }
+                                },
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontSize = 30.sp,
+                                    lineHeight = 36.sp,
+                                ),
+                                color = Color.Black,
+                                modifier = Modifier.weight(1f)
+                            )
+                            when (recipe.type) {
+                                "vegetarian" -> {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.vegetarian),
+                                        contentDescription = "Vegetarian",
+                                        tint = Color.Unspecified,
+                                        modifier = Modifier.size(40.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                }
+
+                                "quick" -> {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.quick),
+                                        contentDescription = "Vegetarian",
+                                        tint = Color.Unspecified,
+                                        modifier = Modifier.size(40.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                }
+                                "complex"-> {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.complex),
+                                        contentDescription = "Vegetarian",
+                                        tint = Color.Unspecified,
+                                        modifier = Modifier.size(35.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                }
+
+                                else -> {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.other),
+                                        contentDescription = "Vegetarian",
+                                        tint = Color.Unspecified,
+                                        modifier = Modifier.size(35.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                }
+                            }
+                        }
+
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
                         // Ingredients section
                         Text(
                             text = "INGREDIENTS",
@@ -292,11 +398,13 @@ fun RecipeScreen(
                         }
                     }
 
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     // Actions Row
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 20.dp),
+                            .padding(bottom = 10.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
@@ -306,21 +414,6 @@ fun RecipeScreen(
                                 viewModel.toggleFavorite(recipe)
                             }
                         )
-
-                        // Button to edit the recipe, appears only if current user is creator
-                        if (currentUserId == recipe.createdBy) {
-                            IconButton(
-                                onClick = {
-                                    navController.navigate("editRecipe/${recipe.id}")
-                                }
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = android.R.drawable.ic_menu_edit),
-                                    contentDescription = "Edit Recipe",
-                                    tint = Color.Black
-                                )
-                            }
-                        }
 
                         // Button to automatically transfer ingredients to shopping list
                         IconButton(
@@ -348,9 +441,65 @@ fun RecipeScreen(
                                 modifier = Modifier.size(60.dp)
                             )
                         }
+
+                        // Button to edit the recipe, appears only if current user is creator
+                        if (currentUserId == recipe.createdBy) {
+                            var expanded by remember { mutableStateOf(false) }
+                            Box(
+                                modifier = Modifier.wrapContentSize(Alignment.TopEnd) // 右上に固定
+                            ) {
+                                IconButton(
+                                    onClick = {
+                                        expanded = true
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.MoreVert,
+                                        contentDescription = "Edit Recipe",
+                                        tint = darkOrange,
+                                        modifier = Modifier.size(35.dp)
+                                    )
+                                }
+                                DropdownMenu(
+                                    expanded = expanded,
+                                    onDismissRequest = { expanded = false },
+                                    modifier = Modifier.background(lightGrey)
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text("Edit", color = Color.Black) },
+                                        onClick = {
+                                            expanded = false
+                                            navController.navigate("editRecipe/${recipe.id}") // 編集画面に遷移
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text("Delete", color = Color.Black) },
+                                        onClick = {
+                                            expanded = false
+                                            showDeleteDialog = true
+                                        }
+                                    )
+                                }
+                            }
+                        }
+
+
                     }
                 }
+
             }
         }
     )
+    if (showDeleteDialog) {
+        ConfirmDeleteDialog(
+            onConfirm = {
+                showDeleteDialog = false
+                viewModel.deleteRecipe(recipe.id)
+                navController.navigate("home")
+            },
+            onDismiss = {
+                showDeleteDialog = false
+            }
+        )
+    }
 }
