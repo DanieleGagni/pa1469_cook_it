@@ -3,7 +3,6 @@ package com.example.cookit.screens.listRecipes
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cookit.screens.components.Recipe
 import com.google.firebase.Firebase
@@ -13,7 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-// ViewModel for the ListRecipes screen
+
 class ListRecipesViewModel(application: Application) : AndroidViewModel(application) {
 
     private val db = Firebase.firestore

@@ -25,7 +25,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -37,7 +36,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,7 +54,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.cookit.ui.theme.darkOrange
 import com.example.cookit.ui.theme.lightGrey
-import com.example.cookit.ui.theme.lightOrange
+
 
 @Composable
 fun EditRecipeScreen(
@@ -173,15 +171,16 @@ fun EditRecipeScreen(
                             createdBy = createdBy
                         )
 
-                        viewModel.updateRecipe(
-                            recipeId = recipeId,
-                            updatedRecipe = updatedRecipe,
-                            onSuccess = { navController.navigate("home") },
-                            onFailure = { e -> println("Error updating recipe: ${e.message}") }
-                        )
+                            viewModel.updateRecipe(
+                                recipeId = recipeId,
+                                updatedRecipe = updatedRecipe,
+                                onSuccess = { navController.navigate("home") },
+                                onFailure = { e -> println("Error updating recipe: ${e.message}") }
+                            )
 
-                        showSaveWarning = false
-                    }) {
+                            showSaveWarning = false
+                        }
+                    ) {
                         Text("Save")
                     }
                 },
@@ -260,10 +259,10 @@ fun EditRecipeScreen(
                         maxLines = 1,
                         singleLine = true,
                         colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel al enfocar
-                            unfocusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel sin enfocar
-                            disabledContainerColor = Color(0xFFE0E0E0), // Fondo gris si está deshabilitado
-                            errorContainerColor = Color(0xFFFFCDD2), // Fondo rojo en caso de error
+                            focusedContainerColor = Color(0xFFFFE4C4),
+                            unfocusedContainerColor = Color(0xFFFFE4C4),
+                            disabledContainerColor = Color(0xFFE0E0E0),
+                            errorContainerColor = Color(0xFFFFCDD2),
                             focusedIndicatorColor = Color.Transparent,
                             unfocusedIndicatorColor = Color.Transparent,
                             errorIndicatorColor = Color.Transparent
@@ -350,10 +349,10 @@ fun EditRecipeScreen(
                         maxLines = 1,
                         singleLine = true,
                         colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel al enfocar
-                            unfocusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel sin enfocar
-                            disabledContainerColor = Color(0xFFE0E0E0), // Fondo gris si está deshabilitado
-                            errorContainerColor = Color(0xFFFFCDD2), // Fondo rojo en caso de error
+                            focusedContainerColor = Color(0xFFFFE4C4),
+                            unfocusedContainerColor = Color(0xFFFFE4C4),
+                            disabledContainerColor = Color(0xFFE0E0E0),
+                            errorContainerColor = Color(0xFFFFCDD2),
                             focusedIndicatorColor = Color.Transparent,
                             unfocusedIndicatorColor = Color.Transparent,
                             errorIndicatorColor = Color.Transparent
@@ -398,10 +397,10 @@ fun EditRecipeScreen(
                         maxLines = 1,
                         singleLine = true,
                         colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel al enfocar
-                            unfocusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel sin enfocar
-                            disabledContainerColor = Color(0xFFE0E0E0), // Fondo gris si está deshabilitado
-                            errorContainerColor = Color(0xFFFFCDD2), // Fondo rojo en caso de error
+                            focusedContainerColor = Color(0xFFFFE4C4),
+                            unfocusedContainerColor = Color(0xFFFFE4C4),
+                            disabledContainerColor = Color(0xFFE0E0E0),
+                            errorContainerColor = Color(0xFFFFCDD2),
                             focusedIndicatorColor = Color.Transparent,
                             unfocusedIndicatorColor = Color.Transparent,
                             errorIndicatorColor = Color.Transparent
@@ -443,7 +442,7 @@ fun EditRecipeScreen(
                         modifier = Modifier.padding(start = 8.dp)
                     )
 
-                    //AddEditIngredients(ingredients)
+                    // AddEditIngredients(ingredients)
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -464,10 +463,10 @@ fun EditRecipeScreen(
                             maxLines = 1,
                             singleLine = true,
                             colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel al enfocar
-                                unfocusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel sin enfocar
-                                disabledContainerColor = Color(0xFFE0E0E0), // Fondo gris si está deshabilitado
-                                errorContainerColor = Color(0xFFFFCDD2), // Fondo rojo en caso de error
+                                focusedContainerColor = Color(0xFFFFE4C4),
+                                unfocusedContainerColor = Color(0xFFFFE4C4),
+                                disabledContainerColor = Color(0xFFE0E0E0),
+                                errorContainerColor = Color(0xFFFFCDD2),
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent,
                                 errorIndicatorColor = Color.Transparent
@@ -594,7 +593,6 @@ fun EditRecipeScreen(
                                     Text(
                                         text = when {
                                             editStepIndex >= 0 -> "Edit Step"
-                                            //insertIndex >= 0 -> "Insert Step"
                                             else -> "Enter Step"
                                         }
                                     )
@@ -602,10 +600,10 @@ fun EditRecipeScreen(
                                 maxLines = 1,
                                 singleLine = true,
                                 colors = TextFieldDefaults.colors(
-                                    focusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel al enfocar
-                                    unfocusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel sin enfocar
-                                    disabledContainerColor = Color(0xFFE0E0E0), // Fondo gris si está deshabilitado
-                                    errorContainerColor = Color(0xFFFFCDD2), // Fondo rojo en caso de error
+                                    focusedContainerColor = Color(0xFFFFE4C4),
+                                    unfocusedContainerColor = Color(0xFFFFE4C4),
+                                    disabledContainerColor = Color(0xFFE0E0E0),
+                                    errorContainerColor = Color(0xFFFFCDD2),
                                     focusedIndicatorColor = Color.Transparent,
                                     unfocusedIndicatorColor = Color.Transparent,
                                     errorIndicatorColor = Color.Transparent

@@ -10,6 +10,7 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+
 class EditRecipeViewModel(application: Application) : AndroidViewModel(application) {
 
     private val db = Firebase.firestore
@@ -31,7 +32,6 @@ class EditRecipeViewModel(application: Application) : AndroidViewModel(applicati
             }
             .addOnFailureListener { e ->
                 Log.e("---------------------------- EditRecipeScreen, loadRecipe ------------------- ", "FIREBASE ERROR", e)
-                // TODO error handling (Snackbar)}
             }
     }
 
@@ -124,7 +124,7 @@ class EditRecipeViewModel(application: Application) : AndroidViewModel(applicati
         ingredients.forEach { ingredient ->
 
             val keywords = regex.findAll(ingredient)
-                .map { it.value } //extracts ONLY the captured word group
+                .map { it.value } // extracts ONLY the captured word group
                 .map { it.lowercase() }
                 .filter { it.any { char -> char.isLetter() } } // exclude numbers
                 .filter { it !in STOP_WORDS }
