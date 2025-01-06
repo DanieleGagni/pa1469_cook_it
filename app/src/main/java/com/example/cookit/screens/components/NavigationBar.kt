@@ -9,10 +9,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.navigation.NavHostController
-import com.example.cookit.ui.theme.lightGrey
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cookit.R
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.cookit.ui.theme.lightGrey
 
 
 @Composable
@@ -163,7 +164,7 @@ fun ConfirmationDialog(
                 Text("Cancel")
             }
         },
-        containerColor = Color(0xFFF5F5F5)
+        containerColor = lightGrey
     )
 }
 
@@ -186,19 +187,21 @@ fun PasswordInputDialog(
                     onValueChange = onPasswordChange,
                     label = { Text("Password") },
                     visualTransformation = PasswordVisualTransformation(),
+                    shape = RoundedCornerShape(25.dp),
                     singleLine = true
                 )
             }
         },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text("Confirm")
+                Text("Delete")
             }
         },
         dismissButton = {
             TextButton(onClick = onDismissRequest) {
                 Text("Cancel")
             }
-        }
+        },
+        containerColor = lightGrey
     )
 }

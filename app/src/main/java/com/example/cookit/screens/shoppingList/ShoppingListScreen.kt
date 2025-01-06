@@ -45,6 +45,8 @@ import androidx.navigation.NavHostController
 import com.example.cookit.R
 import com.example.cookit.screens.components.NavigationBar
 import com.example.cookit.ui.theme.darkOrange
+import com.example.cookit.ui.theme.lightGrey
+import com.example.cookit.ui.theme.lightOrange
 
 
 @Composable
@@ -189,29 +191,22 @@ fun ShoppingListScreen(
             if (showWarningDialog) {
                 AlertDialog(
                     onDismissRequest = { showWarningDialog = false },
-                    title = {
-                        Text(text = "Clear Shopping List", style = MaterialTheme.typography.titleMedium)
-                    },
-                    text = {
-                        Text("Are you sure you want to remove all items from your shopping list? This action cannot be undone.")
-                    },
+                    title = { Text(text = "Clear Shopping List") },
+                    text = { Text("Are you sure you want to remove all items from your shopping list? This action cannot be undone.") },
                     confirmButton = {
-                        TextButton(
-                            onClick = {
-                                viewModel.removeAllItems(navController)
-                                showWarningDialog = false
-                            }
-                        ) {
-                            Text("Confirm", color = Color.Red)
+                        TextButton(onClick = {
+                            viewModel.removeAllItems(navController)
+                            showWarningDialog = false
+                        }) {
+                            Text("Delete")
                         }
                     },
                     dismissButton = {
-                        TextButton(
-                            onClick = { showWarningDialog = false }
-                        ) {
+                        TextButton(onClick = { showWarningDialog = false }) {
                             Text("Cancel")
                         }
-                    }
+                    },
+                    containerColor = lightGrey
                 )
             }
         }
