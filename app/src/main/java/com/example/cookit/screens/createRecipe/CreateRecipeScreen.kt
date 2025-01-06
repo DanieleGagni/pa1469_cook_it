@@ -81,9 +81,7 @@ class CreateRecipeScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            CookItTheme() {
-                CreateRecipeScreen()
-            }
+            CreateRecipeScreen()
         }
     }
 }
