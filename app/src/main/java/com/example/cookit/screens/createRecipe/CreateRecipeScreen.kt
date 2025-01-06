@@ -1,7 +1,10 @@
 package com.example.cookit.screens.createRecipe
 
 import android.net.Uri
+import android.os.Bundle
 import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -60,6 +63,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.cookit.screens.components.Recipe
 import com.example.cookit.screens.logIn.LoginUiState
 import com.example.cookit.screens.logIn.LoginViewModel
+// import com.example.cookit.ui.theme.CookItTheme
 import com.example.cookit.ui.theme.darkOrange
 import com.example.cookit.ui.theme.lightGrey
 import com.example.cookit.ui.theme.lightOrange
@@ -73,111 +77,15 @@ import kotlinx.coroutines.flow.StateFlow
 import java.util.UUID
 import kotlin.math.truncate
 
-class CreateRecipeViewModel : ViewModel() {
-
-    private val db = Firebase.firestore
-    private val recipesCollection = db.collection("recipes")
-
-    fun addRecipe(recipe: Recipe) {
-        val id = UUID.randomUUID().toString()
-        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
-
-        if (currentUserId == null) {
-            Log.e("[ERROR]", "User is not authenticated.")
-            return
-        }
-
-        val updatedRecipe = recipe
-            .copy(
-                id = id,
-                createdBy = currentUserId
-            )
-            .withTitleKeywords(extractTitleKeywords(recipe.title))
-            .withIngredientsKeywords(extractIngredientsKeywords(recipe.ingredients))
-
-        recipesCollection
-            .document(id)
-            .set(updatedRecipe)
-            .addOnSuccessListener {
-                Log.d("[DEBUG]", "Recipe '${updatedRecipe.title}' added successfully with ID: $id")
-                //Log.d("[------------------------- DEBUG]", "Recipe '${updatedRecipe.title}' added successfully.")
-                //Log.d("[------------------------- DEBUG]", "Recipe added with ID: ${documentReference.id}")
-            }
-            .addOnFailureListener { e ->
-                Log.e(
-                    "[------------------------- DEBUG]",
-                    "Error adding recipe '${updatedRecipe.title}': ${e.message}"
-                )
-            }
-    }
-
-    // extract keywords from recipe title
-    private fun extractTitleKeywords(title: String): List<String> {
-
-        // \b([A-Za-z]+)\b --> matches only alphabetic characters
-        val wordPattern = "\\b([A-Za-z]+)\\b".toRegex()
-
-        val STOP_WORDS = setOf(
-            "a", "an", "and", "as", "at", "by", "for", "from", "in", "into", "of",
-            "on", "or", "the", "to", "with", "your", "my", "our", "their", "this",
-            "that", "these", "those", "over", "under", "around", "up", "down", "out",
-            "inside", "outside", "through", "onto", "off"
-        )
-
-
-        val extractedKeywords = wordPattern.findAll(title)
-            .map { it.groupValues[1] } //extracts ONLY the captured word group
-            .map { it.lowercase() }
-            .filter { it !in STOP_WORDS }
-            .toList()
-
-        extractedKeywords.forEach { keyword ->
-            Log.d("[------------------------- DEBUG]", "------------------------- $keyword")
-        }
-
-        return extractedKeywords
-    }
-
-    // extract keywords from ingredients
-    private fun extractIngredientsKeywords(ingredients: List<String>): MutableList<String> {
-
-        val regex = """(?:\d+\s*[^a-zA-Z]*|\b)([a-zA-Z\s]+?)(?=\b\d*[^a-zA-Z]*$|\b)""".toRegex()
-
-        val STOP_WORDS = setOf(
-            "cup", "teaspoon", "tablespoon", "small", "medium", "large", "chopped", "diced", "minced", "fresh",
-            "optional", "to", "taste", "and", "or", "any", "half", "cooked", "ounces", "pounds", "g", "mg", "ml",
-            "liter", "kilogram", "gram", "liter", "tsp", "tbsp", "flour", "salt", "pepper", "oil", "water", "sugar",
-            "butter", "cheese", "egg"
-        )
-
-        val allKeywords = mutableListOf<String>()
-
-        ingredients.forEach { ingredient ->
-            val extractedKeywords = mutableListOf<String>()
-
-            regex.findAll(ingredient).forEach { matchResult ->
-
-                val keyword = matchResult.groupValues[1].trim().lowercase()
-
-                if (keyword.isNotBlank() && keyword !in STOP_WORDS) {
-                    allKeywords.add(keyword)
-                }
+class CreateRecipeScreen : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            CookItTheme() {
+                CreateRecipeScreen()
             }
         }
-
-        return allKeywords
     }
-
-    fun Recipe.withTitleKeywords(titleKeywords: List<String>): Recipe {
-        return this.copy(title_keywords = titleKeywords)
-    }
-
-    fun Recipe.withIngredientsKeywords(ingredientsKeywords: List<String>): Recipe {
-        return this.copy(ingredients_keywords = ingredientsKeywords)
-    }
-
-
-
 }
 
 @Composable
@@ -437,7 +345,7 @@ fun AddEditStepsScreen(steps: MutableList<String>) {
 @Composable
 fun CreateRecipeScreen(
     navController: NavHostController,
-    viewModel: CreateRecipeViewModel = viewModel()
+    viewModel: CreateRecipeViewModel
 ) {
     var title by remember { mutableStateOf("") }
     var estimatedTime by remember { mutableStateOf("") }
@@ -780,12 +688,8 @@ fun CreateRecipeScreen(
                         )
                     }
 
+                    viewModel.addRecipe(navController, recipe)
 
-                    viewModel.addRecipe(recipe)
-
-
-                    val recipeJson = Uri.encode(Gson().toJson(recipe))
-                    navController.navigate("showRecipe/$recipeJson")
                 },
                 enabled = isEnabled,
                 colors = ButtonDefaults.buttonColors(
@@ -802,13 +706,5 @@ fun CreateRecipeScreen(
             }
         }
     }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun CreateRecipeScreenPreview() {
-    val navController = rememberNavController() // Dummy NavController for preview
-    CreateRecipeScreen(navController)
 }
 

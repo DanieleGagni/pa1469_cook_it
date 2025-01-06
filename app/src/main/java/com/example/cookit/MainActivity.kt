@@ -21,7 +21,10 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.cookit.screens.listRecipes.ListRecipesScreen
 import com.example.cookit.screens.components.Recipe
+import com.example.cookit.screens.createRecipe.CreateRecipeViewModel
 import com.example.cookit.screens.editRecipe.EditRecipeScreen
+import com.example.cookit.screens.editRecipe.EditRecipeViewModel
+import com.example.cookit.screens.listRecipes.ListRecipesViewModel
 import com.example.cookit.screens.searchRecipe.FilterIngredientsScreen
 import com.example.cookit.screens.searchRecipe.SearchRecipeScreen
 //import com.example.cookit.screens.searchRecipe.FilterIngredientsScreen
@@ -62,6 +65,10 @@ fun App() {
         }
     }
 
+    // shared instance, ensure search history is retained during the current session
+    // TODO we could add it to Firebase
+    val searchRecipeViewModel: SearchRecipeViewModel = viewModel()
+
     NavHost(
         navController = navController,
         startDestination = "logIn",
@@ -71,16 +78,17 @@ fun App() {
         composable("home") { HomeScreen(navController) }
 
         composable("searchRecipes") {
-            val recipeViewModel: SearchRecipeViewModel = viewModel()
-            SearchRecipeScreen(navController, recipeViewModel)
+            SearchRecipeScreen(navController, searchRecipeViewModel)
         }
 
         composable("filterIngredients") {
-            val recipeViewModel: SearchRecipeViewModel = viewModel()
-            FilterIngredientsScreen(navController, recipeViewModel)
+            FilterIngredientsScreen(navController, searchRecipeViewModel)
         }
 
-        composable("createRecipe") { CreateRecipeScreen(navController) }
+        composable("createRecipe") {
+            val createRecipeViewModel: CreateRecipeViewModel = viewModel()
+            CreateRecipeScreen(navController, createRecipeViewModel)
+        }
 
         composable(
             route = "showRecipe/{recipeJson}",
@@ -107,6 +115,9 @@ fun App() {
                 }
             )
         ) { backStackEntry ->
+
+            val listRecipesViewModel: ListRecipesViewModel = viewModel()
+            
             val recipeIdListJson = backStackEntry.arguments?.getString("recipeIdList")
             val isFavorites = backStackEntry.arguments?.getBoolean("isFavorites") ?: false
             val type = backStackEntry.arguments?.getString("type") ?: ""
@@ -116,6 +127,7 @@ fun App() {
             } ?: emptyList()
 
             ListRecipesScreen(
+                viewModel = listRecipesViewModel,
                 navController = navController,
                 recipeIds = recipeIdList,
                 isFavorites = isFavorites,
@@ -123,10 +135,14 @@ fun App() {
             )
         }
 
-        composable("editRecipe/{recipeId}") { backStackEntry ->
+        composable(
+            route = "editRecipe/{recipeId}",
+            arguments = listOf(navArgument("recipeId") { type = NavType.StringType })
+        ) { backStackEntry ->
             val recipeId = backStackEntry.arguments?.getString("recipeId")
             recipeId?.let {
-                EditRecipeScreen(navController, recipeId)
+                val editRecipeViewModel: EditRecipeViewModel = viewModel()
+                EditRecipeScreen(navController, recipeId, editRecipeViewModel)
             }
         }
     }

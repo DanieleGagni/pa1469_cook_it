@@ -1,24 +1,31 @@
 package com.example.cookit.screens.editRecipe
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -29,11 +36,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -42,93 +51,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import com.example.cookit.screens.components.Recipe
-import com.example.cookit.screens.createRecipe.AddEditIngredients
-import com.example.cookit.screens.createRecipe.AddEditStepsScreen
-import com.example.cookit.ui.theme.darkOrange
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-
-class EditRecipeViewModel : ViewModel() {
-
-    private val db = Firebase.firestore
-    private val recipesCollection = db.collection("recipes")
-
-    private val _editingRecipe = MutableStateFlow<Recipe?>(null)
-    val editingRecipe: StateFlow<Recipe?> = _editingRecipe
-
-    fun loadRecipe(recipeId: String) {
-        recipesCollection.document(recipeId).get()
-            .addOnSuccessListener { documentSnapshot ->
-                val recipe = documentSnapshot.toObject(Recipe::class.java)
-                _editingRecipe.value = recipe
-                println("Recipe loaded: $recipe")
-            }
-            .addOnFailureListener { e ->
-                e.printStackTrace()
-                println("Error loading recipe: ${e.message}")
-            }
-    }
-
-    fun updateRecipe(
-        recipeId: String,
-        updatedRecipe: Recipe,
-        onSuccess: () -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-        val updatedRecipeWithKeywords = updatedRecipe
-            .withTitleKeywords(extractTitleKeywords(updatedRecipe.title))
-            .withIngredientsKeywords(extractIngredientsKeywords(updatedRecipe.ingredients))
-
-        recipesCollection.document(recipeId).set(updatedRecipeWithKeywords)
-            .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener { e -> onFailure(e) }
-    }
-
-    private fun extractTitleKeywords(title: String): List<String> {
-        val wordPattern = "\\b([A-Za-z]+)\\b".toRegex()
-        val STOP_WORDS = setOf(
-            "a", "an", "and", "as", "at", "by", "for", "from", "in", "into", "of",
-            "on", "or", "the", "to", "with", "your", "my", "our", "their", "this",
-            "that", "these", "those", "over", "under", "around", "up", "down", "out",
-            "inside", "outside", "through", "onto", "off"
-        )
-        return wordPattern.findAll(title)
-            .map { it.groupValues[1].lowercase() }
-            .filter { it !in STOP_WORDS }
-            .toList()
-    }
-
-    private fun extractIngredientsKeywords(ingredients: List<String>): MutableList<String> {
-        val regex = """(?:\d+\s*[^a-zA-Z]*|\b)([a-zA-Z\s]+?)(?=\b\d*[^a-zA-Z]*$|\b)""".toRegex()
-        val STOP_WORDS = setOf(
-            "cup", "teaspoon", "tablespoon", "small", "medium", "large", "chopped", "diced", "minced", "fresh",
-            "optional", "to", "taste", "and", "or", "any", "half", "cooked", "ounces", "pounds", "g", "mg", "ml",
-            "liter", "kilogram", "gram", "liter", "tsp", "tbsp", "flour", "salt", "pepper", "oil", "water", "sugar",
-            "butter", "cheese", "egg"
-        )
-        return ingredients.flatMap { ingredient ->
-            regex.findAll(ingredient).mapNotNull { matchResult ->
-                val keyword = matchResult.groupValues[1].trim().lowercase()
-                if (keyword.isNotBlank() && keyword !in STOP_WORDS) keyword else null
-            }
-        }.toMutableList()
-    }
-
-    fun Recipe.withTitleKeywords(titleKeywords: List<String>): Recipe {
-        return this.copy(title_keywords = titleKeywords)
-    }
-
-    fun Recipe.withIngredientsKeywords(ingredientsKeywords: List<String>): Recipe {
-        return this.copy(ingredients_keywords = ingredientsKeywords)
-    }
-}
 
 @Composable
 fun EditRecipeScreen(
@@ -138,8 +62,16 @@ fun EditRecipeScreen(
 ) {
     val recipe by viewModel.editingRecipe.collectAsState()
 
+    var hasBeenEdited by remember { mutableStateOf(false) }
+    var showBackWarning by remember { mutableStateOf(false) }
+    var showSaveWarning by remember { mutableStateOf(false) }
+
     LaunchedEffect(recipeId) {
         viewModel.loadRecipe(recipeId)
+    }
+
+    BackHandler(enabled = hasBeenEdited) {
+        showBackWarning = true
     }
 
     if (recipe == null) {
@@ -153,15 +85,127 @@ fun EditRecipeScreen(
             )
         }
     } else {
+
         var title by remember { mutableStateOf(recipe!!.title) }
         var estimatedTime by remember { mutableStateOf(recipe!!.estimatedTime.toString()) }
         var type by remember { mutableStateOf(recipe!!.type) }
         var serves by remember { mutableStateOf(recipe!!.serves.toString()) }
-        val ingredients = remember { mutableStateListOf(*recipe!!.ingredients.toTypedArray()) }
-        val steps = remember { mutableStateListOf(*recipe!!.steps.toTypedArray()) }
+        var ingredients = remember { mutableStateListOf(*recipe!!.ingredients.toTypedArray()) }
+        var steps = remember { mutableStateListOf(*recipe!!.steps.toTypedArray()) }
+        var createdBy by remember { mutableStateOf(recipe!!.createdBy) }
+
+        var currentStep by remember { mutableStateOf("") }
+        var editStepIndex by remember { mutableStateOf(-1) }
+
+        var currentIngredient by remember { mutableStateOf("") }
+        var editIngredientIndex by remember { mutableStateOf(-1) }
 
         val keyboardController = LocalSoftwareKeyboardController.current
         val typeOptions = listOf("vegetarian", "quick", "complex", "other")
+
+        if (showBackWarning) {
+            AlertDialog(
+                onDismissRequest = { showBackWarning = false },
+                title = { Text("Recipe has been updated") },
+                text = { Text("Do you want to save your changes?") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+
+                            val ingrediets_keywords = viewModel.extractIngredientsKeywords(ingredients)
+                            val title_keywords = viewModel.extractTitleKeywords(title)
+
+                            val updatedRecipe = recipe!!.copy(
+                                id = recipeId,
+                                title = title,
+                                title_keywords = title_keywords,
+                                estimatedTime = estimatedTime.toIntOrNull() ?: 0,
+                                type = type,
+                                serves = serves.toIntOrNull() ?: 0,
+                                ingredients = ingredients.toList(),
+                                ingredients_keywords = ingrediets_keywords,
+                                steps = steps.toList(),
+                                createdBy = createdBy
+                            )
+
+                            viewModel.updateRecipe(
+                                recipeId = recipeId,
+                                updatedRecipe = updatedRecipe,
+                                onSuccess = { navController.navigate("home") },
+                                onFailure = { e -> println("Error updating recipe: ${e.message}") }
+                            )
+                            showBackWarning = false
+
+                        }
+                    ) {
+                        Text("Save")
+                    }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = {
+                            showBackWarning = false
+                        }
+                    ) {
+                        Text("Go Back")
+                    }
+                }
+            )
+        }
+
+        if (showSaveWarning) {
+            AlertDialog(
+                onDismissRequest = { showSaveWarning = false },
+                title = { Text("Recipe has been updated") },
+                text = { Text("Do you want to save your changes?") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+
+                            val ingrediets_keywords = viewModel.extractIngredientsKeywords(ingredients)
+                            val title_keywords = viewModel.extractTitleKeywords(title)
+
+                            val updatedRecipe = recipe!!.copy(
+                                id = recipeId,
+                                title = title,
+                                title_keywords = title_keywords,
+                                estimatedTime = estimatedTime.toIntOrNull() ?: 0,
+                                type = type,
+                                serves = serves.toIntOrNull() ?: 0,
+                                ingredients = ingredients.toList(),
+                                ingredients_keywords = ingrediets_keywords,
+                                steps = steps.toList(),
+                                createdBy = createdBy
+                            )
+
+
+                            viewModel.updateRecipe(
+                                recipeId = recipeId,
+                                updatedRecipe = updatedRecipe,
+                                onSuccess = { navController.navigate("home") },
+                                onFailure = { e -> println("Error updating recipe: ${e.message}") }
+                            )
+
+                            showSaveWarning = false
+
+                        }
+                    ) {
+                        Text("Save")
+                    }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = {
+
+                            showSaveWarning = false
+                            navController.navigate("home")
+                        }
+                    ) {
+                        Text("Discard")
+                    }
+                }
+            )
+        }
 
         LazyColumn(
             modifier = Modifier
@@ -219,8 +263,11 @@ fun EditRecipeScreen(
                         modifier = Modifier
                             .fillMaxWidth(),
                         value = title,
-                        onValueChange = { title = it },
-                        label = { Text(text = "Enter Menu Name") },
+                        onValueChange = {
+                            title = it
+                            hasBeenEdited = true
+                        },
+                        label = { Text(text = "Enter Recipe Name") },
                         maxLines = 1,
                         singleLine = true,
                         colors = TextFieldDefaults.colors(
@@ -279,6 +326,7 @@ fun EditRecipeScreen(
                                 onClick = {
                                     type = option
                                     expanded = false
+                                    hasBeenEdited = true
                                 }
                             )
                         }
@@ -307,6 +355,7 @@ fun EditRecipeScreen(
                                 newValue ->
                             if(newValue.all { it.isDigit() }) {
                                 estimatedTime = newValue
+                                hasBeenEdited = true
                             } },
                         label = { Text(text = "Enter Estimated Time (minutes)") },
                         maxLines = 1,
@@ -354,6 +403,7 @@ fun EditRecipeScreen(
                                 newValue ->
                             if(newValue.all { it.isDigit() }) {
                                 serves = newValue
+                                hasBeenEdited = true
                             } },
                         label = { Text(text = "Enter Servings") },
                         maxLines = 1,
@@ -403,7 +453,114 @@ fun EditRecipeScreen(
                         color = Color.Black,
                         modifier = Modifier.padding(start = 8.dp)
                     )
-                    AddEditIngredients(ingredients)
+
+                    //AddEditIngredients(ingredients)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        TextField(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            value = currentIngredient,
+                            onValueChange = { newText ->
+                                currentIngredient = newText
+                                hasBeenEdited = true
+                            },
+                            label = {
+                                Text(
+                                    text = if (editIngredientIndex >= 0) "Edit Ingredient" else "Enter Ingredient"
+                                )
+                            },
+                            maxLines = 1,
+                            singleLine = true,
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel al enfocar
+                                unfocusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel sin enfocar
+                                disabledContainerColor = Color(0xFFE0E0E0), // Fondo gris si está deshabilitado
+                                errorContainerColor = Color(0xFFFFCDD2), // Fondo rojo en caso de error
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                errorIndicatorColor = Color.Transparent
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onDone = {
+                                    if (currentIngredient.isNotBlank()) {
+                                        if (editIngredientIndex >= 0) {
+                                            ingredients[editIngredientIndex] = currentIngredient
+                                            editIngredientIndex = -1
+                                        } else {
+                                            ingredients.add(currentIngredient)
+                                        }
+                                        currentIngredient = ""
+                                        keyboardController?.hide()
+                                    }
+                                }
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                        )
+                        Column(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+                            Text(text = "Ingredients:")
+                            ingredients.forEachIndexed { index, ingredient ->
+                                Row(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "・$ingredient",
+                                        Modifier.weight(1f)
+                                    )
+                                    Button(
+                                        onClick = {
+                                            currentIngredient = ingredient
+                                            editIngredientIndex = index
+                                            hasBeenEdited = true
+                                        },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = Color.LightGray,
+                                            contentColor = Color.Black
+                                        ),
+                                        modifier = Modifier
+                                            .padding(horizontal = 3.dp)
+                                            .size(48.dp),
+                                        contentPadding = PaddingValues(0.dp)
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(id = android.R.drawable.ic_menu_edit),
+                                            contentDescription = "Edit Ingredient",
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
+                                    Button(
+                                        onClick = {
+                                            ingredients.removeAt(index)
+                                            hasBeenEdited = true
+                                        },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = Color.LightGray,
+                                            contentColor = Color.Black
+                                        ),
+                                        modifier = Modifier
+                                            .padding(horizontal = 4.dp)
+                                            .size(48.dp),
+                                        contentPadding = PaddingValues(0.dp)
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(id = android.R.drawable.ic_menu_delete),
+                                            contentDescription = "Delete Ingredient",
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -430,37 +587,138 @@ fun EditRecipeScreen(
                         color = Color.Black,
                         modifier = Modifier.padding(start = 16.dp)
                     )
-                    AddEditStepsScreen(steps)
+
+                    // AddEditStepsScreen(steps)
+                    Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                            TextField(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                value = currentStep,
+                                onValueChange = { newText ->
+                                    currentStep = newText
+                                    hasBeenEdited = true
+                                },
+                                label = {
+                                    Text(
+                                        text = when {
+                                            editStepIndex >= 0 -> "Edit Step"
+                                            //insertIndex >= 0 -> "Insert Step"
+                                            else -> "Enter Step"
+                                        }
+                                    )
+                                },
+                                maxLines = 1,
+                                singleLine = true,
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel al enfocar
+                                    unfocusedContainerColor = Color(0xFFFFE4C4), // Fondo naranja pastel sin enfocar
+                                    disabledContainerColor = Color(0xFFE0E0E0), // Fondo gris si está deshabilitado
+                                    errorContainerColor = Color(0xFFFFCDD2), // Fondo rojo en caso de error
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent,
+                                    errorIndicatorColor = Color.Transparent
+                                ),
+                                keyboardActions = KeyboardActions(
+                                    onDone = {
+                                        if (currentStep.isNotBlank()) {
+                                            when {
+                                                editStepIndex >= 0 -> {
+                                                    steps[editStepIndex] = currentStep
+                                                    editStepIndex = -1
+                                                }
+                                                else -> {
+                                                    steps.add(currentStep)
+                                                }
+                                            }
+                                            currentStep = ""
+                                            keyboardController?.hide()
+                                        }
+                                    }
+                                ),
+                                shape = RoundedCornerShape(12.dp),
+                            )
+                            Column(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                            ) {
+                                Text(text = "Steps:")
+                                steps.forEachIndexed { index, step ->
+                                    Row(
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "${index + 1}.$step",
+                                            Modifier.weight(1f)
+                                        )
+                                        Button(
+                                            onClick = {
+                                                currentStep = step
+                                                editStepIndex = index
+                                                hasBeenEdited = true
+                                            },
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = Color.LightGray,
+                                                contentColor = Color.Black
+                                            ),
+                                            modifier = Modifier
+                                                .padding(horizontal = 4.dp)
+                                                .size(48.dp),
+                                            contentPadding = PaddingValues(0.dp)
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(id = android.R.drawable.ic_menu_edit),
+                                                contentDescription = "Edit Step",
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                        }
+
+                                        Button(
+                                            onClick = {
+                                                steps.removeAt(index)
+                                                hasBeenEdited = true
+                                            },
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = Color.LightGray,
+                                                contentColor = Color.Black
+                                            ),
+                                            modifier = Modifier
+                                                .padding(horizontal = 4.dp)
+                                                .size(48.dp),
+                                            contentPadding = PaddingValues(0.dp)
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(id = android.R.drawable.ic_menu_delete),
+                                                contentDescription = "Delete Step",
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
                 }
             }
 
             item {
                 val isEnabled = title.isNotBlank() &&
-                        estimatedTime.isNotBlank() &&
-                        estimatedTime.all { it.isDigit() } &&
-                        serves.isNotBlank() &&
-                        serves.all { it.isDigit() } &&
-                        type.isNotBlank() &&
-                        ingredients.isNotEmpty() &&
-                        steps.isNotEmpty()
+                                estimatedTime.isNotBlank() &&
+                                estimatedTime.all { it.isDigit() } &&
+                                serves.isNotBlank() &&
+                                serves.all { it.isDigit() } &&
+                                type.isNotBlank() &&
+                                ingredients.isNotEmpty() &&
+                                steps.isNotEmpty() &&
+                                hasBeenEdited
 
                 Button(
-                    onClick = {
-                        val updatedRecipe = recipe!!.copy(
-                            title = title,
-                            estimatedTime = estimatedTime.toIntOrNull() ?: 0,
-                            type = type,
-                            serves = serves.toIntOrNull() ?: 0,
-                            ingredients = ingredients.toList(),
-                            steps = steps.toList()
-                        )
-                        viewModel.updateRecipe(
-                            recipeId = recipeId,
-                            updatedRecipe = updatedRecipe,
-                            onSuccess = { navController.navigate("home") },
-                            onFailure = { e -> println("Error updating recipe: ${e.message}") }
-                        )
-                    },
+                    onClick = { showSaveWarning = true },
                     enabled = isEnabled,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (isEnabled) {
@@ -472,7 +730,7 @@ fun EditRecipeScreen(
                     ),
                     modifier = Modifier.padding(16.dp)
                 ) {
-                    Text(text ="Upadate Recipe")
+                    Text(text ="Update Recipe")
                 }
             }
         }
