@@ -1,6 +1,5 @@
 package com.example.cookit.screens.home
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,20 +33,10 @@ fun HomeScreen(navController: NavHostController) {
     val currentUser = auth.currentUser
     val userName = currentUser?.displayName ?: "User" // Fallback to "User" if name is not set
 
-    fun handleSearchByCategory() {
-        // Navigate to the search by category screen
-        navController.navigate("searchRecipes")
-    }
-
-    fun handleSearchByIngredients() {
-        // Navigate to the search by ingredients screen
-        navController.navigate("filterIngredients")
-    }
-
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            NavigationBar(navController) // Barra de navegación inferior
+            NavigationBar(navController)
         },
         content = { innerPadding ->
             Column(
@@ -55,12 +44,11 @@ fun HomeScreen(navController: NavHostController) {
                     .fillMaxSize()
                     .padding(innerPadding)
                     .background(Color.White),
-                horizontalAlignment = Alignment.CenterHorizontally // Centrar el contenido
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                Spacer(modifier = Modifier.height(24.dp)) // Más espacio superior
+                Spacer(modifier = Modifier.height(24.dp))
 
-                // Saludo en columna
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(horizontal = 16.dp)
@@ -74,16 +62,15 @@ fun HomeScreen(navController: NavHostController) {
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp)) // Espaciado entre saludo y eslogan
+                Spacer(modifier = Modifier.height(16.dp))
 
-                // Eslogan separado
                 Text(
                     text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(color = darkOrange)) { // Color naranja para "Cook"
+                        withStyle(style = SpanStyle(color = darkOrange)) {
                             append("Cook")
                         }
                         append(" with ease, connect\n\nthrough ")
-                        withStyle(style = SpanStyle(color = darkOrange)) { // Color naranja para "Cook"
+                        withStyle(style = SpanStyle(color = darkOrange)) {
                             append("flavours")
                         }
                         append(".")
@@ -93,15 +80,15 @@ fun HomeScreen(navController: NavHostController) {
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(24.dp)) // Espacio entre eslogan y botones
+                Spacer(modifier = Modifier.height(24.dp))
 
-                // Botón "Search by Category"
+                // "Search by Name" Button
                 Button(
-                    onClick = { handleSearchByCategory() },
+                    onClick = { navController.navigate("searchRecipes") },
                     modifier = Modifier
                         .fillMaxWidth(0.8f)
                         .padding(vertical = 8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = darkOrange) // Set the background color
+                    colors = ButtonDefaults.buttonColors(containerColor = darkOrange)
                 ) {
                     Text(
                         text = "Search by Name",
@@ -110,15 +97,15 @@ fun HomeScreen(navController: NavHostController) {
                     )
                 }
 
-                Spacer(modifier = Modifier.height(5.dp)) // Espacio entre botones
+                Spacer(modifier = Modifier.height(5.dp))
 
-                // Botón "Search by Ingredients"
+                // "Search by Ingredients" Button
                 Button(
-                    onClick = { handleSearchByIngredients() },
+                    onClick = { navController.navigate("filterIngredients") },
                     modifier = Modifier
                         .fillMaxWidth(0.8f)
                         .padding(vertical = 8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = darkOrange) // Set the background color
+                    colors = ButtonDefaults.buttonColors(containerColor = darkOrange)
                 ) {
                     Text(
                         text = "Search by Ingredients",
@@ -127,7 +114,7 @@ fun HomeScreen(navController: NavHostController) {
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp)) // Espacio entre botones y categorías
+                Spacer(modifier = Modifier.height(16.dp))
 
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
