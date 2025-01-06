@@ -27,11 +27,10 @@ import com.example.cookit.screens.editRecipe.EditRecipeViewModel
 import com.example.cookit.screens.listRecipes.ListRecipesViewModel
 import com.example.cookit.screens.searchRecipe.FilterIngredientsScreen
 import com.example.cookit.screens.searchRecipe.SearchRecipeScreen
-//import com.example.cookit.screens.searchRecipe.FilterIngredientsScreen
-//import com.example.cookit.screens.searchRecipe.SearchRecipeScreen
 import com.example.cookit.screens.searchRecipe.SearchRecipeViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,8 +64,6 @@ fun App() {
         }
     }
 
-    // shared instance, ensure search history is retained during the current session
-    // TODO we could add it to Firebase
     val searchRecipeViewModel: SearchRecipeViewModel = viewModel()
 
     NavHost(
@@ -147,10 +144,3 @@ fun App() {
         }
     }
 }
-
-// when navigating to showRecipe, the call must look like this:
-
-// val recipeJson = Uri.encode(Gson().toJson(testRecipe))
-// navController.navigate("showRecipe/$recipeJson")
-
-// ... where testRecipe is your recipe object
