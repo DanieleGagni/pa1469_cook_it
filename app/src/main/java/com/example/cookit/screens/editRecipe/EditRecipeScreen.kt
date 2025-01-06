@@ -27,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -54,6 +55,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.cookit.ui.theme.darkOrange
+import com.example.cookit.ui.theme.lightGrey
+import com.example.cookit.ui.theme.lightOrange
 
 @Composable
 fun EditRecipeScreen(
@@ -107,101 +110,86 @@ fun EditRecipeScreen(
         if (showBackWarning) {
             AlertDialog(
                 onDismissRequest = { showBackWarning = false },
-                title = { Text("Recipe has been updated") },
+                title = { Text(text = "Recipe has been updated") },
                 text = { Text("Do you want to save your changes?") },
                 confirmButton = {
-                    Button(
-                        onClick = {
+                    TextButton(onClick = {
+                        val ingrediets_keywords = viewModel.extractIngredientsKeywords(ingredients)
+                        val title_keywords = viewModel.extractTitleKeywords(title)
 
-                            val ingrediets_keywords = viewModel.extractIngredientsKeywords(ingredients)
-                            val title_keywords = viewModel.extractTitleKeywords(title)
+                        val updatedRecipe = recipe!!.copy(
+                            id = recipeId,
+                            title = title,
+                            title_keywords = title_keywords,
+                            estimatedTime = estimatedTime.toIntOrNull() ?: 0,
+                            type = type,
+                            serves = serves.toIntOrNull() ?: 0,
+                            ingredients = ingredients.toList(),
+                            ingredients_keywords = ingrediets_keywords,
+                            steps = steps.toList(),
+                            createdBy = createdBy
+                        )
 
-                            val updatedRecipe = recipe!!.copy(
-                                id = recipeId,
-                                title = title,
-                                title_keywords = title_keywords,
-                                estimatedTime = estimatedTime.toIntOrNull() ?: 0,
-                                type = type,
-                                serves = serves.toIntOrNull() ?: 0,
-                                ingredients = ingredients.toList(),
-                                ingredients_keywords = ingrediets_keywords,
-                                steps = steps.toList(),
-                                createdBy = createdBy
-                            )
-
-                            viewModel.updateRecipe(
-                                recipeId = recipeId,
-                                updatedRecipe = updatedRecipe,
-                                onSuccess = { navController.navigate("home") },
-                                onFailure = { e -> println("Error updating recipe: ${e.message}") }
-                            )
-                            showBackWarning = false
-
-                        }
-                    ) {
+                        viewModel.updateRecipe(
+                            recipeId = recipeId,
+                            updatedRecipe = updatedRecipe,
+                            onSuccess = { navController.navigate("home") },
+                            onFailure = { e -> println("Error updating recipe: ${e.message}") }
+                        )
+                        showBackWarning = false
+                    }) {
                         Text("Save")
                     }
                 },
                 dismissButton = {
-                    Button(
-                        onClick = {
-                            showBackWarning = false
-                        }
-                    ) {
+                    TextButton(onClick = { showBackWarning = false }) {
                         Text("Go Back")
                     }
-                }
+                },
+                containerColor = lightGrey
             )
         }
 
         if (showSaveWarning) {
             AlertDialog(
                 onDismissRequest = { showSaveWarning = false },
-                title = { Text("Recipe has been updated") },
+                title = { Text(text = "Recipe has been updated") },
                 text = { Text("Do you want to save your changes?") },
                 confirmButton = {
-                    Button(
-                        onClick = {
+                    TextButton(onClick = {
+                        val ingrediets_keywords = viewModel.extractIngredientsKeywords(ingredients)
+                        val title_keywords = viewModel.extractTitleKeywords(title)
 
-                            val ingrediets_keywords = viewModel.extractIngredientsKeywords(ingredients)
-                            val title_keywords = viewModel.extractTitleKeywords(title)
+                        val updatedRecipe = recipe!!.copy(
+                            id = recipeId,
+                            title = title,
+                            title_keywords = title_keywords,
+                            estimatedTime = estimatedTime.toIntOrNull() ?: 0,
+                            type = type,
+                            serves = serves.toIntOrNull() ?: 0,
+                            ingredients = ingredients.toList(),
+                            ingredients_keywords = ingrediets_keywords,
+                            steps = steps.toList(),
+                            createdBy = createdBy
+                        )
 
-                            val updatedRecipe = recipe!!.copy(
-                                id = recipeId,
-                                title = title,
-                                title_keywords = title_keywords,
-                                estimatedTime = estimatedTime.toIntOrNull() ?: 0,
-                                type = type,
-                                serves = serves.toIntOrNull() ?: 0,
-                                ingredients = ingredients.toList(),
-                                ingredients_keywords = ingrediets_keywords,
-                                steps = steps.toList(),
-                                createdBy = createdBy
-                            )
+                        viewModel.updateRecipe(
+                            recipeId = recipeId,
+                            updatedRecipe = updatedRecipe,
+                            onSuccess = { navController.navigate("home") },
+                            onFailure = { e -> println("Error updating recipe: ${e.message}") }
+                        )
 
-
-                            viewModel.updateRecipe(
-                                recipeId = recipeId,
-                                updatedRecipe = updatedRecipe,
-                                onSuccess = { navController.navigate("home") },
-                                onFailure = { e -> println("Error updating recipe: ${e.message}") }
-                            )
-
-                            showSaveWarning = false
-
-                        }
-                    ) {
+                        showSaveWarning = false
+                    }) {
                         Text("Save")
                     }
                 },
                 dismissButton = {
-                    Button(
-                        onClick = {
-
-                            showSaveWarning = false
-                            navController.navigate("home")
-                        }
-                    ) {
+                    TextButton(onClick = {
+                        showSaveWarning = false
+                        navController.navigate("home")
+                    }) {
                         Text("Discard")
                     }
                 }

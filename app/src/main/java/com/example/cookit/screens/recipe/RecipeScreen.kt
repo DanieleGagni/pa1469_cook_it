@@ -55,6 +55,8 @@ import com.example.cookit.R
 import com.example.cookit.screens.components.NavigationBar
 import com.example.cookit.screens.components.Recipe
 import com.example.cookit.ui.theme.darkOrange
+import com.example.cookit.ui.theme.lightGrey
+import com.example.cookit.ui.theme.lightOrange
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -210,34 +212,22 @@ fun ConfirmDeleteDialog(
             Text(text = "Delete Recipe")
         },
         text = {
-            Text(
-                text = "Are you sure you want to delete this recipe?",
-                color = Color.Black
-            )
+            Text("Are you sure you want to delete this recipe?")
         },
         confirmButton = {
-            androidx.compose.material3.TextButton(
-                onClick = onConfirm,
-                modifier = Modifier
-                    .background(Color(0xFFFFE4C4), shape = RoundedCornerShape(4.dp))
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-            ) {
-                Text("Delete", color = Color.Black)
+            androidx.compose.material3.TextButton(onClick = onConfirm) {
+                Text("Delete")
             }
         },
         dismissButton = {
-            androidx.compose.material3.TextButton(
-                onClick = onDismiss,
-                modifier = Modifier
-                    .background(Color(0xFFFFE4C4), shape = RoundedCornerShape(4.dp))
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-            ) {
-                Text("Cancel", color = Color.Black)
+            androidx.compose.material3.TextButton(onClick = onDismiss) {
+                Text("Cancel")
             }
         },
-        containerColor = Color.White
+        containerColor = lightGrey
     )
 }
+
 
 
 
@@ -466,15 +456,14 @@ fun RecipeScreen(
                                     Icon(
                                         imageVector = Icons.Default.MoreVert,
                                         contentDescription = "Edit Recipe",
-                                        tint = Color(0xFFF58D1E),
+                                        tint = darkOrange,
                                         modifier = Modifier.size(35.dp)
                                     )
                                 }
                                 DropdownMenu(
                                     expanded = expanded,
                                     onDismissRequest = { expanded = false },
-                                    modifier = Modifier
-                                        .background(Color(0xFFFFF5DD))
+                                    modifier = Modifier.background(lightGrey)
                                 ) {
                                     DropdownMenuItem(
                                         text = { Text("Edit", color = Color.Black) },
