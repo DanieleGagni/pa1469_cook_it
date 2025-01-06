@@ -58,10 +58,13 @@ data class ShoppingItem(
     val done: Boolean
 )
 
-class ShoppingListViewModel : ViewModel() {
-    private val db = FirebaseFirestore.getInstance()
+class ShoppingListViewModel(
+    private val db: FirebaseFirestore = FirebaseFirestore.getInstance(),
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+) : ViewModel() {
+
     private val currentUserId: String?
-        get() = FirebaseAuth.getInstance().currentUser?.uid
+        get() = auth.currentUser?.uid
 
     private val _shoppingList = MutableStateFlow<List<ShoppingItem>>(emptyList())
     val shoppingList: StateFlow<List<ShoppingItem>> = _shoppingList
