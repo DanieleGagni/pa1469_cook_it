@@ -52,7 +52,7 @@ import androidx.navigation.NavHostController
 import com.example.cookit.R
 import com.example.cookit.screens.components.NavigationBar
 import com.example.cookit.screens.components.Recipe
-import com.example.cookit.ui.theme.CookItTheme
+import com.example.cookit.ui.theme.darkOrange
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
@@ -108,7 +108,7 @@ fun ListRecipesScreen(
                         text = buildAnnotatedString {
                             withStyle(
                                 style = SpanStyle(
-                                    color = Color(0xFFF58D1E),
+                                    color = darkOrange,
                                     fontWeight = FontWeight.Bold
                                 )
                             ) {
@@ -116,7 +116,7 @@ fun ListRecipesScreen(
                             }
                             append("favorites")
                         },
-                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 25.sp),
+                        style = MaterialTheme.typography.labelLarge.copy(fontSize = 25.sp),
                         color = Color.Black,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
@@ -126,7 +126,7 @@ fun ListRecipesScreen(
                         text = buildAnnotatedString {
                             withStyle(
                                 style = SpanStyle(
-                                    color = Color(0xFFF58D1E),
+                                    color = darkOrange,
                                     fontWeight = FontWeight.Bold
                                 )
                             ) {
@@ -134,7 +134,7 @@ fun ListRecipesScreen(
                             }
                             append("results")
                         },
-                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 25.sp),
+                        style = MaterialTheme.typography.labelLarge.copy(fontSize = 25.sp),
                         color = Color.Black,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
@@ -269,14 +269,24 @@ fun RecipeItem(
                     }
                     Text(
                         text = recipe.type,
-                        style = MaterialTheme.typography.bodySmall.copy(color = Color.Gray),
+                        style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray),
                         maxLines = 2
+                    )
+
+                    Spacer(modifier = Modifier.width(60.dp))
+
+                    Text(
+                        text = "Estimated time: ",
+                        style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray)
+                    )
+                    Text(
+                        text = String.format(recipe.estimatedTime.toString()),
+                        style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray)
                     )
                 }
 
             }
             Column {
-                //HERE SHOULD GO THE OPTION TO ADD TO FAVOURITES
                 Icon(
                     painter =
                     if (isFavorite)

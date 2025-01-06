@@ -87,7 +87,9 @@ fun SearchRecipeScreen(navController: NavHostController, viewModel: SearchRecipe
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             SearchBar(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth(),
                 query = text,
                 onQueryChange = {
                     text = it
@@ -100,7 +102,10 @@ fun SearchRecipeScreen(navController: NavHostController, viewModel: SearchRecipe
                 active = active,
                 onActiveChange = { active = it },
                 placeholder = {
-                    Text(text = "Search Recipe")
+                    Text(
+                        text = "Search Recipe",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
                 },
                 leadingIcon = {
                     Icon(imageVector = Icons.Default.Search, contentDescription = "Search Icon")

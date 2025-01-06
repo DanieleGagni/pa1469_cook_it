@@ -230,7 +230,7 @@ fun EditRecipeScreen(
                             append("Edit")
                             withStyle(
                                 style = SpanStyle(
-                                    color = Color(0xFFF58D1E),
+                                    color = darkOrange,
                                     fontWeight = FontWeight.Bold)
                             ) {
                                 append(" Recipe")
@@ -722,7 +722,7 @@ fun EditRecipeScreen(
                     enabled = isEnabled,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (isEnabled) {
-                            Color(0xFFF58D1E)
+                            darkOrange
                         } else {
                             Color.Gray
                         },
