@@ -81,22 +81,21 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.0.0-alpha01")
     implementation("androidx.compose.ui:ui-tooling-preview:1.0.5")
     implementation("androidx.activity:activity-compose:1.4.0")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.0.5")
+
     testImplementation("junit:junit:4.13.2")
     testImplementation("io.mockk:mockk:1.12.4")
-    testImplementation("org.mockito:mockito-core:4.8.0")
-    androidTestImplementation("org.mockito:mockito-android:4.8.0")
+    testImplementation("org.mockito:mockito-core:5.5.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("androidx.arch.core:core-testing:2.1.0")
+    testImplementation("app.cash.turbine:turbine:1.0.0")
+
     androidTestImplementation("io.mockk:mockk-android:1.12.4")
     androidTestImplementation("androidx.test.ext:junit:1.1.3")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.0.5")
-    debugImplementation("androidx.compose.ui:ui-tooling:1.0.5")
-
-    //Estas son las nuevas
-    androidTestImplementation ("androidx.compose.ui:ui-test-junit4:1.5.0")
-    androidTestImplementation ("androidx.navigation:navigation-testing:2.7.0")
-    androidTestImplementation ("org.mockito:mockito-android:5.5.0")
-    testImplementation ("org.mockito:mockito-core:5.5.0")
-    testImplementation ("org.mockito.kotlin:mockito-kotlin:5.2.1")
-    androidTestImplementation ("org.mockito.kotlin:mockito-kotlin:5.2.1")
-
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.5.0")
+    androidTestImplementation("androidx.navigation:navigation-testing:2.7.0")
+    androidTestImplementation("org.mockito:mockito-android:5.5.0")
+    androidTestImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
 }
