@@ -19,20 +19,26 @@ data class AuthUiState(
     val isLoading: Boolean = false
 )
 
-class AuthViewModel : ViewModel() {
+class AuthViewModel(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+) : ViewModel() {
+
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> get() = _uiState
+
     fun onNameChange(newName: String) {
         _uiState.value = _uiState.value.copy(name = newName)
     }
+
     fun onUsernameChange(newUsername: String) {
         _uiState.value = _uiState.value.copy(username = newUsername)
     }
+
     fun onPasswordChange(newPassword: String) {
         _uiState.value = _uiState.value.copy(password = newPassword)
     }
-    private fun validateInputs(): Boolean {
+
+    fun validateInputs(): Boolean {
         val state = _uiState.value
         return when {
             state.name.isEmpty() -> {
@@ -57,6 +63,7 @@ class AuthViewModel : ViewModel() {
             }
         }
     }
+
     fun handleSignUp(navController: NavHostController) {
         if (validateInputs()) {
             _uiState.value = _uiState.value.copy(isLoading = true)
@@ -93,6 +100,7 @@ class AuthViewModel : ViewModel() {
                 }
         }
     }
+
     fun login(navController: NavHostController) {
         val username = _uiState.value.username
         val password = _uiState.value.password
