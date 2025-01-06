@@ -373,7 +373,9 @@ fun RecipeScreen(
             onConfirm = {
                 showDeleteDialog = false
                 viewModel.deleteRecipe(recipe.id)
-                navController.navigate("home")
+                navController.navigate("home") {
+                    popUpTo(0) { inclusive = true }
+                }
             },
             onDismiss = {
                 showDeleteDialog = false
