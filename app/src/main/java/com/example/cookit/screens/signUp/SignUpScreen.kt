@@ -251,6 +251,7 @@ fun SignUpScreen(
                         onClick = { viewModel.handleSignUp(navController) },
                         modifier = Modifier
                             .fillMaxWidth()
+                            .testTag("createAccountButton")
                             .padding(vertical = 8.dp),
                         enabled = !uiState.isLoading,
                         colors = ButtonDefaults.filledTonalButtonColors(

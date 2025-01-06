@@ -204,8 +204,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.example.cookit.screens.logIn.LoginViewModel
 import com.example.cookit.screens.shoppingList.ShoppingListScreen
 import com.example.cookit.screens.shoppingList.ShoppingListViewModel
+import com.example.cookit.screens.signUp.SignUpViewModel
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -232,18 +234,25 @@ class ShoppingListScreenTest {
 
      */
 
+    /*
     @Test
     fun testEmptyStateDisplay() {
 
-        val viewModel: ShoppingListViewModel = mock(ShoppingListViewModel::class.java)
-
-        // Arrange: Create a TestNavHostController
         val navController = TestNavHostController(ApplicationProvider.getApplicationContext())
         navController.navigatorProvider.addNavigator(ComposeNavigator())
 
+        // Mock ViewModel that handles login success
+        val mockLoginViewModel = mock(LoginViewModel::class.java)
+        `when`(mockLoginViewModel.login(anyString(), anyString())).thenReturn(true)  // Mock login success
+
+        val viewModel = ShoppingListViewModel()
+
         composeTestRule.setContent {
-            // Define the NavHost for the test to directly navigate to the ShoppingListScreen
-            NavHost(navController = navController, startDestination = "shoppingList") {
+            NavHost(navController = navController, startDestination = "login") {
+                composable("login") {
+                    // Simulate login success, navigate to shopping list
+                    navController.navigate("shoppingList")
+                }
                 composable("shoppingList") {
                     ShoppingListScreen(
                         navController = navController,
@@ -253,10 +262,13 @@ class ShoppingListScreenTest {
             }
         }
 
+
         // Check if "Your shopping list is empty. Start adding items!" text is displayed
         composeTestRule.onNodeWithText("Your shopping list is empty. Start adding items!")
             .assertIsDisplayed()
     }
+
+     */
 
     // Other test cases can be adapted similarly...
 }

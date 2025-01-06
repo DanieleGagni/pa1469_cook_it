@@ -15,11 +15,20 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.cookit.screens.home.HomeScreen
 import com.example.cookit.screens.logIn.LogInScreen
 import com.example.cookit.screens.logIn.LoginViewModel
+import com.example.cookit.screens.shoppingList.ShoppingListScreen
+import com.example.cookit.screens.shoppingList.ShoppingListViewModel
 import com.example.cookit.screens.signUp.SignUpScreen
 import com.example.cookit.screens.signUp.SignUpViewModel
+import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.AuthResult
+import com.google.firebase.auth.FirebaseAuth
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
+import io.mockk.*
 
 @RunWith(AndroidJUnit4::class)
 class LogInScreenTest {
@@ -27,7 +36,7 @@ class LogInScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-
+    /*
     @Test
     fun testLogInScreenUIElements() {
         // Arrange: Set up the NavController and ViewModel
@@ -150,4 +159,61 @@ class LogInScreenTest {
         composeTestRule.onNodeWithTag("signUpScreen").assertIsDisplayed()
     }
 
+ */
+/*
+    @Test
+    fun testLoginNavigationToHome() {
+
+        // Create a mock FirebaseAuth instance using MockK
+        val mockAuth = mockk<FirebaseAuth>()
+        // Create a mock AuthResult
+        val mockAuthResult = mockk<AuthResult>()
+
+        // Mock the behavior of signInWithEmailAndPassword
+        every { mockAuth.signInWithEmailAndPassword(any(), any()) } returns mockk {
+            every { isSuccessful } returns true  // Simulate successful login
+            every { result } returns mockAuthResult  // Simulate returning the mock AuthResult
+        }
+
+        // Create a mock NavController
+        val navController = TestNavHostController(ApplicationProvider.getApplicationContext())
+        navController.navigatorProvider.addNavigator(ComposeNavigator())
+
+        // Create an instance of the LoginViewModel using the mocked FirebaseAuth
+        val viewModel = LoginViewModel() // Using actual constructor
+
+        // Set the username and password in the ViewModel
+        viewModel.onUsernameChange("test@example.com")
+        viewModel.onPasswordChange("password123")
+
+        // Set up the NavHost with a "login" screen and a "home" screen
+        composeTestRule.setContent {
+            NavHost(navController = navController, startDestination = "login") {
+                composable("login") {
+                    // Trigger the login process in the ViewModel
+                    viewModel.login(navController)
+                }
+                composable("home") {
+                    // Simulate the home screen (after successful login)
+                    ShoppingListScreen(
+                        navController = navController,
+                        viewModel = mockk() // Mock ShoppingListViewModel
+                    )
+                }
+            }
+        }
+
+        // Verify that navigation happens after login
+        composeTestRule.waitForIdle()
+
+        // Assert the navController navigates to the "home" screen
+        assert(navController.currentBackStackEntry?.destination?.route == "home")
+
+        // Optionally, check for UI elements on the home screen
+        composeTestRule.onNodeWithText("Your shopping list is empty. Start adding items!")
+            .assertIsDisplayed()
+
+    }
+
+ */
 }

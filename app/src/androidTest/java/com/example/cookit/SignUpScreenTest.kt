@@ -95,12 +95,20 @@ class SignUpScreenTest {
         composeTestRule.onNodeWithText("Password").performTextInput("password123")
 
         // Click the "Create Account" button
-        composeTestRule.onNodeWithText("Create Account").performClick()
+        //composeTestRule.onNodeWithText("Create Account").performClick()
+        composeTestRule.onNodeWithTag("createAccountButton").performClick()
 
-        // Verify navigation to "home" (assuming successful sign-up)
+        // Debugging: Check if navigation occurred to "home"
+        assert(navController.currentDestination?.route == "home")
+
+        // Wait for idle to ensure UI updates have occurred
+        composeTestRule.waitForIdle()
+
+        // Now, check if the "homeScreen" tag is displayed
         composeTestRule.onNodeWithTag("homeScreen").assertIsDisplayed()
-        //assert(navController.currentDestination?.route == "home")
     }
+
+
 
     @Test
     fun testSignUpValidation() {

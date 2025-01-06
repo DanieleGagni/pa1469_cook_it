@@ -32,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -176,7 +177,11 @@ class ListRecipesViewModel : ViewModel() {
             .addOnFailureListener { it.printStackTrace() }
     }
 
+    fun setMockRecipes(mockRecipes: List<Recipe>) {
+        _recipes.value = mockRecipes
+    }
 }
+
 
 @Composable
 fun ListRecipesScreen(
@@ -267,7 +272,8 @@ fun ListRecipesScreen(
                 } else {
                     Text(
                         text = "No recipes found.",
-                        modifier = Modifier.align(Alignment.Center),
+                        modifier = Modifier
+                            .align(Alignment.Center),
                         style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray)
                     )
                 }
@@ -284,7 +290,8 @@ fun ListRecipesScreen(
                                 val recipeJson = Gson().toJson(recipes[index])
                                 Log.d("-------------- RecipeItem", recipeJson)
                                 navController.navigate("showRecipe/$recipeJson")
-                            }
+                            },
+                            modifier = Modifier.testTag(recipes[index].title)
                         )
                     }
                 }
@@ -299,11 +306,16 @@ fun ListRecipesScreen(
 fun RecipeItem(
     recipe: Recipe,
     isFavorite: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier
 ) {
+
+    Log.d("TestTag", "Recipe title: ${recipe.title}")
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            //.testTag(recipe.title)
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(4.dp),
