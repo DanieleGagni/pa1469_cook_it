@@ -46,7 +46,6 @@ import com.example.cookit.R
 import com.example.cookit.screens.components.NavigationBar
 import com.example.cookit.ui.theme.darkOrange
 import com.example.cookit.ui.theme.lightGrey
-import com.example.cookit.ui.theme.lightOrange
 
 
 @Composable

@@ -204,7 +204,7 @@ fun HomeScreen(navController: NavHostController) {
                                     Text(
                                         text = category,
                                         modifier = Modifier
-                                            .align(Alignment.CenterVertically), // Vertically align with icon
+                                            .align(Alignment.CenterVertically),
                                         style = MaterialTheme.typography.bodyMedium
                                     )
                                 }

@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
@@ -103,13 +102,6 @@ fun ConfirmDeleteDialog(
 }
 
 
-// when navigating to the RecipeScreen, the call must look like this:
-
-// val recipeJson = Uri.encode(Gson().toJson(testRecipe))
-// navController.navigate("showRecipe/$recipeJson")
-
-// ... where testRecipe is your recipe object
-
 @Composable
 fun RecipeScreen(
     navController: NavHostController,
@@ -151,7 +143,7 @@ fun RecipeScreen(
 
                     Column(
                         modifier = Modifier
-                            .weight(1f) // Use weight to allow the scrollable content to take available space
+                            .weight(1f)
                             .verticalScroll(rememberScrollState())
                     ) {
 

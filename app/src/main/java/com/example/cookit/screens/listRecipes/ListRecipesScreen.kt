@@ -132,7 +132,7 @@ fun ListRecipesScreen(
             NavigationBar(navController)
         },
 
-    ) { innerPadding ->
+        ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -258,7 +258,7 @@ fun RecipeItem(
                         maxLines = 2
                     )
 
-                    Spacer(modifier = Modifier.width(60.dp))
+                    Spacer(modifier = Modifier.width(40.dp))
 
                     Text(
                         text = "Estimated time: ",
