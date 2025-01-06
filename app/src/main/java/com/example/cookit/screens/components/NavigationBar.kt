@@ -13,9 +13,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import com.example.cookit.ui.theme.lightGrey
+import com.example.cookit.ui.theme.lightOrange
 
 
 @Composable
@@ -182,7 +184,7 @@ fun ConfirmationDialog(
                 Text("Cancel")
             }
         },
-        containerColor = Color(0xFFF5F5F5)
+        containerColor = lightGrey
     )
 }
 
@@ -205,21 +207,24 @@ fun PasswordInputDialog(
                     onValueChange = onPasswordChange,
                     label = { Text("Password") },
                     visualTransformation = PasswordVisualTransformation(),
+                    shape = RoundedCornerShape(25.dp),
                     singleLine = true
                 )
             }
         },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text("Confirm")
+                Text("Delete")
             }
         },
         dismissButton = {
             TextButton(onClick = onDismissRequest) {
                 Text("Cancel")
             }
-        }
+        },
+        containerColor = lightGrey
     )
+
 }
 
 fun retrieveFavoriteRecipes(onResult: (List<String>) -> Unit) {
