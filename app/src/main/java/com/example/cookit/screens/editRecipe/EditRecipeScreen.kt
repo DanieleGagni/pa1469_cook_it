@@ -82,9 +82,51 @@ class EditRecipeViewModel : ViewModel() {
         onSuccess: () -> Unit,
         onFailure: (Exception) -> Unit
     ) {
-        recipesCollection.document(recipeId).set(updatedRecipe)
+        val updatedRecipeWithKeywords = updatedRecipe
+            .withTitleKeywords(extractTitleKeywords(updatedRecipe.title))
+            .withIngredientsKeywords(extractIngredientsKeywords(updatedRecipe.ingredients))
+
+        recipesCollection.document(recipeId).set(updatedRecipeWithKeywords)
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { e -> onFailure(e) }
+    }
+
+    private fun extractTitleKeywords(title: String): List<String> {
+        val wordPattern = "\\b([A-Za-z]+)\\b".toRegex()
+        val STOP_WORDS = setOf(
+            "a", "an", "and", "as", "at", "by", "for", "from", "in", "into", "of",
+            "on", "or", "the", "to", "with", "your", "my", "our", "their", "this",
+            "that", "these", "those", "over", "under", "around", "up", "down", "out",
+            "inside", "outside", "through", "onto", "off"
+        )
+        return wordPattern.findAll(title)
+            .map { it.groupValues[1].lowercase() }
+            .filter { it !in STOP_WORDS }
+            .toList()
+    }
+
+    private fun extractIngredientsKeywords(ingredients: List<String>): MutableList<String> {
+        val regex = """(?:\d+\s*[^a-zA-Z]*|\b)([a-zA-Z\s]+?)(?=\b\d*[^a-zA-Z]*$|\b)""".toRegex()
+        val STOP_WORDS = setOf(
+            "cup", "teaspoon", "tablespoon", "small", "medium", "large", "chopped", "diced", "minced", "fresh",
+            "optional", "to", "taste", "and", "or", "any", "half", "cooked", "ounces", "pounds", "g", "mg", "ml",
+            "liter", "kilogram", "gram", "liter", "tsp", "tbsp", "flour", "salt", "pepper", "oil", "water", "sugar",
+            "butter", "cheese", "egg"
+        )
+        return ingredients.flatMap { ingredient ->
+            regex.findAll(ingredient).mapNotNull { matchResult ->
+                val keyword = matchResult.groupValues[1].trim().lowercase()
+                if (keyword.isNotBlank() && keyword !in STOP_WORDS) keyword else null
+            }
+        }.toMutableList()
+    }
+
+    fun Recipe.withTitleKeywords(titleKeywords: List<String>): Recipe {
+        return this.copy(title_keywords = titleKeywords)
+    }
+
+    fun Recipe.withIngredientsKeywords(ingredientsKeywords: List<String>): Recipe {
+        return this.copy(ingredients_keywords = ingredientsKeywords)
     }
 }
 

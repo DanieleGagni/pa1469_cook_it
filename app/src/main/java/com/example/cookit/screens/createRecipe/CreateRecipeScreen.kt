@@ -95,8 +95,6 @@ class CreateRecipeViewModel : ViewModel() {
             .withTitleKeywords(extractTitleKeywords(recipe.title))
             .withIngredientsKeywords(extractIngredientsKeywords(recipe.ingredients))
 
-        // TODO: recipe.id is not initialized
-
         recipesCollection
             .document(id)
             .set(updatedRecipe)
