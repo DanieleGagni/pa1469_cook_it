@@ -1,6 +1,5 @@
 package com.example.cookit.screens.createRecipe
 
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -19,13 +18,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -33,11 +30,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,29 +48,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.cookit.screens.components.Recipe
-import com.example.cookit.screens.logIn.LoginUiState
-import com.example.cookit.screens.logIn.LoginViewModel
-// import com.example.cookit.ui.theme.CookItTheme
 import com.example.cookit.ui.theme.darkOrange
 import com.example.cookit.ui.theme.lightGrey
 import com.example.cookit.ui.theme.lightOrange
 import com.example.cookit.ui.theme.lightRed
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import com.google.gson.Gson
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import java.util.UUID
-import kotlin.math.truncate
 
 class CreateRecipeScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -90,7 +70,6 @@ class CreateRecipeScreen : ComponentActivity() {
 fun AddEditIngredients(ingredients: MutableList<String>) {
     var currentIngredient by remember { mutableStateOf("") }
     var editIndex by remember { mutableStateOf(-1) }
-    //val ingredients = remember { mutableStateListOf<String>() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
 
@@ -111,10 +90,10 @@ fun AddEditIngredients(ingredients: MutableList<String>) {
             maxLines = 1,
             singleLine = true,
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = lightOrange, // Fondo naranja pastel al enfocar
-                unfocusedContainerColor = lightOrange, // Fondo naranja pastel sin enfocar
-                disabledContainerColor = lightGrey, // Fondo gris si está deshabilitado
-                errorContainerColor = lightRed, // Fondo rojo en caso de error
+                focusedContainerColor = lightOrange,
+                unfocusedContainerColor = lightOrange,
+                disabledContainerColor = lightGrey,
+                errorContainerColor = lightRed,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 errorIndicatorColor = Color.Transparent
@@ -201,10 +180,7 @@ fun AddEditIngredients(ingredients: MutableList<String>) {
 fun AddEditStepsScreen(steps: MutableList<String>) {
     var currentStep by remember { mutableStateOf("") }
     var editIndex by remember { mutableStateOf(-1) }
-    //var insertIndex by remember { mutableStateOf(-1) }
-    //val steps = remember { mutableStateListOf<String>() }
     val keyboardController = LocalSoftwareKeyboardController.current
-
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
@@ -219,7 +195,6 @@ fun AddEditStepsScreen(steps: MutableList<String>) {
                 Text(
                     text = when {
                         editIndex >= 0 -> "Edit Step"
-                        //insertIndex >= 0 -> "Insert Step"
                         else -> "Enter Step"
                     }
                 )
@@ -227,10 +202,10 @@ fun AddEditStepsScreen(steps: MutableList<String>) {
             maxLines = 1,
             singleLine = true,
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = lightOrange, // Fondo naranja pastel al enfocar
-                unfocusedContainerColor = lightOrange, // Fondo naranja pastel sin enfocar
-                disabledContainerColor = lightGrey, // Fondo gris si está deshabilitado
-                errorContainerColor = lightRed, // Fondo rojo en caso de error
+                focusedContainerColor = lightOrange,
+                unfocusedContainerColor = lightOrange,
+                disabledContainerColor = lightGrey,
+                errorContainerColor = lightRed,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 errorIndicatorColor = Color.Transparent
@@ -243,10 +218,6 @@ fun AddEditStepsScreen(steps: MutableList<String>) {
                                 steps[editIndex] = currentStep
                                 editIndex = -1
                             }
-//                            insertIndex >= 0 -> {
-//                                steps.add(insertIndex, currentStep)
-//                                insertIndex = -1
-//                            }
                             else -> {
                                 steps.add(currentStep)
                             }
@@ -295,26 +266,7 @@ fun AddEditStepsScreen(steps: MutableList<String>) {
                             modifier = Modifier.size(24.dp)
                         )
                     }
-//                    Button(
-//                        onClick = {
-//                            currentStep = ""
-//                            insertIndex = index + 1
-//                        },
-//                        colors = ButtonDefaults.buttonColors(
-//                            containerColor = Color.LightGray,
-//                            contentColor = Color.Black
-//                        ),
-//                        modifier = Modifier
-//                            .padding(horizontal = 4.dp)
-//                            .size(48.dp),
-//                        contentPadding = PaddingValues(0.dp)
-//                    ) {
-//                        Icon(
-//                            painter = painterResource(id = android.R.drawable.ic_input_add),
-//                            contentDescription = "Insert Step",
-//                            modifier = Modifier.size(24.dp)
-//                        )
-//                    }
+
                     Button(
                         onClick = {
                             steps.removeAt(index)
@@ -365,7 +317,6 @@ fun CreateRecipeScreen(
         item {
             Spacer(modifier = Modifier.height(20.dp))
         }
-
 
         item {
             Spacer(modifier = Modifier.height(20.dp))
@@ -420,10 +371,10 @@ fun CreateRecipeScreen(
                     maxLines = 1,
                     singleLine = true,
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = lightOrange, // Fondo naranja pastel al enfocar
-                        unfocusedContainerColor = lightOrange, // Fondo naranja pastel sin enfocar
-                        disabledContainerColor = lightGrey, // Fondo gris si está deshabilitado
-                        errorContainerColor = lightRed, // Fondo rojo en caso de error
+                        focusedContainerColor = lightOrange,
+                        unfocusedContainerColor = lightOrange,
+                        disabledContainerColor = lightGrey,
+                        errorContainerColor = lightRed,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                         errorIndicatorColor = Color.Transparent
@@ -434,7 +385,7 @@ fun CreateRecipeScreen(
                         }
                     ),
 
-                    shape = RoundedCornerShape(12.dp), // Bordes redondeados
+                    shape = RoundedCornerShape(12.dp),
                    )
             }
         }
@@ -484,7 +435,6 @@ fun CreateRecipeScreen(
             }
         }
 
-
         // TextField to enter estimated time
         item {
             Spacer(modifier = Modifier.height(20.dp))
@@ -512,10 +462,10 @@ fun CreateRecipeScreen(
                     maxLines = 1,
                     singleLine = true,
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = lightOrange, // Fondo naranja pastel al enfocar
-                        unfocusedContainerColor = lightOrange, // Fondo naranja pastel sin enfocar
-                        disabledContainerColor = lightGrey, // Fondo gris si está deshabilitado
-                        errorContainerColor = lightRed, // Fondo rojo en caso de error
+                        focusedContainerColor = lightOrange,
+                        unfocusedContainerColor = lightOrange,
+                        disabledContainerColor = lightGrey,
+                        errorContainerColor = lightRed,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                         errorIndicatorColor = Color.Transparent
@@ -560,10 +510,10 @@ fun CreateRecipeScreen(
                     maxLines = 1,
                     singleLine = true,
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = lightOrange, // Fondo naranja pastel al enfocar
-                        unfocusedContainerColor = lightOrange, // Fondo naranja pastel sin enfocar
-                        disabledContainerColor = lightGrey, // Fondo gris si está deshabilitado
-                        errorContainerColor = lightRed, // Fondo rojo en caso de error
+                        focusedContainerColor = lightOrange,
+                        unfocusedContainerColor = lightOrange,
+                        disabledContainerColor = lightGrey,
+                        errorContainerColor = lightRed,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                         errorIndicatorColor = Color.Transparent
@@ -580,7 +530,6 @@ fun CreateRecipeScreen(
                 )
             }
         }
-
 
         // Add ingredients section
         item {
@@ -609,7 +558,6 @@ fun CreateRecipeScreen(
                 AddEditIngredients(ingredients)
             }
         }
-
 
         // Add steps section
         item {
@@ -640,7 +588,6 @@ fun CreateRecipeScreen(
             }
         }
 
-
         // Post Button
         item {
             val isEnabled = title.isNotBlank() &&
@@ -652,10 +599,8 @@ fun CreateRecipeScreen(
                     ingredients.isNotEmpty() &&
                     steps.isNotEmpty()
 
-
             Button(
                 onClick = {
-
 
                     val recipe = Recipe.create(
                         title = title,
@@ -665,9 +610,6 @@ fun CreateRecipeScreen(
                         steps = steps,
                         type = type
                     )
-
-
-
 
                     Log.d(
                         "[------------------------- DEBUG]",

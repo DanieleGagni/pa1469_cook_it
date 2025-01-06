@@ -4,11 +4,9 @@ package com.example.cookit.screens.searchRecipe
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -16,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,13 +27,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -46,8 +41,8 @@ import androidx.navigation.NavHostController
 import com.example.cookit.ui.theme.CookItTheme
 import com.example.cookit.screens.components.NavigationBar
 import com.example.cookit.ui.theme.darkOrange
-import com.example.cookit.ui.theme.lightGrey
 import com.example.cookit.ui.theme.lightOrange
+
 
 class FilterIngredientsScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,11 +73,11 @@ fun FilterIngredientsScreen(navController: NavHostController, viewModel: SearchR
 
                 Text(
                     text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(color = darkOrange)) { // Color naranja para "Cook"
+                        withStyle(style = SpanStyle(color = darkOrange)) {
                             append("Add")
                         }
                         append(" your ingredients\n")
-                        withStyle(style = SpanStyle(color = darkOrange)) { // Color naranja para "Cook"
+                        withStyle(style = SpanStyle(color = darkOrange)) {
                             append("Find")
                         }
                         append(" your recipe!")
@@ -204,8 +199,7 @@ fun FilterIngredientsScreen(navController: NavHostController, viewModel: SearchR
                 TextButton(onClick = { isDialogOpen = false }) {
                     Text("Cancel")
                 }
-            },
-            //containerColor = lightGrey
+            }
         )
     }
 }

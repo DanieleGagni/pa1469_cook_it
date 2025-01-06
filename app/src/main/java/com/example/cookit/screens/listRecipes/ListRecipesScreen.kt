@@ -1,6 +1,5 @@
 package com.example.cookit.screens.listRecipes
 
-import android.app.Application
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -44,23 +43,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.cookit.R
 import com.example.cookit.screens.components.NavigationBar
 import com.example.cookit.screens.components.Recipe
 import com.example.cookit.ui.theme.darkOrange
-import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.firestore
-import com.google.firebase.firestore.ktx.firestore
 import com.google.gson.Gson
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
 
 class ListRecipesScreen : ComponentActivity() {
@@ -175,7 +163,7 @@ fun ListRecipesScreen(
                             recipe = recipes[index],
                             isFavorite = favoriteStatuses[recipes[index].id] == true,
                             onClick = {
-                                val recipeJson = Gson().toJson(recipes[index])
+                                val recipeJson = Uri.encode(Gson().toJson(recipes[index]))
                                 Log.d("-------------- RecipeItem", recipeJson)
                                 navController.navigate("showRecipe/$recipeJson")
                             }
@@ -188,7 +176,6 @@ fun ListRecipesScreen(
 }
 
 
-// TODO recipe should display title, type and estimated time
 @Composable
 fun RecipeItem(
     recipe: Recipe,

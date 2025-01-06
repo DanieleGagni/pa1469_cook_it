@@ -1,7 +1,6 @@
 package com.example.cookit.screens.searchRecipe
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
@@ -15,7 +14,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -27,8 +25,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.cookit.ui.theme.CookItTheme
-import com.google.gson.Gson
 import com.example.cookit.screens.components.NavigationBar
+
 
 class SearchRecipeScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -162,7 +160,6 @@ fun SearchHistoryItem(navController: NavHostController, searchItem: String, view
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
-            // verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = Icons.Default.Search,
