@@ -25,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.cookit.R
@@ -206,6 +207,7 @@ fun LogInScreen(
                             modifier = Modifier
                                 .height(48.dp)
                                 .clip(RoundedCornerShape(24.dp))
+                                .testTag("signUpButton")
                                 .padding(vertical = 4.dp),
                             //screen's background color
                             color = Color.White

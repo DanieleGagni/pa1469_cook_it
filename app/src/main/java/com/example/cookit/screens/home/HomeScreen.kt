@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -54,6 +55,7 @@ fun HomeScreen(navController: NavHostController) {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
+                    .testTag("homeScreen")
                     .background(Color.White),
                 horizontalAlignment = Alignment.CenterHorizontally // Centrar el contenido
             ) {

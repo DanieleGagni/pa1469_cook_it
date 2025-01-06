@@ -25,6 +25,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import com.example.cookit.R
 import com.example.cookit.ui.theme.backOrange
@@ -153,6 +154,7 @@ fun SignUpScreen(
                         .padding(innerPadding)
                         .fillMaxSize()
                         .verticalScroll(scrollState)
+                        .testTag("signUpScreen")
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {

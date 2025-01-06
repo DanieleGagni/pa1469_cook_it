@@ -1,13 +1,11 @@
 package com.example.cookit
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.printToLog
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -28,6 +26,7 @@ class LogInScreenTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
+
 
     @Test
     fun testLogInScreenUIElements() {
@@ -61,27 +60,32 @@ class LogInScreenTest {
         composeTestRule.onNodeWithText("Password").assertIsDisplayed()
         composeTestRule.onNodeWithText("Log In").assertIsDisplayed()
         composeTestRule.onNodeWithText("Don't have an account?").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("signUpButton").assertIsDisplayed()
 
     }
 
 
-
-    //NOT WORKING
+    //NOT WORKING PROBLEMS WITH LOGIC I THINK
     @Test
     fun testLoginButtonFunctionality() {
         // Arrange: Set up the NavController and ViewModel
         val navController = TestNavHostController(ApplicationProvider.getApplicationContext())
         navController.navigatorProvider.addNavigator(ComposeNavigator())
 
-        val viewModel = LoginViewModel()
+        val logInViewModel = LoginViewModel()
+        val signUpViewModel = SignUpViewModel()
 
+        // Act: Set the content with a programmatic NavHost
         composeTestRule.setContent {
             NavHost(
                 navController = navController,
-                startDestination = "logIn"
+                startDestination = "login"
             ) {
                 composable("login") {
-                    LogInScreen(navController = navController, viewModel = viewModel)
+                    LogInScreen(navController = navController, viewModel = logInViewModel)
+                }
+                composable("signUp") {
+                    SignUpScreen(navController = navController, viewModel = signUpViewModel)
                 }
                 composable("home") {
                     HomeScreen(navController)
@@ -95,6 +99,7 @@ class LogInScreenTest {
         composeTestRule.onNodeWithText("Password", ignoreCase = true)
             .performTextInput("00000000")
 
+        /*
         // Click the login button
         composeTestRule.onNodeWithText("Log In", ignoreCase = true).performClick()
 
@@ -106,5 +111,43 @@ class LogInScreenTest {
 
         // Verify navigation to "home" (assuming successful login)
         assert(navController.currentDestination?.route == "home")
+         */
+
+        // go to home page
+        composeTestRule.onNodeWithText("Log In").performClick()
+        //PROBLEMS CHECKING IT GOES TO THE HOME SCREEN WHEN CLICKING LOG IN BUTTON
+        composeTestRule.onNodeWithTag("homeScreen").assertIsDisplayed()
     }
+
+
+    //NOT WORKING
+    @Test
+    fun tesSignUpButtonFunctionality() {
+        // Arrange: Set up the NavController and ViewModel
+        val navController = TestNavHostController(ApplicationProvider.getApplicationContext())
+        navController.navigatorProvider.addNavigator(ComposeNavigator())
+
+        val logInViewModel = LoginViewModel()
+        val signUpViewModel = SignUpViewModel()
+
+        // Act: Set the content with a programmatic NavHost
+        composeTestRule.setContent {
+            NavHost(
+                navController = navController,
+                startDestination = "login"
+            ) {
+                composable("login") {
+                    LogInScreen(navController = navController, viewModel = logInViewModel)
+                }
+                composable("signUp") {
+                    SignUpScreen(navController = navController, viewModel = signUpViewModel)
+                }
+            }
+        }
+
+        // go to signUp screen
+        composeTestRule.onNodeWithTag("signUpButton").performClick()
+        composeTestRule.onNodeWithTag("signUpScreen").assertIsDisplayed()
+    }
+
 }
