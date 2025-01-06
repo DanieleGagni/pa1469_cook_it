@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -25,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -207,14 +209,17 @@ fun ShoppingListScreen(
     viewModel: ShoppingListViewModel = viewModel()
 ) {
     val shoppingList by viewModel.shoppingList.collectAsState()
+    var newIngredient by remember { mutableStateOf(TextFieldValue("")) }
+
+    // State to manage the visibility of the warning dialog
+    var showWarningDialog by remember { mutableStateOf(false) }
+
     // Trigger data fetch when the screen is first displayed
     LaunchedEffect(Unit) {
         viewModel.fetchShoppingList(navController)
     }
 
-    var newIngredient by remember { mutableStateOf(TextFieldValue("")) }
-
-    Scaffold (
+    Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             NavigationBar(navController)
@@ -225,7 +230,7 @@ fun ShoppingListScreen(
                     .fillMaxSize()
                     .background(Color.White)
                     .padding(innerPadding),
-                verticalArrangement = Arrangement.SpaceBetween // Ensure button stays visible
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
                 val scrollState = rememberScrollState()
 
@@ -239,11 +244,7 @@ fun ShoppingListScreen(
                 ) {
                     Text(
                         text = buildAnnotatedString {
-                            withStyle(
-                                style = SpanStyle(
-                                    color = darkOrange
-                                )
-                            ) {
+                            withStyle(style = SpanStyle(color = darkOrange)) {
                                 append("SHOPPING ")
                             }
                             append("LIST")
@@ -272,10 +273,7 @@ fun ShoppingListScreen(
                                 Checkbox(
                                     checked = item.done,
                                     onCheckedChange = {
-                                        viewModel.toggleItemStatus(
-                                            navController,
-                                            index
-                                        )
+                                        viewModel.toggleItemStatus(navController, index)
                                     }
                                 )
                                 Text(
@@ -288,7 +286,7 @@ fun ShoppingListScreen(
                                     Icon(
                                         painter = painterResource(id = R.drawable.remove),
                                         contentDescription = "Remove Icon",
-                                        modifier = Modifier.size(18.dp), // Smaller trash icon
+                                        modifier = Modifier.size(18.dp),
                                         tint = Color.Unspecified
                                     )
                                 }
@@ -331,7 +329,7 @@ fun ShoppingListScreen(
                 }
 
                 Button(
-                    onClick = { viewModel.removeAllItems(navController) },
+                    onClick = { showWarningDialog = true },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
@@ -343,6 +341,36 @@ fun ShoppingListScreen(
                         style = MaterialTheme.typography.labelLarge
                     )
                 }
+            }
+
+            // Confirmation Dialog
+            if (showWarningDialog) {
+                AlertDialog(
+                    onDismissRequest = { showWarningDialog = false },
+                    title = {
+                        Text(text = "Clear Shopping List", style = MaterialTheme.typography.titleMedium)
+                    },
+                    text = {
+                        Text("Are you sure you want to remove all items from your shopping list? This action cannot be undone.")
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                viewModel.removeAllItems(navController)
+                                showWarningDialog = false
+                            }
+                        ) {
+                            Text("Confirm", color = Color.Red)
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { showWarningDialog = false }
+                        ) {
+                            Text("Cancel")
+                        }
+                    }
+                )
             }
         }
     )
